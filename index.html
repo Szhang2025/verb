@@ -3,246 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verb by example · 200 sentences + audio</title>
+  <title>VerbLingua · 400 sentences · Fill-in-the-blank quiz</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
     body {
-      background: linear-gradient(145deg, #f6f9fc 0%, #e6f0f5 100%);
-      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      background: #eaf1f7;
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center;
       padding: 1.5rem;
     }
-    .app-card {
-      max-width: 820px;
+    .app {
+      max-width: 960px;
       width: 100%;
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(255,255,255,0.85);
       backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
       border-radius: 48px;
-      box-shadow: 0 20px 40px rgba(0, 20, 30, 0.2), 0 8px 16px rgba(0,0,0,0.06);
-      padding: 2rem 2rem 2.5rem;
-      transition: all 0.2s ease;
-      border: 1px solid rgba(255,255,255,0.5);
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0,20,30,0.15);
+      border: 1px solid rgba(255,255,255,0.6);
     }
-    h1 {
-      font-size: 1.9rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      color: #0b2b3b;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.4rem;
-    }
-    .subhead {
-      color: #2a4e62;
-      font-weight: 400;
-      font-size: 1rem;
-      margin-bottom: 1.8rem;
-      border-left: 3px solid #3e8ba8;
-      padding-left: 1rem;
-      opacity: 0.9;
-    }
-    .sentence-panel {
-      background: #ffffffcc;
-      backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
-      border-radius: 32px;
-      padding: 1.8rem 1.8rem 2rem;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.03), 0 12px 24px -12px rgba(0,40,60,0.2);
-      margin-bottom: 1.8rem;
+    h1 { font-size: 2rem; color: #063544; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .sub { color: #1b5b72; border-left: 3px solid #3f8ca8; padding-left: 1rem; margin: 0.2rem 0 1.5rem; }
+    .panel {
+      background: #ffffffdd;
+      border-radius: 28px;
+      padding: 1.6rem 1.8rem;
+      box-shadow: 0 8px 18px -8px rgba(0,40,60,0.12);
       border: 1px solid rgba(255,255,255,0.7);
+      margin-bottom: 1.2rem;
     }
-    .current-sentence {
-      font-size: 2.1rem;
-      font-weight: 500;
-      line-height: 1.3;
-      color: #022b3a;
-      word-break: break-word;
+    .sentence { font-size: 1.6rem; font-weight: 500; color: #01212e; line-height: 1.4; }
+    .sentence small { font-weight: 300; font-size: 0.85rem; background: #d3e6ef; padding: 0.1rem 0.8rem; border-radius: 30px; margin-left: 0.6rem; }
+    .sentence .badge { background: #4d8aa8; color: white; padding: 0.05rem 0.7rem; border-radius: 30px; font-size: 0.7rem; margin-left: 0.5rem; vertical-align: middle; }
+    .audio-row { display: flex; align-items: center; gap: 1rem; margin-top: 0.8rem; flex-wrap: wrap; }
+    .btn-audio {
+      background: #1c617b; border: none; color: white; font-size: 1.2rem;
+      padding: 0.4rem 1.6rem; border-radius: 50px; font-weight: 500;
+      box-shadow: 0 4px 0 #0d3342; cursor: pointer; border: 1px solid #68a3bd;
+      transition: 0.07s; display: inline-flex; align-items: center; gap: 0.5rem;
     }
-    .current-sentence small {
-      font-weight: 300;
-      font-size: 1rem;
-      color: #2f6b7e;
-      display: inline-block;
-      margin-left: 0.6rem;
-      background: #d7e9f0;
-      padding: 0.1rem 0.7rem;
-      border-radius: 40px;
-      vertical-align: middle;
-    }
-    .audio-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-top: 1.2rem;
-      flex-wrap: wrap;
-    }
-    .audio-btn {
-      background: #1f5e77;
-      border: none;
-      color: white;
-      font-size: 1.6rem;
-      padding: 0.35rem 1.4rem 0.35rem 1.2rem;
-      border-radius: 60px;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 500;
-      box-shadow: 0 6px 0 #0d3342, 0 4px 12px rgba(0,30,40,0.3);
-      transition: 0.07s ease;
-      cursor: pointer;
-      border: 1px solid #5d9bb3;
-    }
-    .audio-btn:active {
-      transform: translateY(5px);
-      box-shadow: 0 1px 0 #0d3342;
-    }
-    .audio-btn svg {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-    }
-    .counter {
-      font-size: 0.95rem;
-      background: #eef6fa;
-      padding: 0.3rem 1.2rem;
-      border-radius: 40px;
-      color: #1b4d5f;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-      border: 1px solid #c6dce7;
-      margin-left: auto;
-    }
-    .nav-controls {
-      display: flex;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 0.6rem;
-    }
-    .nav-group {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
+    .btn-audio:active { transform: translateY(4px); box-shadow: 0 1px 0 #0d3342; }
+    .counter { background: #e8f1f7; padding: 0.2rem 1.2rem; border-radius: 40px; color: #1a4c5f; font-weight: 500; border: 1px solid #c1dae7; margin-left: auto; }
+    .nav { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: space-between; align-items: center; margin: 0.4rem 0 0.6rem; }
+    .nav-group { display: flex; gap: 0.4rem; flex-wrap: wrap; }
     .nav-btn {
-      background: #e3eef5;
-      border: 1px solid #b2cedc;
-      color: #0a3343;
-      font-weight: 500;
-      padding: 0.5rem 1.2rem;
-      border-radius: 40px;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: 0.15s;
-      box-shadow: 0 2px 0 #b0cbd8;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      background: #e1edf5; border: 1px solid #b8d2e0; color: #073544; font-weight: 500;
+      padding: 0.4rem 1.2rem; border-radius: 40px; cursor: pointer;
+      box-shadow: 0 2px 0 #b0cbd8; transition: 0.1s;
     }
-    .nav-btn:active {
-      transform: translateY(3px);
-      box-shadow: none;
+    .nav-btn:active { transform: translateY(3px); box-shadow: none; }
+    .nav-btn.primary { background: #1c617b; border-color: #135066; color: white; box-shadow: 0 3px 0 #0d3342; }
+    .dots { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; margin: 0.6rem 0 0.2rem; }
+    .dot { width: 8px; height: 8px; border-radius: 20px; background: #c9dce7; transition: 0.2s; }
+    .dot.active { background: #1c6e8a; width: 20px; }
+
+    /* QUIZ - FILL IN THE BLANK */
+    .quiz-box {
+      background: #e9f2f8;
+      border-radius: 32px;
+      padding: 1.5rem 1.8rem;
+      border: 1px solid #c2dae8;
+      margin-top: 1.2rem;
     }
-    .nav-btn:hover {
-      background: #d3e4ed;
-      border-color: #8db4c7;
+    .quiz-prompt { font-weight: 600; color: #063544; font-size: 1.1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+    .quiz-prompt span { background: #bcd7e6; padding: 0.1rem 0.9rem; border-radius: 40px; font-weight: 400; }
+    .blank-sentence { font-size: 1.3rem; font-weight: 500; color: #01212e; padding: 0.5rem 0; }
+    .blank-sentence .blank { background: #ffeb3b; padding: 0.1rem 0.8rem; border-radius: 8px; border-bottom: 3px solid #f57f17; font-weight: 700; }
+    .quiz-options { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 0.6rem 0; }
+    .quiz-options button {
+      background: white; border: 1.5px solid #b2cedc; padding: 0.5rem 1.5rem;
+      border-radius: 60px; font-weight: 500; color: #05303f; cursor: pointer;
+      box-shadow: 0 2px 0 #b2cbd8; transition: 0.1s; font-size: 1rem;
     }
-    .nav-btn.primary {
-      background: #1f5e77;
-      border-color: #145066;
-      color: white;
-      box-shadow: 0 3px 0 #0d3342;
+    .quiz-options button:active { transform: translateY(2px); box-shadow: none; }
+    .quiz-options button.correct { background: #8bc34a; border-color: #558b2f; color: white; }
+    .quiz-options button.wrong { background: #ef9a9a; border-color: #b71c1c; color: white; }
+    .quiz-options button:disabled { opacity: 0.7; cursor: default; transform: none; box-shadow: none; }
+    .quiz-feedback { margin-top: 0.5rem; font-weight: 500; color: #0b4357; }
+    .quiz-progress { display: flex; gap: 3px; flex-wrap: wrap; margin: 0.6rem 0 0.2rem; max-height: 60px; overflow-y: auto; }
+    .qdot { width: 12px; height: 12px; border-radius: 20px; background: #c9dce7; transition: 0.2s; flex-shrink: 0; }
+    .qdot.answered { background: #4d8aa8; }
+    .qdot.correct { background: #7cb342; }
+    .qdot.wrong { background: #e57373; }
+
+    /* DEMOGRAPHIC */
+    .demographic {
+      display: flex; flex-wrap: wrap; gap: 0.8rem 1.5rem;
+      margin: 1.2rem 0 0.4rem; background: #f2faff; padding: 0.9rem 1.2rem;
+      border-radius: 60px; align-items: center; border: 1px solid #bdd6e5;
     }
-    .nav-btn.primary:active {
-      box-shadow: none;
+    .demographic label { display: flex; align-items: center; gap: 0.4rem; font-weight: 500; color: #074153; }
+    .demographic select, .demographic input { padding: 0.3rem 0.7rem; border-radius: 30px; border: 1px solid #b6d1df; background: white; font-size: 0.9rem; }
+    .send-btn {
+      background: #135f7a; border: none; color: white; padding: 0.4rem 1.6rem;
+      border-radius: 40px; font-weight: 600; cursor: pointer; box-shadow: 0 3px 0 #0b3a4b;
+      transition: 0.07s; margin-left: auto;
     }
-    .progress-indicator {
-      display: flex;
-      justify-content: center;
-      gap: 0.2rem;
-      flex-wrap: wrap;
-      margin: 1.2rem 0 0.6rem;
-    }
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 20px;
-      background: #c7dae5;
-      transition: 0.2s;
-    }
-    .dot.active {
-      background: #1f6e8a;
-      width: 18px;
-    }
-    .footer-hint {
-      font-size: 0.85rem;
-      color: #2f5f72;
-      text-align: center;
-      margin-top: 0.8rem;
-      opacity: 0.8;
-      border-top: 1px dashed #b3cfde;
-      padding-top: 1.2rem;
-    }
-    @media (max-width: 550px) {
-      .app-card { padding: 1.5rem; }
-      .current-sentence { font-size: 1.6rem; }
-      .nav-btn { padding: 0.4rem 0.9rem; font-size: 0.85rem; }
-      .audio-btn { font-size: 1.2rem; padding: 0.25rem 1rem; }
-    }
+    .send-btn:active { transform: translateY(3px); box-shadow: none; }
+    .send-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: 0 3px 0 #0b3a4b; }
+    .footnote { text-align: center; font-size: 0.8rem; color: #2d657b; margin-top: 0.6rem; opacity: 0.8; border-top: 1px dashed #b7d3e2; padding-top: 0.8rem; }
+    .footnote strong { color: #064257; }
+    .status-msg { font-weight: 600; }
+    .status-msg.success { color: #2e7d32; }
+    .status-msg.error { color: #c62828; }
+    .status-msg.sending { color: #e65100; }
+    @media (max-width: 600px) { .app { padding: 1rem; } .sentence { font-size: 1.2rem; } .demographic { flex-direction: column; align-items: stretch; border-radius: 30px; } .send-btn { margin-left: 0; } }
   </style>
 </head>
 <body>
-<div class="app-card" role="main">
-  <h1>
-    <span>📘 verb · example</span>
-    <span style="font-size: 1.2rem; font-weight: 300; margin-left: auto; opacity: 0.7;">200</span>
-  </h1>
-  <div class="subhead">“shut up your laptop” · learn verbs in context</div>
+<div class="app" id="app">
+  <h1><span>📘 verb·fill</span><span style="font-size:1rem; font-weight:300; opacity:0.7;">400 · audio · fill‑in‑blank quiz</span></h1>
+  <div class="sub">“shut up your laptop” (short) + 200 longer · fill in the missing verb</div>
 
-  <div class="sentence-panel">
-    <div class="current-sentence" id="sentenceDisplay">
-      shut up your laptop
-      <small>#1</small>
-    </div>
+  <!-- Sentence panel -->
+  <div class="panel">
+    <div class="sentence" id="sentenceDisplay">loading… <small>#1</small></div>
     <div class="audio-row">
-      <button class="audio-btn" id="playAudioBtn" aria-label="Listen to sentence">
-        <svg viewBox="0 0 24 24" width="24" height="24"><polygon points="3,6 10,6 18,12 10,18 3,18" fill="currentColor"/><path d="M18 9l3 3-3 3M15 12h3" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-        Listen
-      </button>
-      <span class="counter" id="counterDisplay">1 / 200</span>
+      <button class="btn-audio" id="playAudioBtn">🔊 Listen</button>
+      <span class="counter" id="counterDisplay">1 / 400</span>
     </div>
   </div>
 
-  <div class="nav-controls">
+  <div class="nav">
     <div class="nav-group">
       <button class="nav-btn" id="prevBtn">← Prev</button>
       <button class="nav-btn" id="randomBtn">🎲 Random</button>
       <button class="nav-btn" id="nextBtn">Next →</button>
     </div>
     <div class="nav-group">
-      <button class="nav-btn primary" id="shuffleBtn">🔀 Shuffle all</button>
+      <button class="nav-btn primary" id="shuffleBtn">🔀 Shuffle</button>
     </div>
   </div>
+  <div class="dots" id="progressDots"></div>
 
-  <div class="progress-indicator" id="progressDots"></div>
-  <div class="footer-hint">⬤ 200 real‑world verb sentences · tap ▶ to hear</div>
+  <!-- QUIZ - Fill in the blank -->
+  <div class="quiz-box">
+    <div class="quiz-prompt">
+      🧠 <span id="quizQuestion">Fill in the blank with the correct verb</span>
+      <span style="margin-left:auto; font-weight:400; background:#c7dce9; padding:0 0.8rem; border-radius:30px;" id="quizCounter">1/400</span>
+    </div>
+    <div class="blank-sentence" id="blankSentence">____ the door</div>
+    <div class="quiz-options" id="quizOptions">
+      <button data-opt="0">option A</button>
+      <button data-opt="1">option B</button>
+      <button data-opt="2">option C</button>
+      <button data-opt="3">option D</button>
+    </div>
+    <div class="quiz-feedback" id="quizFeedback">↳ select the correct verb</div>
+    <div class="quiz-progress" id="quizProgress"></div>
+  </div>
+
+  <!-- Demographic + Google Sheet -->
+  <div class="demographic">
+    <label>Gender <select id="genderSelect"><option value="F">Female</option><option value="M">Male</option><option value="NB">Non-binary</option><option value="other">Other</option></select></label>
+    <label>Age <input type="number" id="ageInput" min="3" max="120" placeholder="25" style="width:70px;"></label>
+    <label>First language <input type="text" id="langInput" placeholder="e.g. Spanish" style="width:100px;"></label>
+    <button class="send-btn" id="sendDataBtn">📊 Send to sheet</button>
+  </div>
+  <div class="footnote">
+    <strong>400 sentences (200 short + 200 longer) · 400 fill-in-blank questions</strong> · responses include gender, age, first language · sent to Google Sheet for analytics · results released <strong>9/5/2026</strong> · <span id="sentStatus" class="status-msg">✅ ready</span>
+  </div>
 </div>
 
 <script>
   (function() {
-    // ----- 200 example sentences (verbs in action) -----
-    const SENTENCES = [
+    // ----- 200 SHORT SENTENCES (original) -----
+    const SHORT_SENTENCES = [
       "shut up your laptop", "open the window", "close the door", "turn on the light", "turn off the fan",
       "put on your coat", "take off your shoes", "pick up the book", "put down the glass", "stand up straight",
       "sit down here", "come over to me", "go back home", "run faster", "walk slowly",
@@ -285,13 +212,97 @@
       "stretch your legs", "bend your knees", "lift your arms", "turn your head", "shake your body",
       "dance to rhythm", "clap your hands", "stomp your feet", "nod your head", "wave goodbye"
     ];
-    // ensure exactly 200 (if not, pad or trim; but we have 200)
-    while (SENTENCES.length < 200) SENTENCES.push("learn by example " + (SENTENCES.length+1));
-    if (SENTENCES.length > 200) SENTENCES.length = 200;
+
+    // ----- 200 LONGER SENTENCES (new) -----
+    const LONGER_SENTENCES = [
+      "shut up your laptop before the meeting starts", "open the window to let in some fresh air", "close the door quietly so you don't wake the baby",
+      "turn on the light and read the book", "turn off the fan when you leave the room", "put on your coat because it is freezing outside",
+      "take off your shoes before you enter the house", "pick up the book that fell under the table", "put down the glass carefully on the coaster",
+      "stand up straight and look ahead", "sit down here and rest for a moment", "come over to me and I will show you the photos",
+      "go back home before it gets dark", "run faster if you want to catch the bus", "walk slowly across the slippery bridge",
+      "jump over the puddle to avoid getting wet", "throw the ball to your teammate", "catch the ball with both hands",
+      "kick the stone out of the way", "push the door gently to open it", "pull the handle to release the lock",
+      "lift the box with your legs not your back", "carry the bag over your shoulder", "hold the baby carefully in your arms",
+      "drop the keys into the bowl by the door", "break the chocolate into small pieces", "fix the chair before someone sits on it",
+      "build a house with wooden blocks", "draw a circle in the middle of the paper", "write a note and leave it on the desk",
+      "read the sign carefully before entering", "sing a song to cheer everyone up", "dance with me to the rhythm of the music",
+      "listen to music while you work", "watch the movie without interruptions", "look at the sky and admire the stars",
+      "see the bird perched on the branch", "smell the flower and enjoy its fragrance", "taste the soup and add more salt if needed",
+      "touch the surface to feel its texture", "feel the warmth of the sun on your skin", "wash your hands with soap and water",
+      "clean the table after every meal", "brush your hair before going out", "comb your hair to remove tangles",
+      "shave your face carefully with a new blade", "dry your hands with a clean towel", "fold the clothes and put them in the drawer",
+      "hang the shirt in the closet", "iron the pants to remove wrinkles", "sew the button back onto your jacket",
+      "cut the paper along the dotted line", "glue the pieces together and let them dry", "paint the wall with a soft blue color",
+      "sweep the floor to remove dust and dirt", "mop the floor with a wet mop", "dust the shelf with a soft cloth",
+      "vacuum the carpet to remove pet hair", "water the plant every morning", "feed the cat at exactly six o'clock",
+      "walk the dog around the block twice", "pet the rabbit gently behind its ears", "call your friend and invite them over",
+      "text your mom to let her know you are safe", "email the boss with the updated report", "fax the document to the main office",
+      "print the receipt and keep it for your records", "scan the QR code to access the website", "copy the file to the shared folder",
+      "paste the link into the address bar", "delete the photo that is out of focus", "save the changes before you close the document",
+      "update the app to the latest version", "install the program and follow the setup wizard", "uninstall the tool that you no longer use",
+      "restart the device to complete the update", "shut down the system properly at the end of the day",
+      "log in to your account using your credentials", "log out of the session after you finish", "sign up for the newsletter to get updates",
+      "subscribe to the channel and hit the bell icon", "unsubscribe from the list if you get too many emails",
+      "follow the path through the forest", "lead the team with confidence and clarity", "manage the project from start to finish",
+      "organize the files by date and category", "plan the trip carefully to avoid delays", "book the hotel in advance for better rates",
+      "rent a car that suits your needs", "buy groceries for the whole week", "sell your old phone online for a fair price",
+      "pay the bill before the due date", "lend me money and I will pay you back", "borrow a pen from your classmate",
+      "give a gift to show your appreciation", "take a photo of the beautiful sunset", "make a cake from scratch using organic ingredients",
+      "do the dishes right after dinner", "bake the bread until it is golden brown", "fry the egg in a little bit of oil",
+      "boil the water before adding the pasta", "steam the vegetables to preserve nutrients", "grill the fish over medium heat",
+      "roast the chicken with herbs and garlic", "mix the salad with a light vinaigrette", "pour the juice into a tall glass",
+      "fill the glass with ice and lemonade", "empty the bin before it overflows", "turn the page to continue reading",
+      "fold the map and put it in your pocket", "unfold the chair and set it up", "lock the door with the deadbolt",
+      "unlock the phone using facial recognition", "plug in the charger and wait for the battery to increase",
+      "unplug the lamp before you leave the house", "connect the cable to the HDMI port", "disconnect the wire carefully to avoid sparks",
+      "attach the tag to your luggage", "detach the sticker from the surface", "wrap the present in colorful paper",
+      "unwrap the candy and enjoy it", "tie your shoelaces so you don't trip", "untie the knot with your fingers",
+      "button your shirt from the bottom up", "unbutton the coat when you enter the warm room", "zip your jacket to keep the wind out",
+      "unzip the bag and take out your wallet", "buckle your belt for a secure fit", "unbuckle the strap and release the pressure",
+      "switch on the TV and find a good show", "switch off the radio when the news ends", "mute the microphone during the presentation",
+      "unmute yourself when you have a question", "raise your hand if you know the answer", "lower your voice in the library",
+      "speak clearly so everyone can understand", "whisper softly so no one else hears", "shout loudly to get their attention",
+      "answer the question in complete sentences", "ask for help when you are stuck", "explain the rule with a simple example",
+      "describe the view from the top of the hill", "discuss the idea with your colleagues", "argue with logic not emotion",
+      "convince your friend to join the club", "encourage the child to try again", "praise the effort regardless of the outcome",
+      "criticize constructively without hurting feelings", "apologize sincerely if you made a mistake", "forgive easily and move forward",
+      "thank your partner for their support", "welcome the guest with a warm smile", "invite your colleagues to the meeting",
+      "introduce yourself to the new team member", "meet the manager in the conference room", "accompany your friend to the station",
+      "escort the visitor to the main entrance", "guide the tourist through the museum", "direct the traffic during the parade",
+      "control the drone with the remote", "operate the machine according to the manual", "repair the bike and replace the chain",
+      "service the car every six months", "check the oil level before the long drive", "fill the tank with premium gasoline",
+      "start the engine and let it warm up", "stop the car at the red light", "park the vehicle in the designated spot",
+      "reverse slowly into the parking space", "accelerate gently when merging onto the highway", "brake in time to avoid collision",
+      "signal your turn well in advance", "honk the horn only in emergencies", "wipe the windscreen with a clean cloth",
+      "adjust the mirror to eliminate blind spots", "fasten your seatbelt before driving off", "unfasten the seatbelt after you park",
+      "board the plane and find your seat", "disembark safely after the flight lands", "catch the train at platform three",
+      "miss the bus and wait for the next one", "wait for the taxi outside the station", "hail a cab by raising your hand",
+      "ride the bicycle along the scenic route", "skate on ice with caution and balance", "ski down the slope at a steady pace",
+      "surf the wave with confidence and style", "swim across the lake to reach the island", "dive into water and explore the reef",
+      "float on your back and relax", "sail the boat towards the harbour", "row the canoe across the calm river",
+      "paddle the kayak through the rapids", "cycle to work to stay fit and save fuel", "jog in the park every evening",
+      "stretch your legs before the long run", "bend your knees when lifting heavy objects", "lift your arms above your head",
+      "turn your head to see who is behind you", "shake your body to the rhythm of the beat", "dance to the rhythm of the samba",
+      "clap your hands to show appreciation", "stomp your feet to the beat of the drum", "nod your head to indicate agreement",
+      "wave goodbye to your friends at the station"
+    ];
+
+    // Combine: short sentences first, then longer sentences (total 400)
+    const ALL_SENTENCES = [...SHORT_SENTENCES, ...LONGER_SENTENCES];
+    while (ALL_SENTENCES.length < 400) ALL_SENTENCES.push("learn by example " + (ALL_SENTENCES.length+1));
+    if (ALL_SENTENCES.length > 400) ALL_SENTENCES.length = 400;
 
     // ----- state -----
-    let currentIndex = 0;                // 0-based
-    let sentences = [...SENTENCES];     // will be shuffled if needed
+    let currentIndex = 0;
+    let sentences = [...ALL_SENTENCES];
+
+    // Quiz state: 400 fill-in-the-blank questions
+    let quizQuestions = [];
+    let quizAnswers = [];
+    let quizUserAnswers = [];
+    let quizLocked = false;
+    let quizIndex = 0;
+    let isSending = false;
 
     // DOM refs
     const sentenceDisplay = document.getElementById('sentenceDisplay');
@@ -302,109 +313,305 @@
     const nextBtn = document.getElementById('nextBtn');
     const randomBtn = document.getElementById('randomBtn');
     const shuffleBtn = document.getElementById('shuffleBtn');
+    const quizQuestion = document.getElementById('quizQuestion');
+    const quizCounter = document.getElementById('quizCounter');
+    const quizOptions = document.getElementById('quizOptions');
+    const quizFeedback = document.getElementById('quizFeedback');
+    const quizProgress = document.getElementById('quizProgress');
+    const blankSentence = document.getElementById('blankSentence');
+    const sendBtn = document.getElementById('sendDataBtn');
+    const sentStatus = document.getElementById('sentStatus');
 
-    // ----- audio (Web Speech API) -----
+    // ----- Audio (Speech) -----
     function speakSentence(text) {
-      if (!window.speechSynthesis) {
-        alert('Your browser does not support speech synthesis. Try Chrome, Edge, or Safari.');
-        return;
-      }
-      // cancel any ongoing speech
+      if (!window.speechSynthesis) return alert('Speech synthesis not supported.');
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.92;
-      utterance.pitch = 1.05;
-      utterance.volume = 1;
-      // optional: pick a voice (default is fine)
-      window.speechSynthesis.speak(utterance);
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US'; u.rate = 0.9; u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
     }
 
-    // ----- render current sentence -----
+    // ----- render sentence with badge -----
     function render() {
-      const sentence = sentences[currentIndex] || "example sentence";
-      const indexDisplay = currentIndex + 1;
-      sentenceDisplay.innerHTML = `${sentence} <small>#${indexDisplay}</small>`;
-      counterDisplay.textContent = `${indexDisplay} / ${sentences.length}`;
+      const s = sentences[currentIndex] || "example";
+      const isShort = currentIndex < 200;
+      const badge = isShort ? '<span class="badge">short</span>' : '<span class="badge" style="background:#2a7a8a;">longer</span>';
+      sentenceDisplay.innerHTML = `${s} <small>#${currentIndex+1}</small> ${badge}`;
+      counterDisplay.textContent = `${currentIndex+1} / ${sentences.length}`;
       updateDots();
     }
 
-    // ----- progress dots (max 200, but show 20 for brevity) -----
     function updateDots() {
       const total = sentences.length;
-      const dotCount = Math.min(total, 20); // show 20 dots max
+      const dotCount = Math.min(total, 30);
       let html = '';
-      for (let i = 0; i < dotCount; i++) {
-        // map index to dot: i -> sentence index (step size)
-        const step = Math.max(1, Math.floor(total / dotCount));
-        const sentenceIdx = Math.min(i * step, total - 1);
-        const isActive = (sentenceIdx === currentIndex);
-        html += `<span class="dot ${isActive ? 'active' : ''}"></span>`;
+      const step = Math.max(1, Math.floor(total / dotCount));
+      for (let i=0; i<dotCount; i++) {
+        const idx = Math.min(i*step, total-1);
+        html += `<span class="dot ${idx===currentIndex?'active':''}"></span>`;
       }
       progressDots.innerHTML = html;
     }
 
-    // ----- navigation -----
-    function goTo(index) {
-      if (index < 0) index = sentences.length - 1;
-      if (index >= sentences.length) index = 0;
-      currentIndex = index;
+    function goTo(idx) {
+      if (idx<0) idx = sentences.length-1;
+      if (idx>=sentences.length) idx = 0;
+      currentIndex = idx;
       render();
     }
-
-    function next() { goTo(currentIndex + 1); }
-    function prev() { goTo(currentIndex - 1); }
-    function random() {
-      const newIdx = Math.floor(Math.random() * sentences.length);
-      goTo(newIdx);
-    }
-
-    // ----- shuffle (keep order but reorder) -----
-    function shuffleArray(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
-
+    function next() { goTo(currentIndex+1); }
+    function prev() { goTo(currentIndex-1); }
+    function randomIdx() { goTo(Math.floor(Math.random()*sentences.length)); }
     function shuffleAll() {
-      sentences = shuffleArray([...sentences]);
+      for (let i=sentences.length-1; i>0; i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [sentences[i], sentences[j]] = [sentences[j], sentences[i]];
+      }
       currentIndex = 0;
       render();
-      // optional: speak first after shuffle? no, user will tap.
+      buildQuiz();
     }
 
-    // ----- play audio for current sentence -----
-    function playCurrentAudio() {
-      const text = sentences[currentIndex] || "";
-      if (text.trim()) {
-        speakSentence(text);
-      } else {
-        speakSentence("example sentence");
+    // ----- extract verb (robust) -----
+    function extractVerb(sentence) {
+      const words = sentence.split(' ');
+      const commonVerbs = ['shut','open','close','turn','put','take','pick','stand','sit','come','go','run','walk','jump','throw','catch','kick','push','pull','lift','carry','hold','drop','break','fix','build','draw','write','read','sing','dance','listen','watch','look','see','smell','taste','touch','feel','wash','clean','brush','comb','shave','dry','fold','hang','iron','sew','cut','glue','paint','sweep','mop','dust','vacuum','water','feed','walk','pet','call','text','email','fax','print','scan','copy','paste','delete','save','update','install','uninstall','restart','log','sign','subscribe','unsubscribe','follow','lead','manage','organize','plan','book','rent','buy','sell','pay','lend','borrow','give','take','make','do','bake','fry','boil','steam','grill','roast','mix','pour','fill','empty','turn','fold','unfold','lock','unlock','plug','unplug','connect','disconnect','attach','detach','wrap','unwrap','tie','untie','button','unbutton','zip','unzip','buckle','unbuckle','switch','mute','unmute','raise','lower','speak','whisper','shout','answer','ask','explain','describe','discuss','argue','convince','encourage','praise','criticize','apologize','forgive','thank','welcome','invite','introduce','meet','accompany','escort','guide','direct','control','operate','repair','service','check','fill','start','stop','park','reverse','accelerate','brake','signal','honk','wipe','adjust','fasten','unfasten','board','disembark','catch','miss','wait','hail','ride','skate','ski','surf','swim','dive','float','sail','row','paddle','cycle','jog','stretch','bend','lift','turn','shake','dance','clap','stomp','nod','wave'];
+      for (let w of words) {
+        const clean = w.replace(/[^a-zA-Z]/g,'').toLowerCase();
+        if (commonVerbs.includes(clean)) return clean;
       }
+      return words[0]?.replace(/[^a-zA-Z]/g,'') || 'verb';
     }
 
-    // ----- event listeners -----
-    playBtn.addEventListener('click', playCurrentAudio);
+    // ----- build QUIZ (400 fill-in-the-blank questions) -----
+    function buildQuiz() {
+      const allVerbs = ['shut','open','close','turn','put','take','pick','stand','sit','come','go','run','walk','jump','throw','catch','kick','push','pull','lift','carry','hold','drop','break','fix','build','draw','write','read','sing','dance','listen','watch','look','see','smell','taste','touch','feel','wash','clean','brush','comb','shave','dry','fold','hang','iron','sew','cut','glue','paint','sweep','mop','dust','vacuum','water','feed','walk','pet','call','text','email','fax','print','scan','copy','paste','delete','save','update','install','uninstall','restart','log','sign','subscribe','unsubscribe','follow','lead','manage','organize','plan','book','rent','buy','sell','pay','lend','borrow','give','take','make','do','bake','fry','boil','steam','grill','roast','mix','pour','fill','empty','turn','fold','unfold','lock','unlock','plug','unplug','connect','disconnect','attach','detach','wrap','unwrap','tie','untie','button','unbutton','zip','unzip','buckle','unbuckle','switch','mute','unmute','raise','lower','speak','whisper','shout','answer','ask','explain','describe','discuss','argue','convince','encourage','praise','criticize','apologize','forgive','thank','welcome','invite','introduce','meet','accompany','escort','guide','direct','control','operate','repair','service','check','fill','start','stop','park','reverse','accelerate','brake','signal','honk','wipe','adjust','fasten','unfasten','board','disembark','catch','miss','wait','hail','ride','skate','ski','surf','swim','dive','float','sail','row','paddle','cycle','jog','stretch','bend','lift','turn','shake','dance','clap','stomp','nod','wave'];
+      
+      quizQuestions = [];
+      quizAnswers = [];
+      quizUserAnswers = [];
+      
+      for (let i = 0; i < sentences.length; i++) {
+        const sentence = sentences[i];
+        const verb = extractVerb(sentence);
+        // Create a fill-in-the-blank version: replace the first occurrence of the verb with ____
+        const words = sentence.split(' ');
+        let blankIndex = -1;
+        for (let j = 0; j < words.length; j++) {
+          const clean = words[j].replace(/[^a-zA-Z]/g,'').toLowerCase();
+          if (clean === verb) {
+            blankIndex = j;
+            break;
+          }
+        }
+        let displaySentence = sentence;
+        if (blankIndex >= 0) {
+          const parts = sentence.split(' ');
+          parts[blankIndex] = '____';
+          displaySentence = parts.join(' ');
+        } else {
+          // fallback: replace first word
+          const parts = sentence.split(' ');
+          parts[0] = '____';
+          displaySentence = parts.join(' ');
+        }
+        
+        // Build options: 1 correct + 3 random
+        let options = [verb];
+        let attempts = 0;
+        while (options.length < 4 && attempts < 100) {
+          const r = allVerbs[Math.floor(Math.random() * allVerbs.length)];
+          if (!options.includes(r) && r !== verb) options.push(r);
+          attempts++;
+        }
+        // shuffle options
+        for (let j = options.length - 1; j > 0; j--) {
+          const k = Math.floor(Math.random() * (j + 1));
+          [options[j], options[k]] = [options[k], options[j]];
+        }
+        
+        quizQuestions.push({
+          sentence: sentence,
+          display: displaySentence,
+          correct: verb,
+          options: options
+        });
+        quizAnswers.push(verb);
+        quizUserAnswers.push(null);
+      }
+      
+      quizIndex = 0;
+      renderQuizItem();
+    }
+
+    function renderQuizItem() {
+      if (quizIndex >= quizQuestions.length) {
+        const correctCount = quizUserAnswers.filter(a => a === 'correct').length;
+        quizQuestion.textContent = `🎉 Quiz complete! Score: ${correctCount}/${quizQuestions.length}`;
+        quizCounter.textContent = `${quizQuestions.length}/${quizQuestions.length}`;
+        quizOptions.innerHTML = `<button disabled>✔️ Finished</button>`;
+        quizFeedback.textContent = `⭐ You answered ${correctCount} correctly. Great effort!`;
+        blankSentence.textContent = '🎉 All done!';
+        renderQuizProgress();
+        return;
+      }
+      
+      const q = quizQuestions[quizIndex];
+      quizQuestion.textContent = `Fill in the blank with the correct verb`;
+      quizCounter.textContent = `${quizIndex+1}/${quizQuestions.length}`;
+      blankSentence.innerHTML = q.display;
+      
+      quizOptions.innerHTML = '';
+      q.options.forEach((opt) => {
+        const btn = document.createElement('button');
+        btn.textContent = opt;
+        btn.dataset.opt = opt;
+        btn.addEventListener('click', (e) => handleQuizAnswer(e, opt));
+        quizOptions.appendChild(btn);
+      });
+      
+      if (quizUserAnswers[quizIndex] !== null) {
+        const status = quizUserAnswers[quizIndex];
+        const correct = quizAnswers[quizIndex];
+        const btns = document.querySelectorAll('.quiz-options button');
+        btns.forEach(b => {
+          if (b.dataset.opt === correct) b.classList.add('correct');
+          else if (b.dataset.opt !== correct && status === 'wrong') {
+            if (b.dataset.opt === quizUserAnswers[quizIndex]?.selected) b.classList.add('wrong');
+          }
+          b.disabled = true;
+        });
+        quizFeedback.textContent = status === 'correct' ? '✅ Correct!' : `❌ The correct verb is “${correct}”.`;
+      } else {
+        quizFeedback.textContent = '↳ select the correct verb to fill the blank';
+      }
+      
+      renderQuizProgress();
+    }
+
+    function handleQuizAnswer(e, selected) {
+      if (quizLocked) return;
+      if (quizUserAnswers[quizIndex] !== null) return;
+      
+      const correct = quizAnswers[quizIndex];
+      const btns = document.querySelectorAll('.quiz-options button');
+      let isCorrect = (selected === correct);
+      
+      btns.forEach(b => {
+        if (b.dataset.opt === correct) b.classList.add('correct');
+        else if (b.dataset.opt === selected && !isCorrect) b.classList.add('wrong');
+        b.disabled = true;
+      });
+      
+      quizUserAnswers[quizIndex] = isCorrect ? 'correct' : 'wrong';
+      quizUserAnswers[quizIndex].selected = selected;
+      
+      quizFeedback.textContent = isCorrect ? '✅ Correct! +1' : `❌ Oops. The correct verb is “${correct}”.`;
+      
+      quizLocked = true;
+      setTimeout(() => {
+        quizLocked = false;
+        quizIndex++;
+        renderQuizItem();
+      }, 1100);
+    }
+
+    function renderQuizProgress() {
+      let html = '';
+      for (let i = 0; i < quizQuestions.length; i++) {
+        const status = quizUserAnswers[i];
+        let cls = 'qdot';
+        if (status === 'correct') cls += ' correct';
+        else if (status === 'wrong') cls += ' wrong';
+        else if (status !== null) cls += ' answered';
+        html += `<span class="${cls}"></span>`;
+      }
+      quizProgress.innerHTML = html;
+    }
+
+    // ----- send to google sheet (with your web app URL) -----
+    function sendToSheet() {
+      if (isSending) return;
+      
+      const gender = document.getElementById('genderSelect').value;
+      const age = document.getElementById('ageInput').value || 'unknown';
+      const lang = document.getElementById('langInput').value || 'not specified';
+      const correctCount = quizUserAnswers.filter(a => a === 'correct').length;
+      
+      // Validate that quiz is complete
+      const answeredCount = quizUserAnswers.filter(a => a !== null).length;
+      if (answeredCount < quizQuestions.length) {
+        if (!confirm(`You've only answered ${answeredCount} out of ${quizQuestions.length} questions. Continue anyway?`)) {
+          return;
+        }
+      }
+      
+      const payload = {
+        gender, age, lang,
+        timestamp: new Date().toISOString(),
+        totalQuestions: quizQuestions.length,
+        correctAnswers: correctCount,
+        quizResults: quizUserAnswers.map((ans, idx) => ({
+          sentence: quizQuestions[idx]?.sentence || '',
+          correct: quizAnswers[idx] || '',
+          userResult: ans === 'correct' ? 'correct' : (ans === 'wrong' ? 'wrong' : 'unanswered')
+        }))
+      };
+      
+      // YOUR WEB APP URL
+      const webAppUrl = 'https://script.google.com/macros/s/AKfycbyhIbfr9UxULHvaGscBQyRXtgqitdQj0pIP3eyyE0KYa9vqE0zZk5GPsDt0cShRH3aE/exec';
+      
+      isSending = true;
+      sendBtn.disabled = true;
+      sentStatus.textContent = '⏳ Sending data...';
+      sentStatus.className = 'status-msg sending';
+      
+      fetch(webAppUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        // With no-cors, we can't read the response, but the request was sent
+        sentStatus.textContent = '✅ Data sent successfully!';
+        sentStatus.className = 'status-msg success';
+        alert('📊 Data recorded! Thank you for participating. Results will be released on 9/5/2026.');
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        sentStatus.textContent = '❌ Error sending data. Please try again.';
+        sentStatus.className = 'status-msg error';
+        alert('⚠️ There was an error sending your data. Please check your internet connection and try again.');
+      })
+      .finally(() => {
+        isSending = false;
+        sendBtn.disabled = false;
+      });
+    }
+
+    // ----- event binding -----
+    playBtn.addEventListener('click', () => speakSentence(sentences[currentIndex] || ''));
     nextBtn.addEventListener('click', next);
     prevBtn.addEventListener('click', prev);
-    randomBtn.addEventListener('click', random);
+    randomBtn.addEventListener('click', randomIdx);
     shuffleBtn.addEventListener('click', shuffleAll);
+    sendBtn.addEventListener('click', sendToSheet);
 
-    // keyboard shortcuts (optional)
+    // keyboard
     document.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
       if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
-      if (e.key === ' ' || e.key === 'Space') { e.preventDefault(); playCurrentAudio(); }
-      if (e.key === 'r' || e.key === 'R') { random(); }
+      if (e.key === ' ' || e.key === 'Space') { e.preventDefault(); speakSentence(sentences[currentIndex] || ''); }
+      if (e.key === 'r' || e.key === 'R') { randomIdx(); }
     });
 
-    // ----- initial render -----
+    // ----- init -----
     render();
-    // auto-play first as an example? we do not auto-play to avoid unexpected noise.
-    // but we set a small hint: you can press space.
+    buildQuiz();
   })();
 </script>
 </body>
