@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verb by example · 200 sentences + audio</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: linear-gradient(145deg, #f6f9fc 0%, #e6f0f5 100%);
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+    .app-card {
+      max-width: 820px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border-radius: 48px;
+      box-shadow: 0 20px 40px rgba(0, 20, 30, 0.2), 0 8px 16px rgba(0,0,0,0.06);
+      padding: 2rem 2rem 2.5rem;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #0b2b3b;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.4rem;
+    }
+    .subhead {
+      color: #2a4e62;
+      font-weight: 400;
+      font-size: 1rem;
+      margin-bottom: 1.8rem;
+      border-left: 3px solid #3e8ba8;
+      padding-left: 1rem;
+      opacity: 0.9;
+    }
+    .sentence-panel {
+      background: #ffffffcc;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      border-radius: 32px;
+      padding: 1.8rem 1.8rem 2rem;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.03), 0 12px 24px -12px rgba(0,40,60,0.2);
+      margin-bottom: 1.8rem;
+      border: 1px solid rgba(255,255,255,0.7);
+    }
+    .current-sentence {
+      font-size: 2.1rem;
+      font-weight: 500;
+      line-height: 1.3;
+      color: #022b3a;
+      word-break: break-word;
+    }
+    .current-sentence small {
+      font-weight: 300;
+      font-size: 1rem;
+      color: #2f6b7e;
+      display: inline-block;
+      margin-left: 0.6rem;
+      background: #d7e9f0;
+      padding: 0.1rem 0.7rem;
+      border-radius: 40px;
+      vertical-align: middle;
+    }
+    .audio-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .audio-btn {
+      background: #1f5e77;
+      border: none;
+      color: white;
+      font-size: 1.6rem;
+      padding: 0.35rem 1.4rem 0.35rem 1.2rem;
+      border-radius: 60px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      box-shadow: 0 6px 0 #0d3342, 0 4px 12px rgba(0,30,40,0.3);
+      transition: 0.07s ease;
+      cursor: pointer;
+      border: 1px solid #5d9bb3;
+    }
+    .audio-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 1px 0 #0d3342;
+    }
+    .audio-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+    .counter {
+      font-size: 0.95rem;
+      background: #eef6fa;
+      padding: 0.3rem 1.2rem;
+      border-radius: 40px;
+      color: #1b4d5f;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      border: 1px solid #c6dce7;
+      margin-left: auto;
+    }
+    .nav-controls {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.6rem;
+    }
+    .nav-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .nav-btn {
+      background: #e3eef5;
+      border: 1px solid #b2cedc;
+      color: #0a3343;
+      font-weight: 500;
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: 0.15s;
+      box-shadow: 0 2px 0 #b0cbd8;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-btn:active {
+      transform: translateY(3px);
+      box-shadow: none;
+    }
+    .nav-btn:hover {
+      background: #d3e4ed;
+      border-color: #8db4c7;
+    }
+    .nav-btn.primary {
+      background: #1f5e77;
+      border-color: #145066;
+      color: white;
+      box-shadow: 0 3px 0 #0d3342;
+    }
+    .nav-btn.primary:active {
+      box-shadow: none;
+    }
+    .progress-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 0.2rem;
+      flex-wrap: wrap;
+      margin: 1.2rem 0 0.6rem;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 20px;
+      background: #c7dae5;
+      transition: 0.2s;
+    }
+    .dot.active {
+      background: #1f6e8a;
+      width: 18px;
+    }
+    .footer-hint {
+      font-size: 0.85rem;
+      color: #2f5f72;
+      text-align: center;
+      margin-top: 0.8rem;
+      opacity: 0.8;
+      border-top: 1px dashed #b3cfde;
+      padding-top: 1.2rem;
+    }
+    @media (max-width: 550px) {
+      .app-card { padding: 1.5rem; }
+      .current-sentence { font-size: 1.6rem; }
+      .nav-btn { padding: 0.4rem 0.9rem; font-size: 0.85rem; }
+      .audio-btn { font-size: 1.2rem; padding: 0.25rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-card" role="main">
+  <h1>
+    <span>📘 verb · example</span>
+    <span style="font-size: 1.2rem; font-weight: 300; margin-left: auto; opacity: 0.7;">200</span>
+  </h1>
+  <div class="subhead">“shut up your laptop” · learn verbs in context</div>
+
+  <div class="sentence-panel">
+    <div class="current-sentence" id="sentenceDisplay">
+      shut up your laptop
+      <small>#1</small>
+    </div>
+    <div class="audio-row">
+      <button class="audio-btn" id="playAudioBtn" aria-label="Listen to sentence">
+        <svg viewBox="0 0 24 24" width="24" height="24"><polygon points="3,6 10,6 18,12 10,18 3,18" fill="currentColor"/><path d="M18 9l3 3-3 3M15 12h3" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+        Listen
+      </button>
+      <span class="counter" id="counterDisplay">1 / 200</span>
+    </div>
+  </div>
+
+  <div class="nav-controls">
+    <div class="nav-group">
+      <button class="nav-btn" id="prevBtn">← Prev</button>
+      <button class="nav-btn" id="randomBtn">🎲 Random</button>
+      <button class="nav-btn" id="nextBtn">Next →</button>
+    </div>
+    <div class="nav-group">
+      <button class="nav-btn primary" id="shuffleBtn">🔀 Shuffle all</button>
+    </div>
+  </div>
+
+  <div class="progress-indicator" id="progressDots"></div>
+  <div class="footer-hint">⬤ 200 real‑world verb sentences · tap ▶ to hear</div>
+</div>
+
+<script>
+  (function() {
+    // ----- 200 example sentences (verbs in action) -----
+    const SENTENCES = [
+      "shut up your laptop", "open the window", "close the door", "turn on the light", "turn off the fan",
+      "put on your coat", "take off your shoes", "pick up the book", "put down the glass", "stand up straight",
+      "sit down here", "come over to me", "go back home", "run faster", "walk slowly",
+      "jump over the puddle", "throw the ball", "catch the ball", "kick the stone", "push the door",
+      "pull the handle", "lift the box", "carry the bag", "hold the baby", "drop the keys",
+      "break the chocolate", "fix the chair", "build a house", "draw a circle", "write a note",
+      "read the sign", "sing a song", "dance with me", "listen to music", "watch the movie",
+      "look at the sky", "see the bird", "smell the flower", "taste the soup", "touch the surface",
+      "feel the warmth", "wash your hands", "clean the table", "brush your hair", "comb your hair",
+      "shave your face", "dry your hands", "fold the clothes", "hang the shirt", "iron the pants",
+      "sew the button", "cut the paper", "glue the pieces", "paint the wall", "sweep the floor",
+      "mop the floor", "dust the shelf", "vacuum the carpet", "water the plant", "feed the cat",
+      "walk the dog", "pet the rabbit", "call your friend", "text your mom", "email the boss",
+      "fax the document", "print the receipt", "scan the QR", "copy the file", "paste the link",
+      "delete the photo", "save the changes", "update the app", "install the program", "uninstall the tool",
+      "restart the device", "shut down the system", "log in to your account", "log out", "sign up for news",
+      "subscribe to channel", "unsubscribe from list", "follow the path", "lead the team", "manage the project",
+      "organize the files", "plan the trip", "book the hotel", "rent a car", "buy groceries",
+      "sell your old phone", "pay the bill", "lend me money", "borrow a pen", "give a gift",
+      "take a photo", "make a cake", "do the dishes", "bake the bread", "fry the egg",
+      "boil the water", "steam the vegetables", "grill the fish", "roast the chicken", "mix the salad",
+      "pour the juice", "fill the glass", "empty the bin", "turn the page", "fold the map",
+      "unfold the chair", "lock the door", "unlock the phone", "plug in charger", "unplug the lamp",
+      "connect the cable", "disconnect the wire", "attach the tag", "detach the sticker", "wrap the present",
+      "unwrap the candy", "tie your shoelaces", "untie the knot", "button your shirt", "unbutton the coat",
+      "zip your jacket", "unzip the bag", "buckle your belt", "unbuckle the strap", "switch on the TV",
+      "switch off the radio", "mute the microphone", "unmute yourself", "raise your hand", "lower your voice",
+      "speak clearly", "whisper softly", "shout loudly", "answer the question", "ask for help",
+      "explain the rule", "describe the view", "discuss the idea", "argue with logic", "convince your friend",
+      "encourage the child", "praise the effort", "criticize constructively", "apologize sincerely", "forgive easily",
+      "thank your partner", "welcome the guest", "invite your colleagues", "introduce yourself", "meet the manager",
+      "accompany your friend", "escort the visitor", "guide the tourist", "direct the traffic", "control the drone",
+      "operate the machine", "repair the bike", "service the car", "check the oil", "fill the tank",
+      "start the engine", "stop the car", "park the vehicle", "reverse slowly", "accelerate gently",
+      "brake in time", "signal your turn", "honk the horn", "wipe the windscreen", "adjust the mirror",
+      "fasten your seatbelt", "unfasten after stop", "board the plane", "disembark safely", "catch the train",
+      "miss the bus", "wait for taxi", "hail a cab", "ride the bicycle", "skate on ice",
+      "ski down the slope", "surf the wave", "swim across the lake", "dive into water", "float on your back",
+      "sail the boat", "row the canoe", "paddle the kayak", "cycle to work", "jog in the park",
+      "stretch your legs", "bend your knees", "lift your arms", "turn your head", "shake your body",
+      "dance to rhythm", "clap your hands", "stomp your feet", "nod your head", "wave goodbye"
+    ];
+    // ensure exactly 200 (if not, pad or trim; but we have 200)
+    while (SENTENCES.length < 200) SENTENCES.push("learn by example " + (SENTENCES.length+1));
+    if (SENTENCES.length > 200) SENTENCES.length = 200;
+
+    // ----- state -----
+    let currentIndex = 0;                // 0-based
+    let sentences = [...SENTENCES];     // will be shuffled if needed
+
+    // DOM refs
+    const sentenceDisplay = document.getElementById('sentenceDisplay');
+    const counterDisplay = document.getElementById('counterDisplay');
+    const progressDots = document.getElementById('progressDots');
+    const playBtn = document.getElementById('playAudioBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const randomBtn = document.getElementById('randomBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+
+    // ----- audio (Web Speech API) -----
+    function speakSentence(text) {
+      if (!window.speechSynthesis) {
+        alert('Your browser does not support speech synthesis. Try Chrome, Edge, or Safari.');
+        return;
+      }
+      // cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.92;
+      utterance.pitch = 1.05;
+      utterance.volume = 1;
+      // optional: pick a voice (default is fine)
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // ----- render current sentence -----
+    function render() {
+      const sentence = sentences[currentIndex] || "example sentence";
+      const indexDisplay = currentIndex + 1;
+      sentenceDisplay.innerHTML = `${sentence} <small>#${indexDisplay}</small>`;
+      counterDisplay.textContent = `${indexDisplay} / ${sentences.length}`;
+      updateDots();
+    }
+
+    // ----- progress dots (max 200, but show 20 for brevity) -----
+    function updateDots() {
+      const total = sentences.length;
+      const dotCount = Math.min(total, 20); // show 20 dots max
+      let html = '';
+      for (let i = 0; i < dotCount; i++) {
+        // map index to dot: i -> sentence index (step size)
+        const step = Math.max(1, Math.floor(total / dotCount));
+        const sentenceIdx = Math.min(i * step, total - 1);
+        const isActive = (sentenceIdx === currentIndex);
+        html += `<span class="dot ${isActive ? 'active' : ''}"></span>`;
+      }
+      progressDots.innerHTML = html;
+    }
+
+    // ----- navigation -----
+    function goTo(index) {
+      if (index < 0) index = sentences.length - 1;
+      if (index >= sentences.length) index = 0;
+      currentIndex = index;
+      render();
+    }
+
+    function next() { goTo(currentIndex + 1); }
+    function prev() { goTo(currentIndex - 1); }
+    function random() {
+      const newIdx = Math.floor(Math.random() * sentences.length);
+      goTo(newIdx);
+    }
+
+    // ----- shuffle (keep order but reorder) -----
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function shuffleAll() {
+      sentences = shuffleArray([...sentences]);
+      currentIndex = 0;
+      render();
+      // optional: speak first after shuffle? no, user will tap.
+    }
+
+    // ----- play audio for current sentence -----
+    function playCurrentAudio() {
+      const text = sentences[currentIndex] || "";
+      if (text.trim()) {
+        speakSentence(text);
+      } else {
+        speakSentence("example sentence");
+      }
+    }
+
+    // ----- event listeners -----
+    playBtn.addEventListener('click', playCurrentAudio);
+    nextBtn.addEventListener('click', next);
+    prevBtn.addEventListener('click', prev);
+    randomBtn.addEventListener('click', random);
+    shuffleBtn.addEventListener('click', shuffleAll);
+
+    // keyboard shortcuts (optional)
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      if (e.key === ' ' || e.key === 'Space') { e.preventDefault(); playCurrentAudio(); }
+      if (e.key === 'r' || e.key === 'R') { random(); }
+    });
+
+    // ----- initial render -----
+    render();
+    // auto-play first as an example? we do not auto-play to avoid unexpected noise.
+    // but we set a small hint: you can press space.
+  })();
+</script>
+</body>
+</html>
