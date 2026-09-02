@@ -1,746 +1,796 @@
-/**
- * STAT Course Feedback System
- * Automatically processes form responses and generates dashboard data
- * NO SIMULATED STATISTICS - only real data from form submissions
- * Last updated: 9/7/2026
- */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>📊 STAT course feedback · survey + dashboard</title>
+    <!-- Google Charts library -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #f4f7fc;
+            padding: 24px;
+            color: #1e2b3c;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-weight: 500;
+            font-size: 2.2rem;
+            margin-bottom: 0.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .subhead {
+            color: #2c3e50;
+            margin-bottom: 28px;
+            border-left: 4px solid #2a7de1;
+            padding-left: 16px;
+            background: #e9f0fa;
+            border-radius: 0 12px 12px 0;
+            padding: 12px 20px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            margin-top: 10px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 22px 24px 28px;
+            box-shadow: 0 6px 18px rgba(0, 20, 40, 0.06);
+            border: 1px solid #dde7f0;
+            transition: 0.15s;
+        }
+        .card:hover {
+            border-color: #b6cce0;
+        }
+        .card h2 {
+            font-weight: 500;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid #e6edf6;
+            padding-bottom: 12px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+        .form-group .hint {
+            font-size: 0.8rem;
+            color: #4a5f73;
+            margin-top: 3px;
+        }
+        select, input[type="text"], textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbdae9;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            background: white;
+            transition: 0.1s;
+            font-family: inherit;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: 2px solid #2a7de1;
+            border-color: transparent;
+        }
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            background: #f9fbfd;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid #e2ebf3;
+        }
+        .radio-group label, .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 400;
+            font-size: 0.92rem;
+        }
+        .btn {
+            background: #1a3b5d;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.15s;
+            margin-top: 8px;
+        }
+        .btn:hover {
+            background: #0f2a44;
+            transform: scale(0.97);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #1a3b5d;
+            color: #1a3b5d;
+        }
+        .btn-outline:hover {
+            background: #e5edf8;
+        }
+        .dashboard {
+            margin-top: 42px;
+            border-top: 2px dashed #b8cee4;
+            padding-top: 28px;
+        }
+        .dashboard-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .dashboard-header select {
+            width: 220px;
+            padding: 10px 16px;
+            border-radius: 40px;
+            background: white;
+        }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 6px;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            padding: 12px 10px 6px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+            border: 1px solid #dfeaf3;
+        }
+        .chart-card h4 {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #2c4b6a;
+            padding-left: 10px;
+            margin-bottom: -2px;
+        }
+        .chart-container {
+            width: 100%;
+            height: 170px;
+        }
+        .summary-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px 32px;
+            background: #eef4fa;
+            padding: 16px 24px;
+            border-radius: 40px;
+            margin: 16px 0 10px;
+        }
+        .stat-badge {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+        .stat-badge span:first-child {
+            font-weight: 400;
+            color: #1f3b57;
+        }
+        .stat-badge .num {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #0b2a47;
+        }
+        .footnote {
+            margin-top: 30px;
+            font-size: 0.85rem;
+            color: #406180;
+            text-align: center;
+            border-top: 1px solid #d3e0ec;
+            padding-top: 20px;
+        }
+        .general-questions {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid #e6edf6;
+        }
+        .general-questions h3 {
+            font-weight: 500;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: #1a3b5d;
+        }
+        @media (max-width: 700px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .dashboard-header { flex-direction: column; align-items: start; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
 
-// ============================================================
-// 1. CONFIGURATION
-// ============================================================
+    <h1>📋 STAT course pulse · week 1.5</h1>
+    <div class="subhead">
+        <strong>🗓️ 9/7/2026 · 1:00 PM</strong> — summary visuals update automatically.
+        Responses are stored in Google Sheets (real data).
+    </div>
 
-const CONFIG = {
-  RESPONSE_SHEET_NAME: 'Form Responses',
-  DASHBOARD_SHEET_NAME: 'Dashboard',
-  PROCESSED_SHEET_NAME: 'Processed Responses',
-  CHART_DATA_SHEET_NAME: 'Chart Data',
-  
-  // Column mappings (based on your Google Form)
-  COLUMNS: {
-    TIMESTAMP: 0,
-    STUDENT_ID: 1,
-    COURSES: 2,
-    EXPECTATION: 3,
-    SURPRISE: 4,
-    SUGGESTION: 5,
-    CLARITY: 6,
-    Q353_COUNTING: 7,
-    Q353_PROB: 8,
-    Q353_GITHUB: 9,
-    Q360_GITHUB_CONF: 10,
-    Q360_SHEETS_CONF: 11,
-    Q360_AI_CONF: 12,
-    Q415_METRICS: 13,
-    Q415_LOGISTIC: 14,
-    Q415_PACE: 15,
-    Q415_F1: 16
-  }
-};
+    <!-- ========== SURVEY SECTION ========== -->
+    <div class="grid-2">
+        <!-- LEFT: student info & course selection -->
+        <div class="card">
+            <h2>🧑‍🎓 About you</h2>
+            <div class="form-group">
+                <label>Student ID or email (optional)</label>
+                <input type="text" id="studentId" placeholder="e.g., jdoe@univ.edu" />
+            </div>
+            <div class="form-group">
+                <label>📚 Enrolled courses (select all that apply)</label>
+                <div class="checkbox-group" id="courseCheckboxes">
+                    <label><input type="checkbox" value="STAT 353-41" /> STAT 353-41 (T/Th)</label>
+                    <label><input type="checkbox" value="STAT 353-42" /> STAT 353-42 (MWF)</label>
+                    <label><input type="checkbox" value="STAT 360" /> STAT 360</label>
+                    <label><input type="checkbox" value="STAT 415" /> STAT 415</label>
+                </div>
+            </div>
 
-// ============================================================
-// 2. TRIGGER: Run automatically on form submission
-// ============================================================
+            <!-- General questions (appear for all) -->
+            <div class="general-questions">
+                <h3>📝 General feedback (all courses)</h3>
+                <div class="form-group">
+                    <label>How have your expectations for this course changed since the first day?</label>
+                    <select id="expectationChange">
+                        <option value="exceeded">They have been exceeded — I'm learning more than expected</option>
+                        <option value="met">They are being met — matches what I expected</option>
+                        <option value="partially">Partially met — some things are different than I thought</option>
+                        <option value="notMet">Not met — the course is not what I anticipated</option>
+                        <option value="unsure">Unsure / too early to tell</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>What is ONE thing that has surprised you (positively or negatively) so far?</label>
+                    <textarea id="surprise" placeholder="e.g., The GitHub workflow is more involved than I thought, but I like the hands-on approach..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>What is ONE suggestion you have to improve the course experience?</label>
+                    <textarea id="suggestion" placeholder="e.g., More in-class examples before the quiz..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>How clear are the course expectations (syllabus, grading, deadlines)?</label>
+                    <select id="clarity">
+                        <option value="very">Very clear — I know exactly what to expect</option>
+                        <option value="mostly">Mostly clear — a few things are still unclear</option>
+                        <option value="somewhat">Somewhat unclear — I have several questions</option>
+                        <option value="veryUnclear">Very unclear — I am confused about expectations</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-function installTrigger() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  // Remove existing triggers
-  const triggers = ScriptApp.getProjectTriggers();
-  triggers.forEach(trigger => {
-    if (trigger.getHandlerFunction() === 'onFormSubmit') {
-      ScriptApp.deleteTrigger(trigger);
-    }
-  });
-  
-  // Create new trigger
-  ScriptApp.newTrigger('onFormSubmit')
-    .forSpreadsheet(ss)
-    .onFormSubmit()
-    .create();
-  
-  Logger.log('✅ Trigger installed successfully!');
-}
+        <!-- RIGHT: course-specific questions (dynamic) -->
+        <div class="card" id="courseSpecificCard">
+            <h2>📌 Course-specific</h2>
+            <div id="dynamicQuestions">
+                <p style="color: #4f6f8f; font-style: italic;">Select at least one course above to see questions.</p>
+            </div>
+        </div>
+    </div>
 
-function onFormSubmit(e) {
-  try {
-    const values = e.values;
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    
-    // Process the new response
-    processResponse(values, ss);
-    
-    // Rebuild the dashboard with real data only
-    refreshDashboard(ss);
-    
-    Logger.log('✅ Form submission processed: Row ' + e.range.getRow());
-  } catch (error) {
-    Logger.log('❌ Error: ' + error.message);
-  }
-}
+    <!-- submit & reset -->
+    <div style="display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0 6px;">
+        <button class="btn" id="submitBtn">📤 Submit to Google Sheet</button>
+        <button class="btn btn-outline" id="resetBtn">↺ Reset form</button>
+    </div>
+    <div id="submitMessage" style="margin: 10px 0 0; font-weight: 500; min-height: 26px;"></div>
 
-// ============================================================
-// 3. PROCESS INDIVIDUAL RESPONSE
-// ============================================================
+    <!-- ========== DASHBOARD ========== -->
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <h2 style="font-weight: 500;">📊 Dashboard · summary statistics</h2>
+            <div>
+                <label for="courseFilter" style="margin-right: 8px; font-weight: 500;">Filter:</label>
+                <select id="courseFilter">
+                    <option value="ALL">📈 All courses</option>
+                    <option value="STAT 353-41">STAT 353-41 (T/Th)</option>
+                    <option value="STAT 353-42">STAT 353-42 (MWF)</option>
+                    <option value="STAT 360">STAT 360</option>
+                    <option value="STAT 415">STAT 415</option>
+                </select>
+            </div>
+        </div>
 
-function processResponse(values, ss) {
-  // Parse courses from checkbox values
-  const coursesRaw = values[CONFIG.COLUMNS.COURSES] || '';
-  const courses = coursesRaw.split(',').map(c => c.trim()).filter(c => c);
-  
-  // Build structured response object
-  const response = {
-    timestamp: values[CONFIG.COLUMNS.TIMESTAMP],
-    studentId: values[CONFIG.COLUMNS.STUDENT_ID] || 'Anonymous',
-    courses: courses,
-    expectation: values[CONFIG.COLUMNS.EXPECTATION] || '',
-    surprise: values[CONFIG.COLUMNS.SURPRISE] || '',
-    suggestion: values[CONFIG.COLUMNS.SUGGESTION] || '',
-    clarity: values[CONFIG.COLUMNS.CLARITY] || '',
-    
-    // STAT 353
-    q353_counting: parseFloat(values[CONFIG.COLUMNS.Q353_COUNTING]) || null,
-    q353_prob: parseFloat(values[CONFIG.COLUMNS.Q353_PROB]) || null,
-    q353_github: values[CONFIG.COLUMNS.Q353_GITHUB] || '',
-    
-    // STAT 360
-    q360_github_conf: parseFloat(values[CONFIG.COLUMNS.Q360_GITHUB_CONF]) || null,
-    q360_sheets_conf: parseFloat(values[CONFIG.COLUMNS.Q360_SHEETS_CONF]) || null,
-    q360_ai_conf: parseFloat(values[CONFIG.COLUMNS.Q360_AI_CONF]) || null,
-    
-    // STAT 415
-    q415_metrics: values[CONFIG.COLUMNS.Q415_METRICS] || '',
-    q415_logistic: values[CONFIG.COLUMNS.Q415_LOGISTIC] || '',
-    q415_pace: values[CONFIG.COLUMNS.Q415_PACE] || '',
-    q415_f1: values[CONFIG.COLUMNS.Q415_F1] || ''
-  };
-  
-  // Store in processed sheet
-  storeProcessedResponse(response, ss);
-  
-  return response;
-}
+        <!-- summary stats -->
+        <div class="summary-stats" id="summaryStats">
+            <div class="stat-badge"><span>📊 responses:</span><span class="num" id="respCount">0</span></div>
+            <div class="stat-badge"><span>⚙️ tech pulse (avg):</span><span class="num" id="techPulse">-</span></div>
+            <div class="stat-badge"><span>⏱️ pace “too fast”:</span><span class="num" id="paceFast">-</span></div>
+            <div class="stat-badge"><span>🔍 expectations met:</span><span class="num" id="expectMet">-</span></div>
+        </div>
 
-function storeProcessedResponse(response, ss) {
-  let sheet = ss.getSheetByName(CONFIG.PROCESSED_SHEET_NAME);
-  
-  if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.PROCESSED_SHEET_NAME);
-    const headers = [
-      'Timestamp', 'Student ID', 'Courses', 'Expectation', 'Surprise',
-      'Suggestion', 'Clarity', '353 Counting', '353 Prob', '353 GitHub',
-      '360 GitHub', '360 Sheets', '360 AI', '415 Metrics', '415 Logistic',
-      '415 Pace', '415 F1'
-    ];
-    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
-  }
-  
-  const row = [
-    response.timestamp,
-    response.studentId,
-    response.courses.join(', '),
-    response.expectation,
-    response.surprise,
-    response.suggestion,
-    response.clarity,
-    response.q353_counting,
-    response.q353_prob,
-    response.q353_github,
-    response.q360_github_conf,
-    response.q360_sheets_conf,
-    response.q360_ai_conf,
-    response.q415_metrics,
-    response.q415_logistic,
-    response.q415_pace,
-    response.q415_f1
-  ];
-  
-  sheet.appendRow(row);
-}
+        <!-- charts -->
+        <div class="chart-grid" id="chartGrid">
+            <div class="chart-card"><h4>📌 Comfort: Counting / Probability (353)</h4><div id="chart_353" class="chart-container"></div></div>
+            <div class="chart-card"><h4>🔧 Tool confidence (360)</h4><div id="chart_360" class="chart-container"></div></div>
+            <div class="chart-card"><h4>📉 Performance metrics & F1 (415)</h4><div id="chart_415" class="chart-container"></div></div>
+        </div>
+        <div style="margin-top: 16px; display: flex; gap: 18px; flex-wrap: wrap; justify-content: center;">
+            <div class="chart-card" style="flex:1; min-width:200px;"><h4>📱 GitHub quiz experience (353)</h4><div id="chart_github" class="chart-container"></div></div>
+            <div class="chart-card" style="flex:1; min-width:200px;"><h4>🧠 F1 Score understanding (415)</h4><div id="chart_f1" class="chart-container"></div></div>
+            <div class="chart-card" style="flex:1; min-width:200px;"><h4>📊 Expectation change (all)</h4><div id="chart_expect" class="chart-container"></div></div>
+        </div>
+    </div>
 
-// ============================================================
-// 4. GET ALL REAL RESPONSES
-// ============================================================
+    <div class="footnote">
+        ⏱️ Fixed display: 9/7/2026 · 1:00 PM · data from Google Sheets (real responses only).
+        Dropdown controls filter per course.
+    </div>
+</div>
 
-function getAllResponses(ss) {
-  const sheet = ss.getSheetByName(CONFIG.PROCESSED_SHEET_NAME);
-  if (!sheet) return [];
-  
-  const data = sheet.getDataRange().getValues();
-  if (data.length < 2) return [];
-  
-  const responses = [];
-  
-  for (let i = 1; i < data.length; i++) {
-    const row = data[i];
-    // Skip completely empty rows
-    if (!row[0] && !row[1] && !row[2]) continue;
-    
-    responses.push({
-      timestamp: row[0],
-      studentId: row[1],
-      courses: row[2] ? row[2].split(',').map(c => c.trim()) : [],
-      expectation: row[3],
-      surprise: row[4],
-      suggestion: row[5],
-      clarity: row[6],
-      q353_counting: row[7],
-      q353_prob: row[8],
-      q353_github: row[9],
-      q360_github_conf: row[10],
-      q360_sheets_conf: row[11],
-      q360_ai_conf: row[12],
-      q415_metrics: row[13],
-      q415_logistic: row[14],
-      q415_pace: row[15],
-      q415_f1: row[16]
-    });
-  }
-  
-  return responses;
-}
-
-// ============================================================
-// 5. CALCULATE SUMMARY STATISTICS (REAL DATA ONLY)
-// ============================================================
-
-function calculateSummary(responses) {
-  if (responses.length === 0) {
-    return {
-      total: 0,
-      byCourse: {},
-      expectationCounts: { exceeded: 0, met: 0, partially: 0, notMet: 0, unsure: 0 },
-      clarityCounts: { very: 0, mostly: 0, somewhat: 0, veryUnclear: 0 },
-      q353_counting_avg: 0,
-      q353_prob_avg: 0,
-      q353_github_counts: { 'Smooth / No issues': 0, 'Slightly Difficult': 0, 'Very Difficult / Glitchy': 0, 'I haven\'t tried it yet': 0 },
-      q360_github_avg: 0,
-      q360_sheets_avg: 0,
-      q360_ai_avg: 0,
-      q415_metrics_counts: { 'understand clearly': 0, 'sort of get it': 0, 'completely lost': 0 },
-      q415_logistic_counts: { 'Very comfortable': 0, 'Somewhat comfortable': 0, 'just memorizing': 0 },
-      q415_pace_counts: { 'Too Fast': 0, 'Just Right': 0, 'Too Slow': 0 },
-      q415_f1_counts: { 'understand clearly': 0, 'know formula but not sure when': 0, 'confused': 0, 'dont remember': 0 },
-      techPulse: 0,
-      paceFast: 0,
-      paceTotal: 0,
-      expectMetCount: 0,
-      surpriseList: [],
-      suggestionList: []
-    };
-  }
-  
-  const summary = {
-    total: responses.length,
-    byCourse: {},
-    expectationCounts: { exceeded: 0, met: 0, partially: 0, notMet: 0, unsure: 0 },
-    clarityCounts: { very: 0, mostly: 0, somewhat: 0, veryUnclear: 0 },
-    q353_counting_avg: 0,
-    q353_prob_avg: 0,
-    q353_github_counts: { 'Smooth / No issues': 0, 'Slightly Difficult': 0, 'Very Difficult / Glitchy': 0, 'I haven\'t tried it yet': 0 },
-    q360_github_avg: 0,
-    q360_sheets_avg: 0,
-    q360_ai_avg: 0,
-    q415_metrics_counts: { 'understand clearly': 0, 'sort of get it': 0, 'completely lost': 0 },
-    q415_logistic_counts: { 'Very comfortable': 0, 'Somewhat comfortable': 0, 'just memorizing': 0 },
-    q415_pace_counts: { 'Too Fast': 0, 'Just Right': 0, 'Too Slow': 0 },
-    q415_f1_counts: { 'understand clearly': 0, 'know formula but not sure when': 0, 'confused': 0, 'dont remember': 0 },
-    techPulse: 0,
-    paceFast: 0,
-    paceTotal: 0,
-    expectMetCount: 0,
-    surpriseList: [],
-    suggestionList: []
-  };
-  
-  const countingVals = [];
-  const probVals = [];
-  const githubConfVals = [];
-  const sheetsConfVals = [];
-  const aiConfVals = [];
-  
-  responses.forEach(r => {
-    // Course breakdown
-    r.courses.forEach(c => {
-      summary.byCourse[c] = (summary.byCourse[c] || 0) + 1;
-    });
-    
-    // Expectations
-    if (r.expectation && summary.expectationCounts.hasOwnProperty(r.expectation)) {
-      summary.expectationCounts[r.expectation]++;
-      if (r.expectation === 'met' || r.expectation === 'exceeded') {
-        summary.expectMetCount++;
-      }
-    }
-    
-    // Clarity
-    if (r.clarity && summary.clarityCounts.hasOwnProperty(r.clarity)) {
-      summary.clarityCounts[r.clarity]++;
-    }
-    
-    // STAT 353
-    if (r.q353_counting !== null && r.q353_counting !== undefined && !isNaN(r.q353_counting)) {
-      countingVals.push(r.q353_counting);
-    }
-    if (r.q353_prob !== null && r.q353_prob !== undefined && !isNaN(r.q353_prob)) {
-      probVals.push(r.q353_prob);
-    }
-    if (r.q353_github && summary.q353_github_counts.hasOwnProperty(r.q353_github)) {
-      summary.q353_github_counts[r.q353_github]++;
-    }
-    
-    // STAT 360
-    if (r.q360_github_conf !== null && r.q360_github_conf !== undefined && !isNaN(r.q360_github_conf)) {
-      githubConfVals.push(r.q360_github_conf);
-    }
-    if (r.q360_sheets_conf !== null && r.q360_sheets_conf !== undefined && !isNaN(r.q360_sheets_conf)) {
-      sheetsConfVals.push(r.q360_sheets_conf);
-    }
-    if (r.q360_ai_conf !== null && r.q360_ai_conf !== undefined && !isNaN(r.q360_ai_conf)) {
-      aiConfVals.push(r.q360_ai_conf);
-    }
-    
-    // STAT 415
-    if (r.q415_metrics && summary.q415_metrics_counts.hasOwnProperty(r.q415_metrics)) {
-      summary.q415_metrics_counts[r.q415_metrics]++;
-    }
-    if (r.q415_logistic && summary.q415_logistic_counts.hasOwnProperty(r.q415_logistic)) {
-      summary.q415_logistic_counts[r.q415_logistic]++;
-    }
-    if (r.q415_pace && summary.q415_pace_counts.hasOwnProperty(r.q415_pace)) {
-      summary.q415_pace_counts[r.q415_pace]++;
-      if (r.q415_pace === 'Too Fast') summary.paceFast++;
-      summary.paceTotal++;
-    }
-    if (r.q415_f1 && summary.q415_f1_counts.hasOwnProperty(r.q415_f1)) {
-      summary.q415_f1_counts[r.q415_f1]++;
-    }
-    
-    // Collect open-ended responses
-    if (r.surprise) summary.surpriseList.push(r.surprise);
-    if (r.suggestion) summary.suggestionList.push(r.suggestion);
-  });
-  
-  // Calculate averages
-  summary.q353_counting_avg = countingVals.length ? 
-    countingVals.reduce((a, b) => a + b, 0) / countingVals.length : 0;
-  summary.q353_prob_avg = probVals.length ? 
-    probVals.reduce((a, b) => a + b, 0) / probVals.length : 0;
-  summary.q360_github_avg = githubConfVals.length ? 
-    githubConfVals.reduce((a, b) => a + b, 0) / githubConfVals.length : 0;
-  summary.q360_sheets_avg = sheetsConfVals.length ? 
-    sheetsConfVals.reduce((a, b) => a + b, 0) / sheetsConfVals.length : 0;
-  summary.q360_ai_avg = aiConfVals.length ? 
-    aiConfVals.reduce((a, b) => a + b, 0) / aiConfVals.length : 0;
-  
-  // Tech pulse (combined average of all tech scores)
-  const allTechVals = [...githubConfVals, ...sheetsConfVals, ...aiConfVals];
-  summary.techPulse = allTechVals.length ? 
-    allTechVals.reduce((a, b) => a + b, 0) / allTechVals.length : 0;
-  
-  return summary;
-}
-
-// ============================================================
-// 6. BUILD DASHBOARD
-// ============================================================
-
-function refreshDashboard(ss) {
-  if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  const responses = getAllResponses(ss);
-  
-  if (responses.length === 0) {
-    updateEmptyDashboard(ss);
-    return;
-  }
-  
-  const summary = calculateSummary(responses);
-  updateDashboardSheet(summary, ss);
-  updateChartData(summary, ss);
-  
-  Logger.log('✅ Dashboard updated with ' + responses.length + ' real responses.');
-}
-
-function updateDashboardSheet(summary, ss) {
-  let sheet = ss.getSheetByName(CONFIG.DASHBOARD_SHEET_NAME);
-  if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.DASHBOARD_SHEET_NAME);
-  } else {
-    sheet.clear();
-  }
-  
-  const now = new Date();
-  const timezone = Session.getScriptTimeZone();
-  
-  // ===== HEADER =====
-  sheet.getRange(1, 1).setValue('📊 STAT Course Feedback Dashboard');
-  sheet.getRange(2, 1).setValue('Last updated: ' + Utilities.formatDate(now, timezone, 'yyyy-MM-dd HH:mm:ss'));
-  sheet.getRange(1, 1, 2, 1).merge();
-  sheet.getRange(1, 1, 2, 1).setFontSize(16).setFontWeight('bold');
-  
-  let row = 4;
-  
-  // ===== SUMMARY STATS =====
-  sheet.getRange(row, 1).setValue('📈 Summary Statistics');
-  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
-  row += 2;
-  
-  sheet.getRange(row, 1).setValue('Total Responses:');
-  sheet.getRange(row, 2).setValue(summary.total);
-  row++;
-  
-  sheet.getRange(row, 1).setValue('Tech Pulse (avg 1-5):');
-  sheet.getRange(row, 2).setValue(summary.techPulse.toFixed(2));
-  row++;
-  
-  sheet.getRange(row, 1).setValue('Expectations Met (%):');
-  const expectPct = summary.total ? (summary.expectMetCount / summary.total * 100).toFixed(1) : 0;
-  sheet.getRange(row, 2).setValue(expectPct + '%');
-  row++;
-  
-  sheet.getRange(row, 1).setValue('Pace "Too Fast" (415):');
-  sheet.getRange(row, 2).setValue(summary.paceTotal ? `${summary.paceFast}/${summary.paceTotal}` : 'N/A');
-  row += 2;
-  
-  // ===== COURSE BREAKDOWN =====
-  sheet.getRange(row, 1).setValue('📚 Responses by Course');
-  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
-  row++;
-  
-  const courseHeaders = ['Course', 'Count'];
-  sheet.getRange(row, 1, 1, 2).setValues([courseHeaders]);
-  sheet.getRange(row, 1, 1, 2).setFontWeight('bold');
-  row++;
-  
-  const courseData = Object.entries(summary.byCourse).sort((a, b) => b[1] - a[1]);
-  if (courseData.length) {
-    sheet.getRange(row, 1, courseData.length, 2).setValues(courseData);
-    row += courseData.length + 2;
-  }
-  
-  // ===== EXPECTATION CHANGE =====
-  sheet.getRange(row, 1).setValue('🔍 Expectation Change');
-  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
-  row++;
-  
-  const expHeaders = ['Category', 'Count'];
-  sheet.getRange(row, 1, 1, 2).setValues([expHeaders]);
-  sheet.getRange(row, 1, 1, 2).setFontWeight('bold');
-  row++;
-  
-  const expData = Object.entries(summary.expectationCounts).filter(([k, v]) => v > 0);
-  if (expData.length) {
-    sheet.getRange(row, 1, expData.length, 2).setValues(expData);
-    row += expData.length + 2;
-  }
-  
-  // ===== CLARITY =====
-  sheet.getRange(row, 1).setValue('📋 Clarity of Expectations');
-  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
-  row++;
-  
-  const clarityHeaders = ['Category', 'Count'];
-  sheet.getRange(row, 1, 1, 2).setValues([clarityHeaders]);
-  sheet.getRange(row, 1, 1, 2).setFontWeight('bold');
-  row++;
-  
-  const clarityData = Object.entries(summary.clarityCounts).filter(([k, v]) => v > 0);
-  if (clarityData.length) {
-    sheet.getRange(row, 1, clarityData.length, 2).setValues(clarityData);
-    row += clarityData.length + 2;
-  }
-  
-  // ===== STAT 353 =====
-  sheet.getRange(row, 1).setValue('📌 STAT 353');
-  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
-  row++;
-  
-  sheet.getRange(row, 1).setValue('Average Comfort: Counting Principle (1-5)');
-  sheet.getRange(row, 2).setValue(summary.q353_counting_avg.toFixed(2));
-  row++;
-  sheet.getRange(row, 1).setValue('Average Comfort: Basic Probability (1-5)');
-  sheet.getRange(row, 2).setValue(summary.q353_prob_avg.toFixed(2));
-  row++;
-  
-  sheet.getRange(row, 1).setValue('GitHub Quiz Experience:');
-  row++;
-  const ghData = Object.entries(summary.q353_github_counts).filter(([k, v]) => v > 0);
-  if (ghData.length) {
-    sheet.getRange(row, 1, ghData.length, 2).setValues(ghData);
-    row += ghData.length + 2;
-  }
-  
-  // ===== STAT 360 =====
-  sheet.getRange(row, 1).setValue('🔧 STAT 360 - Tool Confidence (1-5)');
-  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
-  row++;
-  
-  sheet.getRange(row, 1).setValue('GitHub Confidence:');
-  sheet.getRange(row, 2).setValue(summary.q360_github_avg.toFixed(2));
-  row++;
-  sheet.getRange(row, 1).setValue('Sheets Confidence:');
-  sheet.getRange(row, 2).setValue(summary.q360_sheets_avg.toFixed(2));
-  row++;
-  sheet.getRange(row, 1).setValue('AI Confidence:');
-  sheet.getRange(row, 2).setValue(summary.q360_ai_avg.toFixed(2));
-  row += 2;
-  
-  // ===== STAT 415 =====
-  sheet.getRange(row, 1).setValue('📉 STAT 415');
-  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
-  row++;
-  
-  sheet.getRange(row, 1).setValue('Performance Metrics Grasp:');
-  row++;
-  const metricsData = Object.entries(summary.q415_metrics_counts).filter(([k, v]) => v > 0);
-  if (metricsData.length) {
-    sheet.getRange(row, 1, metricsData.length, 2).setValues(metricsData);
-    row += metricsData.length + 1;
-  }
-  
-  sheet.getRange(row, 1).setValue('Logistic Regression Comfort:');
-  row++;
-  const logData = Object.entries(summary.q415_logistic_counts).filter(([k, v]) => v > 0);
-  if (logData.length) {
-    sheet.getRange(row, 1, logData.length, 2).setValues(logData);
-    row += logData.length + 1;
-  }
-  
-  sheet.getRange(row, 1).setValue('Pace:');
-  row++;
-  const paceData = Object.entries(summary.q415_pace_counts).filter(([k, v]) => v > 0);
-  if (paceData.length) {
-    sheet.getRange(row, 1, paceData.length, 2).setValues(paceData);
-    row += paceData.length + 1;
-  }
-  
-  sheet.getRange(row, 1).setValue('F1 Score Understanding:');
-  row++;
-  const f1Data = Object.entries(summary.q415_f1_counts).filter(([k, v]) => v > 0);
-  if (f1Data.length) {
-    sheet.getRange(row, 1, f1Data.length, 2).setValues(f1Data);
-  }
-  
-  // Auto-resize and format
-  sheet.autoResizeColumns(1, 2);
-  sheet.getRange(1, 1, row + 5, 2).setBorder(true, true, true, true, false, false);
-}
-
-function updateEmptyDashboard(ss) {
-  let sheet = ss.getSheetByName(CONFIG.DASHBOARD_SHEET_NAME);
-  if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.DASHBOARD_SHEET_NAME);
-  } else {
-    sheet.clear();
-  }
-  
-  const now = new Date();
-  sheet.getRange(1, 1).setValue('📊 STAT Course Feedback Dashboard');
-  sheet.getRange(2, 1).setValue('Last updated: ' + Utilities.formatDate(now, Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss'));
-  sheet.getRange(1, 1, 2, 1).merge();
-  sheet.getRange(1, 1, 2, 1).setFontSize(16).setFontWeight('bold');
-  
-  sheet.getRange(4, 1).setValue('⚠️ No responses received yet.');
-  sheet.getRange(4, 1).setFontSize(14).setFontColor('#666666');
-  sheet.getRange(5, 1).setValue('Once students submit the form, the dashboard will populate automatically.');
-  sheet.getRange(5, 1).setFontSize(12).setFontColor('#888888');
-}
-
-// ============================================================
-// 7. UPDATE CHART DATA
-// ============================================================
-
-function updateChartData(summary, ss) {
-  let sheet = ss.getSheetByName(CONFIG.CHART_DATA_SHEET_NAME);
-  if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.CHART_DATA_SHEET_NAME);
-  } else {
-    sheet.clear();
-  }
-  
-  let row = 1;
-  
-  // Expectation Change
-  sheet.getRange(row, 1).setValue('Expectation Change');
-  row++;
-  const expData = Object.entries(summary.expectationCounts).filter(([k, v]) => v > 0);
-  if (expData.length) {
-    sheet.getRange(row, 1, expData.length, 2).setValues(expData);
-    row += expData.length + 2;
-  }
-  
-  // GitHub Experience
-  sheet.getRange(row, 1).setValue('STAT 353 - GitHub Experience');
-  row++;
-  const ghData = Object.entries(summary.q353_github_counts).filter(([k, v]) => v > 0);
-  if (ghData.length) {
-    sheet.getRange(row, 1, ghData.length, 2).setValues(ghData);
-    row += ghData.length + 2;
-  }
-  
-  // F1 Score
-  sheet.getRange(row, 1).setValue('STAT 415 - F1 Score Understanding');
-  row++;
-  const f1Data = Object.entries(summary.q415_f1_counts).filter(([k, v]) => v > 0);
-  if (f1Data.length) {
-    sheet.getRange(row, 1, f1Data.length, 2).setValues(f1Data);
-    row += f1Data.length + 2;
-  }
-  
-  // Clarity
-  sheet.getRange(row, 1).setValue('Clarity of Expectations');
-  row++;
-  const clarityData = Object.entries(summary.clarityCounts).filter(([k, v]) => v > 0);
-  if (clarityData.length) {
-    sheet.getRange(row, 1, clarityData.length, 2).setValues(clarityData);
-  }
-  
-  sheet.autoResizeColumns(1, 2);
-}
-
-// ============================================================
-// 8. WEB APP ENDPOINTS (for HTML dashboard)
-// ============================================================
-
-function doGet(e) {
-  const action = e?.parameter?.action || 'dashboard';
-  const course = e?.parameter?.course || 'ALL';
-  
-  if (action === 'dashboard') {
-    return getDashboardJSON(course);
-  }
-  
-  return ContentService.createTextOutput(JSON.stringify({
-    success: false,
-    error: 'Invalid action'
-  })).setMimeType(ContentService.MimeType.JSON);
-}
-
-function getDashboardJSON(courseFilter) {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let responses = getAllResponses(ss);
-    
-    // Filter by course if specified
-    if (courseFilter !== 'ALL') {
-      responses = responses.filter(r => r.courses.includes(courseFilter));
-    }
-    
-    if (responses.length === 0) {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: true,
-        total: 0,
-        message: 'No responses for this filter',
-        stats: null,
-        charts: null
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const summary = calculateSummary(responses);
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      success: true,
-      total: responses.length,
-      filter: courseFilter,
-      stats: {
-        techPulse: summary.techPulse,
-        expectMetCount: summary.expectMetCount,
-        paceFast: summary.paceFast,
-        paceTotal: summary.paceTotal,
-        q353_counting_avg: summary.q353_counting_avg,
-        q353_prob_avg: summary.q353_prob_avg,
-        q360_github_avg: summary.q360_github_avg,
-        q360_sheets_avg: summary.q360_sheets_avg,
-        q360_ai_avg: summary.q360_ai_avg
-      },
-      charts: {
-        expectation: summary.expectationCounts,
-        clarity: summary.clarityCounts,
-        github: summary.q353_github_counts,
-        f1: summary.q415_f1_counts,
-        metrics: summary.q415_metrics_counts,
-        logistic: summary.q415_logistic_counts,
-        pace: summary.q415_pace_counts,
-        byCourse: summary.byCourse
-      }
-    })).setMimeType(ContentService.MimeType.JSON);
-    
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({
-      success: false,
-      error: error.message
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-// ============================================================
-// 9. ADMIN FUNCTIONS
-// ============================================================
-
-function setupSystem() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  // Create required sheets
-  let sheets = [
-    CONFIG.PROCESSED_SHEET_NAME,
-    CONFIG.DASHBOARD_SHEET_NAME,
-    CONFIG.CHART_DATA_SHEET_NAME
-  ];
-  
-  sheets.forEach(name => {
-    if (!ss.getSheetByName(name)) {
-      ss.insertSheet(name);
-    }
-  });
-  
-  // Install trigger
-  installTrigger();
-  
-  // Build initial dashboard
-  refreshDashboard(ss);
-  
-  Logger.log('✅ System setup complete!');
-  Logger.log('📊 Sheets created: ' + sheets.join(', '));
-  Logger.log('🔔 Trigger installed for automatic updates');
-}
-
-function clearAllData() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(CONFIG.PROCESSED_SHEET_NAME);
-  
-  if (sheet) {
-    const lastRow = sheet.getLastRow();
-    if (lastRow > 1) {
-      sheet.deleteRows(2, lastRow - 1);
-    }
-    Logger.log('✅ All data cleared. Headers preserved.');
-  }
-  
-  refreshDashboard(ss);
-}
-
-function getResponseCount() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const responses = getAllResponses(ss);
-  return responses.length;
-}
-
-function exportCSV() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(CONFIG.PROCESSED_SHEET_NAME);
-  
-  if (!sheet) {
-    Logger.log('❌ No processed responses found.');
-    return;
-  }
-  
-  const data = sheet.getDataRange().getValues();
-  const csv = data.map(row => row.join(',')).join('\n');
-  
-  const date = new Date().toISOString().slice(0, 10);
-  const csvSheet = ss.insertSheet('CSV Export ' + date);
-  csvSheet.getRange(1, 1).setValue(csv);
-  
-  Logger.log('✅ CSV exported to sheet: CSV Export ' + date);
-}
+<script>
+    (function() {
+        // ============================================================
+        // 1. CONFIGURATION - Point to your Google Apps Script Web App
+        // ============================================================
+        const WEB_APP_URL = 'YOUR_WEB_APP_URL_HERE'; // Replace with your deployed URL
+        
+        // ============================================================
+        // 2. FETCH REAL DATA FROM GOOGLE SHEETS
+        // ============================================================
+        function fetchDashboardData(courseFilter) {
+            const url = WEB_APP_URL + '?action=dashboard&course=' + encodeURIComponent(courseFilter);
+            
+            return fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        return data;
+                    } else {
+                        console.error('Error fetching data:', data.error);
+                        return null;
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    return null;
+                });
+        }
+        
+        // ============================================================
+        // 3. RENDER DASHBOARD WITH REAL DATA
+        // ============================================================
+        function renderDashboard(data) {
+            if (!data || !data.stats) {
+                // Show empty state
+                document.getElementById('respCount').innerText = '0';
+                document.getElementById('techPulse').innerText = '-';
+                document.getElementById('paceFast').innerText = '-';
+                document.getElementById('expectMet').innerText = '-';
+                return;
+            }
+            
+            const stats = data.stats;
+            const charts = data.charts;
+            
+            // Update summary stats
+            document.getElementById('respCount').innerText = data.total || 0;
+            document.getElementById('techPulse').innerText = stats.techPulse ? stats.techPulse.toFixed(2) : '-';
+            document.getElementById('paceFast').innerText = stats.paceTotal ? `${stats.paceFast}/${stats.paceTotal}` : '-';
+            
+            const expectPct = data.total ? ((stats.expectMetCount || 0) / data.total * 100).toFixed(1) : 0;
+            document.getElementById('expectMet').innerText = expectPct + '%';
+            
+            // Draw charts with real data
+            drawCharts(stats, charts);
+        }
+        
+        // ============================================================
+        // 4. DRAW CHARTS WITH GOOGLE CHARTS
+        // ============================================================
+        google.charts.load('current', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(() => {
+            // Initial load with 'ALL' filter
+            loadDashboard('ALL');
+        });
+        
+        function drawCharts(stats, charts) {
+            // ---- STAT 353: Counting & Probability ----
+            const data353 = google.visualization.arrayToDataTable([
+                ['Metric', 'Avg comfort (1-5)'],
+                ['Counting', stats.q353_counting_avg || 0],
+                ['Probability', stats.q353_prob_avg || 0]
+            ]);
+            const chart353 = new google.visualization.ColumnChart(document.getElementById('chart_353'));
+            chart353.draw(data353, { 
+                legend: 'none', 
+                colors: ['#2a7de1'], 
+                vAxis: { minValue: 0, maxValue: 5 }, 
+                height: 140, 
+                chartArea: { width: '70%', height: '70%' } 
+            });
+            
+            // ---- STAT 360: Tool Confidence ----
+            const data360 = google.visualization.arrayToDataTable([
+                ['Tool', 'Confidence (1-5)'],
+                ['GitHub', stats.q360_github_avg || 0],
+                ['Sheets', stats.q360_sheets_avg || 0],
+                ['AI', stats.q360_ai_avg || 0]
+            ]);
+            const chart360 = new google.visualization.ColumnChart(document.getElementById('chart_360'));
+            chart360.draw(data360, { 
+                legend: 'none', 
+                colors: ['#1f8b4c'], 
+                vAxis: { minValue: 0, maxValue: 5 }, 
+                height: 140, 
+                chartArea: { width: '70%', height: '70%' } 
+            });
+            
+            // ---- STAT 415: Metrics & Logistic (mapped to 1-5) ----
+            function mapMetrics(val) {
+                if (val === 'understand clearly') return 5;
+                if (val === 'sort of get it') return 3;
+                if (val === 'completely lost') return 1;
+                return null;
+            }
+            function mapLogistic(val) {
+                if (val === 'Very comfortable') return 5;
+                if (val === 'Somewhat comfortable') return 3;
+                if (val === 'just memorizing') return 2;
+                return null;
+            }
+            
+            // Calculate averages from counts
+            let metricsTotal = 0, metricsCount = 0;
+            if (charts && charts.metrics) {
+                Object.entries(charts.metrics).forEach(([key, count]) => {
+                    const val = mapMetrics(key);
+                    if (val !== null) {
+                        metricsTotal += val * count;
+                        metricsCount += count;
+                    }
+                });
+            }
+            const avgMetrics = metricsCount ? metricsTotal / metricsCount : 0;
+            
+            let logTotal = 0, logCount = 0;
+            if (charts && charts.logistic) {
+                Object.entries(charts.logistic).forEach(([key, count]) => {
+                    const val = mapLogistic(key);
+                    if (val !== null) {
+                        logTotal += val * count;
+                        logCount += count;
+                    }
+                });
+            }
+            const avgLog = logCount ? logTotal / logCount : 0;
+            
+            const data415 = google.visualization.arrayToDataTable([
+                ['Metric', 'Avg score'],
+                ['Performance metrics', avgMetrics],
+                ['Logistic regression', avgLog]
+            ]);
+            const chart415 = new google.visualization.ColumnChart(document.getElementById('chart_415'));
+            chart415.draw(data415, { 
+                legend: 'none', 
+                colors: ['#b33c9e'], 
+                vAxis: { minValue: 0, maxValue: 5 }, 
+                height: 140, 
+                chartArea: { width: '70%', height: '70%' } 
+            });
+            
+            // ---- GitHub Quiz Experience ----
+            const ghData = google.visualization.arrayToDataTable([
+                ['Experience', 'Count'],
+                ...Object.entries(charts?.github || {}).filter(([k, v]) => v > 0)
+            ]);
+            const chartGh = new google.visualization.PieChart(document.getElementById('chart_github'));
+            chartGh.draw(ghData, { 
+                height: 140, 
+                chartArea: { width: '80%', height: '80%' }, 
+                sliceVisibilityThreshold: 0 
+            });
+            
+            // ---- F1 Score Understanding ----
+            const f1Data = google.visualization.arrayToDataTable([
+                ['F1 understanding', 'Count'],
+                ...Object.entries(charts?.f1 || {}).filter(([k, v]) => v > 0)
+            ]);
+            const chartF1 = new google.visualization.PieChart(document.getElementById('chart_f1'));
+            chartF1.draw(f1Data, { 
+                height: 140, 
+                chartArea: { width: '80%', height: '80%' }, 
+                sliceVisibilityThreshold: 0 
+            });
+            
+            // ---- Expectation Change ----
+            const expData = google.visualization.arrayToDataTable([
+                ['Expectation', 'Count'],
+                ...Object.entries(charts?.expectation || {}).filter(([k, v]) => v > 0)
+            ]);
+            const chartExp = new google.visualization.PieChart(document.getElementById('chart_expect'));
+            chartExp.draw(expData, { 
+                height: 140, 
+                chartArea: { width: '80%', height: '80%' }, 
+                sliceVisibilityThreshold: 0 
+            });
+        }
+        
+        // ============================================================
+        // 5. LOAD DASHBOARD WITH FILTER
+        // ============================================================
+        function loadDashboard(courseFilter) {
+            fetchDashboardData(courseFilter)
+                .then(data => {
+                    if (data) {
+                        renderDashboard(data);
+                    } else {
+                        // Show error state
+                        document.getElementById('respCount').innerText = '⚠️';
+                        document.getElementById('techPulse').innerText = 'Error';
+                        document.getElementById('paceFast').innerText = '-';
+                        document.getElementById('expectMet').innerText = '-';
+                    }
+                });
+        }
+        
+        // ============================================================
+        // 6. DROPDOWN FILTER
+        // ============================================================
+        document.getElementById('courseFilter').addEventListener('change', function() {
+            loadDashboard(this.value);
+        });
+        
+        // ============================================================
+        // 7. SUBMIT FORM TO GOOGLE SHEETS
+        // ============================================================
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const data = collectFormData();
+            
+            if (!data.courses || data.courses.length === 0) {
+                document.getElementById('submitMessage').innerHTML = '⚠️ Please select at least one course.';
+                document.getElementById('submitMessage').style.color = '#cc5500';
+                return;
+            }
+            
+            // Send to Google Sheets via POST
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Use no-cors for simple deployment
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                document.getElementById('submitMessage').innerHTML = '✅ Response submitted successfully!';
+                document.getElementById('submitMessage').style.color = '#1a6e3a';
+                
+                // Refresh dashboard after a moment
+                setTimeout(() => {
+                    loadDashboard(document.getElementById('courseFilter').value);
+                }, 1000);
+            })
+            .catch(error => {
+                document.getElementById('submitMessage').innerHTML = '❌ Error submitting: ' + error.message;
+                document.getElementById('submitMessage').style.color = '#cc0000';
+            });
+        });
+        
+        // ============================================================
+        // 8. COLLECT FORM DATA
+        // ============================================================
+        function collectFormData() {
+            // Get selected courses
+            const checked = document.querySelectorAll('#courseCheckboxes input:checked');
+            const courses = Array.from(checked).map(cb => cb.value);
+            
+            // Get general questions
+            const studentId = document.getElementById('studentId').value;
+            const expectation = document.getElementById('expectationChange').value;
+            const surprise = document.getElementById('surprise').value;
+            const suggestion = document.getElementById('suggestion').value;
+            const clarity = document.getElementById('clarity').value;
+            
+            // Get course-specific questions
+            const data = {
+                studentId: studentId,
+                courses: courses,
+                expectation: expectation,
+                surprise: surprise,
+                suggestion: suggestion,
+                clarity: clarity
+            };
+            
+            // STAT 353
+            const q353c = document.querySelector('.q353c');
+            const q353p = document.querySelector('.q353p');
+            const q353g = document.querySelector('.q353g');
+            if (q353c) data.q353Counting = q353c.value;
+            if (q353p) data.q353Probability = q353p.value;
+            if (q353g) data.q353GitHub = q353g.value;
+            
+            // STAT 360
+            const q360g = document.querySelector('.q360g');
+            const q360s = document.querySelector('.q360s');
+            const q360a = document.querySelector('.q360a');
+            if (q360g) data.q360GitHub = q360g.value;
+            if (q360s) data.q360Sheets = q360s.value;
+            if (q360a) data.q360AI = q360a.value;
+            
+            // STAT 415
+            const q415m = document.querySelector('.q415m');
+            const q415l = document.querySelector('.q415l');
+            const q415p = document.querySelector('.q415p');
+            const q415f = document.querySelector('.q415f');
+            if (q415m) data.q415Metrics = q415m.value;
+            if (q415l) data.q415Logistic = q415l.value;
+            if (q415p) data.q415Pace = q415p.value;
+            if (q415f) data.q415F1 = q415f.value;
+            
+            return data;
+        }
+        
+        // ============================================================
+        // 9. DYNAMIC QUESTIONS (UI only)
+        // ============================================================
+        function updateDynamicQuestions() {
+            const checked = document.querySelectorAll('#courseCheckboxes input:checked');
+            const courses = Array.from(checked).map(cb => cb.value);
+            const container = document.getElementById('dynamicQuestions');
+            
+            if (courses.length === 0) {
+                container.innerHTML = `<p style="color: #4f6f8f; font-style: italic;">Select at least one course above to see questions.</p>`;
+                return;
+            }
+            
+            let html = '';
+            
+            if (courses.some(c => c.startsWith('STAT 353'))) {
+                html += `<div style="background:#f2f7ff; padding:10px 14px; border-radius:14px; margin-bottom:12px;">
+                    <strong>STAT 353</strong><br>
+                    <div class="form-group"><label>Comfort: Counting principle (1-5)</label>
+                        <select class="q353c">
+                            <option value="1">1 - Very Uncomfortable</option>
+                            <option value="2">2 - Uncomfortable</option>
+                            <option value="3" selected>3 - Neutral</option>
+                            <option value="4">4 - Comfortable</option>
+                            <option value="5">5 - Very Comfortable</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Comfort: Basic probability (1-5)</label>
+                        <select class="q353p">
+                            <option value="1">1 - Very Uncomfortable</option>
+                            <option value="2">2 - Uncomfortable</option>
+                            <option value="3" selected>3 - Neutral</option>
+                            <option value="4">4 - Comfortable</option>
+                            <option value="5">5 - Very Comfortable</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>GitHub quiz experience</label>
+                        <select class="q353g">
+                            <option>Smooth / No issues</option>
+                            <option>Slightly Difficult</option>
+                            <option>Very Difficult / Glitchy</option>
+                            <option>I haven't tried it yet</option>
+                        </select>
+                    </div>
+                </div>`;
+            }
+            
+            if (courses.includes('STAT 360')) {
+                html += `<div style="background:#f0faf3; padding:10px 14px; border-radius:14px; margin-bottom:12px;">
+                    <strong>STAT 360</strong><br>
+                    <div class="form-group"><label>GitHub confidence (1-5)</label>
+                        <select class="q360g">
+                            <option value="1">1 - Very Lost</option>
+                            <option value="2">2</option>
+                            <option value="3" selected>3 - Neutral</option>
+                            <option value="4">4</option>
+                            <option value="5">5 - Very Confident</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Sheets confidence (1-5)</label>
+                        <select class="q360s">
+                            <option value="1">1 - Very Lost</option>
+                            <option value="2">2</option>
+                            <option value="3" selected>3 - Neutral</option>
+                            <option value="4">4</option>
+                            <option value="5">5 - Very Confident</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>AI confidence (1-5)</label>
+                        <select class="q360a">
+                            <option value="1">1 - Very Lost</option>
+                            <option value="2">2</option>
+                            <option value="3" selected>3 - Neutral</option>
+                            <option value="4">4</option>
+                            <option value="5">5 - Very Confident</option>
+                        </select>
+                    </div>
+                </div>`;
+            }
+            
+            if (courses.includes('STAT 415')) {
+                html += `<div style="background:#fcf0f7; padding:10px 14px; border-radius:14px; margin-bottom:12px;">
+                    <strong>STAT 415</strong><br>
+                    <div class="form-group"><label>Performance metrics grasp</label>
+                        <select class="q415m">
+                            <option>understand clearly</option>
+                            <option selected>sort of get it</option>
+                            <option>completely lost</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Logistic regression comfort</label>
+                        <select class="q415l">
+                            <option>Very comfortable</option>
+                            <option selected>Somewhat comfortable</option>
+                            <option>just memorizing</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Pace</label>
+                        <select class="q415p">
+                            <option selected>Just Right</option>
+                            <option>Too Fast</option>
+                            <option>Too Slow</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>F1 Score understanding</label>
+                        <select class="q415f">
+                            <option>understand clearly</option>
+                            <option selected>know formula but not sure when</option>
+                            <option>confused</option>
+                            <option>dont remember</option>
+                        </select>
+                    </div>
+                </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        document.querySelectorAll('#courseCheckboxes input').forEach(cb => {
+            cb.addEventListener('change', updateDynamicQuestions);
+        });
+        updateDynamicQuestions();
+        
+        // ============================================================
+        // 10. RESET FORM
+        // ============================================================
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
+            document.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+            document.querySelectorAll('#courseCheckboxes input').forEach(cb => cb.checked = false);
+            document.getElementById('submitMessage').innerHTML = '';
+            updateDynamicQuestions();
+        });
+        
+        // ============================================================
+        // 11. INITIAL LOAD
+        // ============================================================
+        // Load dashboard on page load
+        window.addEventListener('load', function() {
+            loadDashboard('ALL');
+        });
+    })();
+</script>
+</body>
+</html>
