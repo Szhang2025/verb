@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
     </script>
     <style>
+        /* ===== MAIN APP STYLES ===== */
         * {
             margin: 0;
             padding: 0;
@@ -164,8 +165,6 @@
             background: #1c6e8a;
             width: 20px;
         }
-
-        /* QUIZ */
         .quiz-box {
             background: #e9f2f8;
             border-radius: 32px;
@@ -269,8 +268,6 @@
         .qdot.wrong {
             background: #e57373;
         }
-
-        /* DEMOGRAPHIC */
         .demographic {
             display: flex;
             flex-wrap: wrap;
@@ -316,8 +313,6 @@
         .send-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
-            box-shadow: 0 3px 0 #0b3a4b;
         }
         .footnote {
             text-align: center;
@@ -360,9 +355,7 @@
             }
         }
 
-        /* ============================================================
-           POPUP DASHBOARD - appears after submission
-           ============================================================ */
+        /* ===== POPUP DASHBOARD STYLES ===== */
         .dashboard-overlay {
             display: none;
             position: fixed;
@@ -431,7 +424,6 @@
             transform: translateY(3px);
             box-shadow: none;
         }
-
         .popup-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -457,7 +449,6 @@
             letter-spacing: 0.5px;
             font-weight: 600;
         }
-
         .popup-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -540,7 +531,18 @@
         .popup-footer strong {
             color: #064257;
         }
-        /* scrollbar styling */
+        .popup-loading {
+            text-align: center;
+            padding: 2rem;
+            color: #4d7a8f;
+        }
+        .popup-error {
+            background: #ffebee;
+            color: #b71c1c;
+            padding: 1rem;
+            border-radius: 12px;
+            border-left: 4px solid #b71c1c;
+        }
         .dashboard-popup::-webkit-scrollbar {
             width: 6px;
         }
@@ -551,13 +553,26 @@
             background: #b8d2e0;
             border-radius: 10px;
         }
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #1c617b;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0.5rem auto;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- ============================================================
-    MAIN APP
-    ============================================================ -->
+    <!-- ===== MAIN APP ===== -->
     <div class="app" id="app">
         <h1>
             <span>📘 verb·fill</span>
@@ -565,7 +580,6 @@
         </h1>
         <div class="sub">“shut up your laptop” (short) + 200 longer · fill in the missing verb</div>
 
-        <!-- Sentence panel -->
         <div class="panel">
             <div class="sentence" id="sentenceDisplay">loading… <small>#1</small></div>
             <div class="audio-row">
@@ -586,7 +600,6 @@
         </div>
         <div class="dots" id="progressDots"></div>
 
-        <!-- QUIZ -->
         <div class="quiz-box">
             <div class="quiz-prompt">
                 🧠 <span id="quizQuestion">Fill in the blank with the correct verb</span>
@@ -603,7 +616,6 @@
             <div class="quiz-progress" id="quizProgress"></div>
         </div>
 
-        <!-- Demographic + Submit -->
         <div class="demographic">
             <label>Gender <select id="genderSelect"><option value="F">Female</option><option value="M">Male</option><option value="NB">Non-binary</option><option value="other">Other</option></select></label>
             <label>Age <input type="number" id="ageInput" min="3" max="120" placeholder="25" style="width:70px;"></label>
@@ -611,65 +623,74 @@
             <button class="send-btn" id="sendDataBtn">📊 Submit & View Dashboard</button>
         </div>
         <div class="footnote">
-            <strong>400 sentences (200 short + 200 longer) · 400 fill-in-blank questions</strong> · responses include gender, age, first language · results released <strong>9/5/2026</strong> · <span id="sentStatus" class="status-msg">✅ ready</span>
+            <strong>400 sentences · 400 fill-in-blank questions</strong> · responses include gender, age, first language · results released <strong>9/5/2026</strong> · <span id="sentStatus" class="status-msg">✅ ready</span>
         </div>
     </div>
 
-    <!-- ============================================================
-    POPUP DASHBOARD
-    ============================================================ -->
+    <!-- ===== POPUP DASHBOARD ===== -->
     <div class="dashboard-overlay" id="dashboardOverlay">
         <div class="dashboard-popup" id="dashboardPopup">
             <div class="popup-header">
-                <h2>📊 Your Quiz Dashboard</h2>
+                <h2>📊 All Responders Dashboard</h2>
                 <button class="popup-close" id="closeDashboard">✕ Close</button>
             </div>
 
-            <div class="popup-stats" id="popupStats">
-                <div class="popup-stat"><div class="num" id="popTotal">—</div><div class="lbl">Questions</div></div>
-                <div class="popup-stat"><div class="num" id="popCorrect">—</div><div class="lbl">Correct</div></div>
-                <div class="popup-stat"><div class="num" id="popScore">—%</div><div class="lbl">Score</div></div>
-                <div class="popup-stat"><div class="num" id="popWrong">—</div><div class="lbl">Wrong</div></div>
-            </div>
-
-            <div class="popup-grid">
-                <div class="popup-chart-box">
-                    <h3>📉 Your Most Missed Verbs</h3>
-                    <div class="popup-chart-wrapper">
-                        <canvas id="popupChart"></canvas>
-                    </div>
-                    <div style="font-size:0.75rem; color:#4d7a8f; text-align:center; margin-top:0.3rem;">
-                        Based on your quiz answers · bars show % of times you got each verb wrong
-                    </div>
+            <div id="dashboardContent">
+                <!-- Loading state -->
+                <div class="popup-loading" id="loadingState">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top:0.5rem;">Fetching data from all responders…</p>
                 </div>
-                <div>
-                    <div class="popup-demographics">
-                        <h3>👤 Your Profile</h3>
-                        <div id="popupProfile">
-                            <div class="popup-demo-item"><span class="label">Gender</span><span class="value" id="popGender">—</span></div>
-                            <div class="popup-demo-item"><span class="label">Age</span><span class="value" id="popAge">—</span></div>
-                            <div class="popup-demo-item"><span class="label">First Language</span><span class="value" id="popLang">—</span></div>
-                            <div class="popup-demo-item"><span class="label">Total Responses</span><span class="value" id="popTotalResponses">—</span></div>
+
+                <!-- Stats -->
+                <div class="popup-stats" id="popupStats" style="display:none;">
+                    <div class="popup-stat"><div class="num" id="popTotal">—</div><div class="lbl">Total Responses</div></div>
+                    <div class="popup-stat"><div class="num" id="popAvgScore">—%</div><div class="lbl">Average Score</div></div>
+                    <div class="popup-stat"><div class="num" id="popTotalWrong">—</div><div class="lbl">Total Wrong</div></div>
+                    <div class="popup-stat"><div class="num" id="popUniqueVerbs">—</div><div class="lbl">Unique Verbs</div></div>
+                </div>
+
+                <!-- Chart + Demographics -->
+                <div class="popup-grid" id="popupGrid" style="display:none;">
+                    <div class="popup-chart-box">
+                        <h3>📉 Top 20 Most Missed Verbs (All Responders)</h3>
+                        <div class="popup-chart-wrapper">
+                            <canvas id="popupChart"></canvas>
+                        </div>
+                        <div style="font-size:0.75rem; color:#4d7a8f; text-align:center; margin-top:0.3rem;">
+                            Bars show % of times each verb was answered incorrectly across all responders
                         </div>
                     </div>
-                    <div class="popup-demographics" style="margin-top:1rem;">
-                        <h3>🏆 Top 5 Missed Verbs</h3>
-                        <div id="popupTop5">
-                            <div style="color:#4d7a8f; font-size:0.9rem;">Complete the quiz to see results</div>
+                    <div>
+                        <div class="popup-demographics">
+                            <h3>👥 Responder Demographics</h3>
+                            <div id="popupProfile">
+                                <div class="popup-demo-item"><span class="label">Gender Distribution</span><span class="value" id="popGenderDist">—</span></div>
+                                <div class="popup-demo-item"><span class="label">Avg Age</span><span class="value" id="popAvgAge">—</span></div>
+                                <div class="popup-demo-item"><span class="label">Age Range</span><span class="value" id="popAgeRange">—</span></div>
+                                <div class="popup-demo-item"><span class="label">Top Language</span><span class="value" id="popTopLang">—</span></div>
+                                <div class="popup-demo-item"><span class="label">Total Languages</span><span class="value" id="popLangCount">—</span></div>
+                            </div>
+                        </div>
+                        <div class="popup-demographics" style="margin-top:1rem;">
+                            <h3>🏆 Top 5 Most Missed Verbs</h3>
+                            <div id="popupTop5">
+                                <div style="color:#4d7a8f; font-size:0.9rem;">Loading…</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="popup-footer">
-                <strong>Data submitted successfully!</strong> · Results will be released on <strong>9/5/2026</strong> · Thank you for participating! 🎉
+                <div class="popup-footer" id="popupFooter" style="display:none;">
+                    <strong>Data from all responders</strong> · Results will be released on <strong>9/5/2026</strong> · <span id="popupResponseCount">0</span> responses collected so far
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         // ============================================================
-        // 400 SENTENCES
+        // 400 SENTENCES (short + longer)
         // ============================================================
         const SHORT_SENTENCES = [
             "shut up your laptop", "open the window", "close the door", "turn on the light", "turn off the fan",
@@ -866,7 +887,6 @@
         let quizIndex = 0;
         let isSending = false;
         let popupChartInstance = null;
-        let currentStats = null;
 
         // DOM refs
         const sentenceDisplay = document.getElementById('sentenceDisplay');
@@ -889,15 +909,22 @@
         // Popup DOM refs
         const overlay = document.getElementById('dashboardOverlay');
         const closeBtn = document.getElementById('closeDashboard');
+        const loadingState = document.getElementById('loadingState');
+        const popupStats = document.getElementById('popupStats');
+        const popupGrid = document.getElementById('popupGrid');
+        const popupFooter = document.getElementById('popupFooter');
+
         const popTotal = document.getElementById('popTotal');
-        const popCorrect = document.getElementById('popCorrect');
-        const popScore = document.getElementById('popScore');
-        const popWrong = document.getElementById('popWrong');
-        const popGender = document.getElementById('popGender');
-        const popAge = document.getElementById('popAge');
-        const popLang = document.getElementById('popLang');
-        const popTotalResponses = document.getElementById('popTotalResponses');
+        const popAvgScore = document.getElementById('popAvgScore');
+        const popTotalWrong = document.getElementById('popTotalWrong');
+        const popUniqueVerbs = document.getElementById('popUniqueVerbs');
+        const popGenderDist = document.getElementById('popGenderDist');
+        const popAvgAge = document.getElementById('popAvgAge');
+        const popAgeRange = document.getElementById('popAgeRange');
+        const popTopLang = document.getElementById('popTopLang');
+        const popLangCount = document.getElementById('popLangCount');
         const popupTop5 = document.getElementById('popupTop5');
+        const popupResponseCount = document.getElementById('popupResponseCount');
 
         // ============================================================
         // AUDIO
@@ -1146,15 +1173,14 @@
         }
 
         // ============================================================
-        // COMPUTE STATS FROM QUIZ RESULTS
+        // COMPUTE STATS FROM QUIZ RESULTS (local)
         // ============================================================
-        function computeStats() {
+        function computeLocalStats() {
             const total = quizUserAnswers.length;
             const correct = quizUserAnswers.filter(a => a === 'correct').length;
             const wrong = quizUserAnswers.filter(a => a === 'wrong').length;
             const unanswered = quizUserAnswers.filter(a => a === null).length;
 
-            // Per-verb stats
             const verbStats = {};
             for (let i = 0; i < quizQuestions.length; i++) {
                 const verb = quizAnswers[i];
@@ -1188,33 +1214,226 @@
         }
 
         // ============================================================
-        // SHOW POPUP DASHBOARD
+        // FETCH ALL DATA FROM SHEET
         // ============================================================
-        function showDashboard(stats, gender, age, lang) {
-            // Update stats
-            popTotal.textContent = stats.total;
-            popCorrect.textContent = stats.correct;
-            popScore.textContent = stats.score + '%';
-            popWrong.textContent = stats.wrong;
+        async function fetchAllData() {
+            const webAppUrl =
+                'https://script.google.com/macros/s/AKfycbyhIbfr9UxULHvaGscBQyRXtgqitdQj0pIP3eyyE0KYa9vqE0zZk5GPsDt0cShRH3aE/exec';
 
-            // Update profile
-            popGender.textContent = gender || '—';
-            popAge.textContent = age || '—';
-            popLang.textContent = lang || '—';
-            popTotalResponses.textContent = stats.total;
+            try {
+                // Try GET with action parameter
+                let response = await fetch(`${webAppUrl}?action=getData`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    // Try without parameter
+                    response = await fetch(webAppUrl, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                return data;
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                throw error;
+            }
+        }
+
+        // ============================================================
+        // PARSE AGGREGATE DATA FROM ALL RESPONDERS
+        // ============================================================
+        function parseAggregateData(sheetData) {
+            // Handle different response formats
+            let rows = [];
+            if (sheetData.data && Array.isArray(sheetData.data)) {
+                rows = sheetData.data;
+            } else if (sheetData.values && Array.isArray(sheetData.values)) {
+                rows = sheetData.values;
+            } else if (Array.isArray(sheetData)) {
+                rows = sheetData;
+            } else {
+                throw new Error('Unexpected data format');
+            }
+
+            if (rows.length < 2) {
+                throw new Error('No data found in sheet');
+            }
+
+            const headers = rows[0];
+            const dataRows = rows.slice(1);
+
+            // Find column indices
+            const idx = {
+                gender: headers.indexOf('Gender'),
+                age: headers.indexOf('Age'),
+                lang: headers.indexOf('First Language'),
+                score: headers.indexOf('Score (%)'),
+                results: headers.indexOf('Quiz Results (JSON)'),
+            };
+
+            if (idx.results === -1) {
+                const altNames = ['QuizResults', 'results', 'json', 'Quiz Results'];
+                for (const name of altNames) {
+                    const i = headers.indexOf(name);
+                    if (i !== -1) { idx.results = i; break; }
+                }
+            }
+
+            // Aggregate stats
+            const verbStats = {};
+            let totalScore = 0;
+            let scoreCount = 0;
+            const genders = [];
+            const ages = [];
+            const langs = [];
+            let totalWrongCount = 0;
+            let totalQuestionsCount = 0;
+
+            for (const row of dataRows) {
+                if (!row || row.length === 0 || row.every(c => !c)) continue;
+
+                const gender = row[idx.gender] || 'Unknown';
+                const age = row[idx.age] || '';
+                const lang = row[idx.lang] || 'Unknown';
+                const score = parseFloat(row[idx.score]);
+
+                if (gender) genders.push(gender);
+                if (lang) langs.push(lang);
+                if (age) { const a = parseInt(age); if (!isNaN(a)) ages.push(a); }
+
+                if (!isNaN(score)) { totalScore += score;
+                    scoreCount++; }
+
+                let results = [];
+                if (idx.results !== -1 && row[idx.results]) {
+                    try {
+                        const raw = row[idx.results].trim();
+                        if (raw.startsWith('[') || raw.startsWith('{')) {
+                            results = JSON.parse(raw);
+                        } else {
+                            const cleaned = raw.replace(/'/g, '"');
+                            results = JSON.parse(cleaned);
+                        }
+                    } catch (e) {
+                        const parts = row[idx.results].split(',').map(s => s.trim());
+                        results = parts.map(p => {
+                            const match = p.match(/"verb":"([^"]+)"/);
+                            return match ? { verb: match[1], result: 'wrong' } : null;
+                        }).filter(Boolean);
+                    }
+                }
+
+                if (Array.isArray(results) && results.length > 0) {
+                    totalQuestionsCount = Math.max(totalQuestionsCount, results.length);
+                    for (const item of results) {
+                        const verb = item.verb || item.correct || item.word || '';
+                        if (!verb) continue;
+                        const isWrong = (item.userResult === 'wrong' || item.result === 'wrong');
+                        if (!verbStats[verb]) verbStats[verb] = { total: 0, wrong: 0 };
+                        verbStats[verb].total++;
+                        if (isWrong) {
+                            verbStats[verb].wrong++;
+                            totalWrongCount++;
+                        }
+                    }
+                }
+            }
+
+            // Compute error rates
+            const verbErrorRates = [];
+            for (const [verb, stats] of Object.entries(verbStats)) {
+                if (stats.total > 0) {
+                    verbErrorRates.push({
+                        verb,
+                        total: stats.total,
+                        wrong: stats.wrong,
+                        errorRate: stats.wrong / stats.total,
+                    });
+                }
+            }
+            verbErrorRates.sort((a, b) => b.errorRate - a.errorRate);
+
+            // Gender distribution
+            const genderCount = {};
+            genders.forEach(g => { genderCount[g] = (genderCount[g] || 0) + 1; });
+
+            // Language distribution
+            const langCount = {};
+            langs.forEach(l => { langCount[l] = (langCount[l] || 0) + 1; });
+
+            const validAges = ages.filter(a => !isNaN(a) && a > 0);
+
+            return {
+                totalResponses: genders.length,
+                totalQuestions: totalQuestionsCount || 400,
+                avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0,
+                totalWrong: totalWrongCount,
+                uniqueVerbs: verbErrorRates.length,
+                verbErrorRates,
+                demographics: {
+                    genderCount,
+                    ages: validAges,
+                    langCount,
+                },
+                raw: dataRows,
+            };
+        }
+
+        // ============================================================
+        // SHOW POPUP DASHBOARD WITH AGGREGATE DATA
+        // ============================================================
+        function showDashboardWithAggregateData(aggregateStats) {
+            // Update stats
+            popTotal.textContent = aggregateStats.totalResponses;
+            popAvgScore.textContent = aggregateStats.avgScore + '%';
+            popTotalWrong.textContent = aggregateStats.totalWrong;
+            popUniqueVerbs.textContent = aggregateStats.uniqueVerbs;
+
+            // Demographics
+            const demo = aggregateStats.demographics;
+            const genderStr = Object.entries(demo.genderCount)
+                .map(([k, v]) => `${k}: ${v}`)
+                .join(' · ');
+
+            const avgAge = demo.ages.length > 0 ?
+                Math.round(demo.ages.reduce((a, b) => a + b, 0) / demo.ages.length) :
+                '—';
+            const ageRange = demo.ages.length > 0 ?
+                `${Math.min(...demo.ages)} – ${Math.max(...demo.ages)}` :
+                '—';
+
+            const topLang = Object.entries(demo.langCount)
+                .sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
+
+            popGenderDist.textContent = genderStr || '—';
+            popAvgAge.textContent = avgAge;
+            popAgeRange.textContent = ageRange;
+            popTopLang.textContent = topLang;
+            popLangCount.textContent = Object.keys(demo.langCount).length;
 
             // Top 5
-            const top5 = stats.verbErrorRates.slice(0, 5);
+            const top5 = aggregateStats.verbErrorRates.slice(0, 5);
             if (top5.length > 0) {
                 popupTop5.innerHTML = top5.map(v =>
                     `<div class="popup-top5-item"><span class="verb">${v.verb}</span><span class="pct">${Math.round(v.errorRate * 100)}%</span></div>`
                 ).join('');
             } else {
-                popupTop5.innerHTML = '<div style="color:#4d7a8f; font-size:0.9rem;">No wrong answers yet!</div>';
+                popupTop5.innerHTML = '<div style="color:#4d7a8f; font-size:0.9rem;">No wrong answers recorded yet</div>';
             }
 
+            popupResponseCount.textContent = aggregateStats.totalResponses;
+
             // Chart - Top 20
-            const top20 = stats.verbErrorRates.slice(0, 20);
+            const top20 = aggregateStats.verbErrorRates.slice(0, 20);
             const labels = top20.map(v => v.verb);
             const data = top20.map(v => +(v.errorRate * 100).toFixed(1));
 
@@ -1226,7 +1445,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: '% Incorrect',
+                        label: '% Incorrect (All Responders)',
                         data: data,
                         backgroundColor: data.map((v) => {
                             const intensity = Math.min(v / 100, 1);
@@ -1249,7 +1468,7 @@
                         tooltip: {
                             callbacks: {
                                 label: (ctx) =>
-                                    `${ctx.parsed.x}% incorrect (${top20[ctx.dataIndex]?.wrong || 0} wrong out of ${top20[ctx.dataIndex]?.total || 0})`
+                                    `${ctx.parsed.x}% incorrect (${top20[ctx.dataIndex]?.wrong || 0} wrong out of ${top20[ctx.dataIndex]?.total || 0} attempts)`
                             }
                         }
                     },
@@ -1266,23 +1485,41 @@
                 }
             });
 
-            // Show overlay
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            currentStats = stats;
+            // Show everything
+            loadingState.style.display = 'none';
+            popupStats.style.display = 'grid';
+            popupGrid.style.display = 'grid';
+            popupFooter.style.display = 'block';
+        }
+
+        // ============================================================
+        // SHOW POPUP WITH ERROR
+        // ============================================================
+        function showPopupError(message) {
+            loadingState.innerHTML = `
+                <div class="popup-error">
+                    <strong>⚠️ Error loading data</strong>
+                    <p style="margin-top:0.5rem;">${message}</p>
+                    <p style="margin-top:0.5rem; font-size:0.85rem;">
+                        Make sure the Google Apps Script is deployed with a <code>doGet()</code> function
+                        that returns the sheet data as JSON.
+                    </p>
+                    <button class="btn-primary" style="margin-top:0.8rem;" onclick="location.reload()">🔄 Retry</button>
+                </div>
+            `;
         }
 
         // ============================================================
         // SEND TO SHEET + SHOW DASHBOARD
         // ============================================================
-        function sendToSheet() {
+        async function sendToSheet() {
             if (isSending) return;
 
             const gender = document.getElementById('genderSelect').value;
             const age = document.getElementById('ageInput').value || 'unknown';
             const lang = document.getElementById('langInput').value || 'not specified';
 
-            const stats = computeStats();
+            const localStats = computeLocalStats();
 
             const payload = {
                 gender,
@@ -1290,7 +1527,7 @@
                 lang,
                 timestamp: new Date().toISOString(),
                 totalQuestions: quizQuestions.length,
-                correctAnswers: stats.correct,
+                correctAnswers: localStats.correct,
                 quizResults: quizUserAnswers.map((ans, idx) => ({
                     sentence: quizQuestions[idx]?.sentence || '',
                     correct: quizAnswers[idx] || '',
@@ -1306,29 +1543,58 @@
             sentStatus.textContent = '⏳ Sending data...';
             sentStatus.className = 'status-msg sending';
 
-            fetch(webAppUrl, {
+            // Show the popup with loading state
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            loadingState.style.display = 'block';
+            popupStats.style.display = 'none';
+            popupGrid.style.display = 'none';
+            popupFooter.style.display = 'none';
+
+            try {
+                // Send the data
+                await fetch(webAppUrl, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
-                })
-                .then(() => {
-                    sentStatus.textContent = '✅ Data sent successfully!';
-                    sentStatus.className = 'status-msg success';
-                    // Show the dashboard popup with the stats
-                    showDashboard(stats, gender, age, lang);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    sentStatus.textContent = '❌ Error sending data. But you can still view your dashboard.';
-                    sentStatus.className = 'status-msg error';
-                    // Still show the dashboard even if submission fails
-                    showDashboard(stats, gender, age, lang);
-                })
-                .finally(() => {
-                    isSending = false;
-                    sendBtn.disabled = false;
                 });
+
+                sentStatus.textContent = '✅ Data sent successfully!';
+                sentStatus.className = 'status-msg success';
+
+                // Now fetch all data from the sheet
+                try {
+                    const sheetData = await fetchAllData();
+                    const aggregateStats = parseAggregateData(sheetData);
+                    showDashboardWithAggregateData(aggregateStats);
+                } catch (fetchError) {
+                    console.error('Error fetching aggregate data:', fetchError);
+                    // Show error but still show what we have
+                    showPopupError(
+                        `Could not load data from all responders. Your data was submitted, but the dashboard couldn't fetch the aggregate data. Error: ${fetchError.message}`
+                    );
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                sentStatus.textContent = '❌ Error sending data.';
+                sentStatus.className = 'status-msg error';
+
+                // Try to fetch data anyway (maybe there's already data in the sheet)
+                try {
+                    const sheetData = await fetchAllData();
+                    const aggregateStats = parseAggregateData(sheetData);
+                    showDashboardWithAggregateData(aggregateStats);
+                } catch (fetchError) {
+                    showPopupError(
+                        `Failed to submit your data and failed to load existing data. Error: ${error.message}`
+                    );
+                }
+            } finally {
+                isSending = false;
+                sendBtn.disabled = false;
+            }
         }
 
         // ============================================================
@@ -1370,6 +1636,10 @@
         // ============================================================
         render();
         buildQuiz();
+
+        console.log('📊 VerbLingua App loaded!');
+        console.log('ℹ️ After submitting, the dashboard will show aggregate data from ALL responders.');
+        console.log('ℹ️ Make sure your Google Apps Script has a doGet() function that returns sheet data.');
     </script>
 </body>
 </html>
