@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VerbLingua · Analytics Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VerbLingua · Learn + Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
     </script>
     <style>
@@ -11,247 +11,328 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
         body {
-            background: #eef5f9;
+            background: #eaf1f7;
             min-height: 100vh;
-            padding: 2rem 1.5rem;
+            display: flex;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
         }
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
+        .app {
+            max-width: 960px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            border-radius: 48px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 20, 30, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.6);
         }
         h1 {
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: #063544;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.8rem;
             flex-wrap: wrap;
-            margin-bottom: 0.2rem;
         }
         .sub {
             color: #1b5b72;
-            border-left: 4px solid #3f8ca8;
-            padding-left: 1.2rem;
-            margin-bottom: 2rem;
-            font-size: 1.05rem;
+            border-left: 3px solid #3f8ca8;
+            padding-left: 1rem;
+            margin: 0.2rem 0 1.5rem;
         }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 20px;
-            padding: 1.2rem 1.5rem;
-            box-shadow: 0 4px 12px rgba(0, 20, 30, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-        .stat-card .label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #4d7a8f;
-            font-weight: 600;
-        }
-        .stat-card .value {
-            font-size: 1.9rem;
-            font-weight: 700;
-            color: #063544;
-            margin-top: 0.2rem;
-        }
-        .stat-card .value small {
-            font-size: 0.9rem;
-            font-weight: 400;
-            color: #4d7a8f;
-            margin-left: 0.3rem;
-        }
-        .chart-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.8rem;
-            margin-bottom: 2rem;
-        }
-        @media (max-width: 800px) {
-            .chart-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        .chart-box {
-            background: white;
+        .panel {
+            background: #ffffffdd;
             border-radius: 28px;
-            padding: 1.5rem 1.5rem 1rem;
-            box-shadow: 0 8px 24px rgba(0, 20, 30, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 1.6rem 1.8rem;
+            box-shadow: 0 8px 18px -8px rgba(0, 40, 60, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            margin-bottom: 1.2rem;
         }
-        .chart-box h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #063544;
-            margin-bottom: 0.8rem;
+        .sentence {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: #01212e;
+            line-height: 1.4;
+        }
+        .sentence small {
+            font-weight: 300;
+            font-size: 0.85rem;
+            background: #d3e6ef;
+            padding: 0.1rem 0.8rem;
+            border-radius: 30px;
+            margin-left: 0.6rem;
+        }
+        .sentence .badge {
+            background: #4d8aa8;
+            color: white;
+            padding: 0.05rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+        .audio-row {
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 1rem;
+            margin-top: 0.8rem;
+            flex-wrap: wrap;
         }
-        .chart-box h2 .badge {
-            background: #d3e6ef;
-            font-size: 0.7rem;
-            padding: 0.1rem 0.7rem;
-            border-radius: 30px;
-            color: #1b5b72;
-            font-weight: 400;
-        }
-        .chart-wrapper {
-            position: relative;
-            height: 380px;
-        }
-        .demographic-box {
-            background: white;
-            border-radius: 28px;
-            padding: 1.5rem;
-            box-shadow: 0 8px 24px rgba(0, 20, 30, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-        .demographic-box h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #063544;
-            margin-bottom: 1rem;
-        }
-        .demographic-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #eef5f9;
-        }
-        .demographic-item:last-child {
-            border-bottom: none;
-        }
-        .demographic-item .label {
-            color: #2d657b;
-        }
-        .demographic-item .value {
-            font-weight: 600;
-            color: #063544;
-        }
-        .footer-note {
-            text-align: center;
-            color: #4d7a8f;
-            font-size: 0.85rem;
-            border-top: 1px dashed #c2dae8;
-            padding-top: 1.2rem;
-            margin-top: 0.5rem;
-            opacity: 0.8;
-        }
-        .footer-note strong {
-            color: #064257;
-        }
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #4d7a8f;
-            font-size: 1.1rem;
-        }
-        .error-msg {
-            background: #ffebee;
-            color: #b71c1c;
-            padding: 1.2rem 1.5rem;
-            border-radius: 16px;
-            border-left: 4px solid #b71c1c;
-            margin-bottom: 1.5rem;
-        }
-        .refresh-btn {
+        .btn-audio {
             background: #1c617b;
             border: none;
             color: white;
+            font-size: 1.2rem;
+            padding: 0.4rem 1.6rem;
+            border-radius: 50px;
+            font-weight: 500;
+            box-shadow: 0 4px 0 #0d3342;
+            cursor: pointer;
+            border: 1px solid #68a3bd;
+            transition: 0.07s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-audio:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #0d3342;
+        }
+        .counter {
+            background: #e8f1f7;
+            padding: 0.2rem 1.2rem;
+            border-radius: 40px;
+            color: #1a4c5f;
+            font-weight: 500;
+            border: 1px solid #c1dae7;
+            margin-left: auto;
+        }
+        .nav {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.4rem 0 0.6rem;
+        }
+        .nav-group {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            background: #e1edf5;
+            border: 1px solid #b8d2e0;
+            color: #073544;
+            font-weight: 500;
             padding: 0.4rem 1.2rem;
             border-radius: 40px;
-            font-weight: 500;
             cursor: pointer;
-            font-size: 0.85rem;
-            box-shadow: 0 3px 0 #0d3342;
-            transition: 0.07s;
-            margin-left: 0.5rem;
+            box-shadow: 0 2px 0 #b0cbd8;
+            transition: 0.1s;
         }
-        .refresh-btn:active {
+        .nav-btn:active {
             transform: translateY(3px);
             box-shadow: none;
         }
-        .top-verb-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.3rem 0;
-            font-size: 0.9rem;
-            border-bottom: 1px solid #f0f6fa;
-        }
-        .top-verb-item .verb {
-            font-weight: 500;
-            color: #063544;
-        }
-        .top-verb-item .pct {
-            color: #1b5b72;
-            font-weight: 600;
-        }
-        .config-box {
-            background: #fff3e0;
-            border: 1px solid #ffcc80;
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .config-box code {
-            background: #f5f5f5;
-            padding: 0.1rem 0.4rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-        .config-box input {
-            padding: 0.4rem 0.8rem;
-            border: 1px solid #b6d1df;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 500px;
-            font-size: 0.9rem;
-            margin: 0.3rem 0;
-        }
-        .config-box label {
-            font-weight: 600;
-            color: #063544;
-            display: block;
-            margin-top: 0.5rem;
-        }
-        .config-box .hint {
-            font-size: 0.85rem;
-            color: #4d7a8f;
-            margin-top: 0.2rem;
-        }
-        .btn-primary {
+        .nav-btn.primary {
             background: #1c617b;
+            border-color: #135066;
             color: white;
-            border: none;
-            padding: 0.4rem 1.5rem;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            margin-top: 0.5rem;
             box-shadow: 0 3px 0 #0d3342;
-            transition: 0.07s;
         }
-        .btn-primary:active {
+        .dots {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin: 0.6rem 0 0.2rem;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 20px;
+            background: #c9dce7;
+            transition: 0.2s;
+        }
+        .dot.active {
+            background: #1c6e8a;
+            width: 20px;
+        }
+
+        /* QUIZ */
+        .quiz-box {
+            background: #e9f2f8;
+            border-radius: 32px;
+            padding: 1.5rem 1.8rem;
+            border: 1px solid #c2dae8;
+            margin-top: 1.2rem;
+        }
+        .quiz-prompt {
+            font-weight: 600;
+            color: #063544;
+            font-size: 1.1rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .quiz-prompt span {
+            background: #bcd7e6;
+            padding: 0.1rem 0.9rem;
+            border-radius: 40px;
+            font-weight: 400;
+        }
+        .blank-sentence {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #01212e;
+            padding: 0.5rem 0;
+        }
+        .blank-sentence .blank {
+            background: #ffeb3b;
+            padding: 0.1rem 0.8rem;
+            border-radius: 8px;
+            border-bottom: 3px solid #f57f17;
+            font-weight: 700;
+        }
+        .quiz-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin: 0.6rem 0;
+        }
+        .quiz-options button {
+            background: white;
+            border: 1.5px solid #b2cedc;
+            padding: 0.5rem 1.5rem;
+            border-radius: 60px;
+            font-weight: 500;
+            color: #05303f;
+            cursor: pointer;
+            box-shadow: 0 2px 0 #b2cbd8;
+            transition: 0.1s;
+            font-size: 1rem;
+        }
+        .quiz-options button:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+        .quiz-options button.correct {
+            background: #8bc34a;
+            border-color: #558b2f;
+            color: white;
+        }
+        .quiz-options button.wrong {
+            background: #ef9a9a;
+            border-color: #b71c1c;
+            color: white;
+        }
+        .quiz-options button:disabled {
+            opacity: 0.7;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+        }
+        .quiz-feedback {
+            margin-top: 0.5rem;
+            font-weight: 500;
+            color: #0b4357;
+        }
+        .quiz-progress {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+            margin: 0.6rem 0 0.2rem;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+        .qdot {
+            width: 12px;
+            height: 12px;
+            border-radius: 20px;
+            background: #c9dce7;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+        .qdot.answered {
+            background: #4d8aa8;
+        }
+        .qdot.correct {
+            background: #7cb342;
+        }
+        .qdot.wrong {
+            background: #e57373;
+        }
+
+        /* DEMOGRAPHIC */
+        .demographic {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem 1.5rem;
+            margin: 1.2rem 0 0.4rem;
+            background: #f2faff;
+            padding: 0.9rem 1.2rem;
+            border-radius: 60px;
+            align-items: center;
+            border: 1px solid #bdd6e5;
+        }
+        .demographic label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 500;
+            color: #074153;
+        }
+        .demographic select,
+        .demographic input {
+            padding: 0.3rem 0.7rem;
+            border-radius: 30px;
+            border: 1px solid #b6d1df;
+            background: white;
+            font-size: 0.9rem;
+        }
+        .send-btn {
+            background: #135f7a;
+            border: none;
+            color: white;
+            padding: 0.4rem 1.6rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #0b3a4b;
+            transition: 0.07s;
+            margin-left: auto;
+        }
+        .send-btn:active {
             transform: translateY(3px);
             box-shadow: none;
         }
-        .btn-primary:disabled {
+        .send-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 3px 0 #0b3a4b;
+        }
+        .footnote {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #2d657b;
+            margin-top: 0.6rem;
+            opacity: 0.8;
+            border-top: 1px dashed #b7d3e2;
+            padding-top: 0.8rem;
+        }
+        .footnote strong {
+            color: #064257;
         }
         .status-msg {
-            margin-top: 0.5rem;
-            font-weight: 500;
+            font-weight: 600;
         }
         .status-msg.success {
             color: #2e7d32;
@@ -259,227 +340,888 @@
         .status-msg.error {
             color: #c62828;
         }
-        .status-msg.info {
-            color: #0d47a1;
+        .status-msg.sending {
+            color: #e65100;
         }
-        .demo-data-btn {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border: 2px solid #4caf50;
-            padding: 0.4rem 1.2rem;
+        @media (max-width: 600px) {
+            .app {
+                padding: 1rem;
+            }
+            .sentence {
+                font-size: 1.2rem;
+            }
+            .demographic {
+                flex-direction: column;
+                align-items: stretch;
+                border-radius: 30px;
+            }
+            .send-btn {
+                margin-left: 0;
+            }
+        }
+
+        /* ============================================================
+           POPUP DASHBOARD - appears after submission
+           ============================================================ */
+        .dashboard-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        .dashboard-overlay.active {
+            display: flex;
+        }
+        .dashboard-popup {
+            background: #eef5f9;
             border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            margin-left: 0.5rem;
-            font-size: 0.85rem;
+            max-width: 1200px;
+            width: 100%;
+            max-height: 95vh;
+            overflow-y: auto;
+            padding: 2rem;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.4s ease;
+            position: relative;
         }
-        .demo-data-btn:hover {
-            background: #c8e6c9;
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .popup-header h2 {
+            font-size: 1.8rem;
+            color: #063544;
+        }
+        .popup-close {
+            background: #e1edf5;
+            border: none;
+            font-size: 1.5rem;
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #063544;
+            font-weight: 600;
+            box-shadow: 0 2px 0 #b0cbd8;
+            transition: 0.1s;
+        }
+        .popup-close:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .popup-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .popup-stat {
+            background: white;
+            border-radius: 16px;
+            padding: 1rem 1.2rem;
+            box-shadow: 0 2px 8px rgba(0, 20, 30, 0.06);
+            text-align: center;
+        }
+        .popup-stat .num {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #063544;
+        }
+        .popup-stat .lbl {
+            font-size: 0.75rem;
+            color: #4d7a8f;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .popup-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 800px) {
+            .popup-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .popup-chart-box {
+            background: white;
+            border-radius: 24px;
+            padding: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0, 20, 30, 0.06);
+        }
+        .popup-chart-box h3 {
+            font-size: 1rem;
+            color: #063544;
+            margin-bottom: 0.5rem;
+        }
+        .popup-chart-wrapper {
+            position: relative;
+            height: 340px;
+        }
+        .popup-demographics {
+            background: white;
+            border-radius: 24px;
+            padding: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0, 20, 30, 0.06);
+        }
+        .popup-demographics h3 {
+            font-size: 1rem;
+            color: #063544;
+            margin-bottom: 0.8rem;
+        }
+        .popup-demo-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid #eef5f9;
+            font-size: 0.9rem;
+        }
+        .popup-demo-item:last-child {
+            border-bottom: none;
+        }
+        .popup-demo-item .label {
+            color: #2d657b;
+        }
+        .popup-demo-item .value {
+            font-weight: 600;
+            color: #063544;
+        }
+        .popup-top5 {
+            margin-top: 1rem;
+        }
+        .popup-top5-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #f0f6fa;
+        }
+        .popup-top5-item .verb {
+            font-weight: 500;
+            color: #063544;
+        }
+        .popup-top5-item .pct {
+            color: #1b5b72;
+            font-weight: 600;
+        }
+        .popup-footer {
+            text-align: center;
+            color: #4d7a8f;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #c2dae8;
+        }
+        .popup-footer strong {
+            color: #064257;
+        }
+        /* scrollbar styling */
+        .dashboard-popup::-webkit-scrollbar {
+            width: 6px;
+        }
+        .dashboard-popup::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .dashboard-popup::-webkit-scrollbar-thumb {
+            background: #b8d2e0;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+
+    <!-- ============================================================
+    MAIN APP
+    ============================================================ -->
+    <div class="app" id="app">
         <h1>
-            📊 VerbLingua · Analytics Dashboard
-            <button class="refresh-btn" id="refreshBtn">⟳ Refresh</button>
-            <button class="demo-data-btn" id="demoDataBtn">📥 Load Demo Data</button>
+            <span>📘 verb·fill</span>
+            <span style="font-size:1rem; font-weight:300; opacity:0.7;">400 · audio · fill‑in‑blank quiz</span>
         </h1>
-        <div class="sub">Top 20 verbs answered incorrectly · based on all responses</div>
+        <div class="sub">“shut up your laptop” (short) + 200 longer · fill in the missing verb</div>
 
-        <!-- Configuration Panel -->
-        <div class="config-box" id="configPanel">
-            <h3 style="color:#063544; margin-bottom:0.5rem;">⚙️ Data Source Configuration</h3>
-            <p style="color:#4d7a8f; font-size:0.9rem; margin-bottom:0.8rem;">
-                <strong>Option 1:</strong> Use the Google Sheets API (requires API Key)
-            </p>
-            <label>Google Sheet ID</label>
-            <input type="text" id="sheetIdInput" placeholder="1YOUR_SHEET_ID_HERE" />
-            <label>Google Sheets API Key</label>
-            <input type="text" id="apiKeyInput" placeholder="AIzaSy..." />
-            <div class="hint">
-                <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Get an API Key</a> ·
-                Enable Google Sheets API in your Google Cloud Console
+        <!-- Sentence panel -->
+        <div class="panel">
+            <div class="sentence" id="sentenceDisplay">loading… <small>#1</small></div>
+            <div class="audio-row">
+                <button class="btn-audio" id="playAudioBtn">🔊 Listen</button>
+                <span class="counter" id="counterDisplay">1 / 400</span>
             </div>
-            <button class="btn-primary" id="connectBtn">🔗 Connect & Load Data</button>
-            <div id="connectionStatus" class="status-msg" style="margin-top:0.5rem;"></div>
-            <hr style="margin:1rem 0; border-color:#e0e0e0;" />
-            <p style="color:#4d7a8f; font-size:0.9rem;">
-                <strong>Option 2:</strong> Use the <strong>"Load Demo Data"</strong> button above to see the dashboard in action with sample data.
-            </p>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid" id="statsGrid">
-            <div class="stat-card"><div class="label">Total Responses</div><div class="value" id="totalResponses">—</div></div>
-            <div class="stat-card"><div class="label">Total Questions</div><div class="value" id="totalQuestions">—</div></div>
-            <div class="stat-card"><div class="label">Average Score</div><div class="value" id="avgScore">—<small>%</small></div></div>
-            <div class="stat-card"><div class="label">Unique Verbs</div><div class="value" id="uniqueVerbs">—</div></div>
+        <div class="nav">
+            <div class="nav-group">
+                <button class="nav-btn" id="prevBtn">← Prev</button>
+                <button class="nav-btn" id="randomBtn">🎲 Random</button>
+                <button class="nav-btn" id="nextBtn">Next →</button>
+            </div>
+            <div class="nav-group">
+                <button class="nav-btn primary" id="shuffleBtn">🔀 Shuffle</button>
+            </div>
+        </div>
+        <div class="dots" id="progressDots"></div>
+
+        <!-- QUIZ -->
+        <div class="quiz-box">
+            <div class="quiz-prompt">
+                🧠 <span id="quizQuestion">Fill in the blank with the correct verb</span>
+                <span style="margin-left:auto; font-weight:400; background:#c7dce9; padding:0 0.8rem; border-radius:30px;" id="quizCounter">1/400</span>
+            </div>
+            <div class="blank-sentence" id="blankSentence">____ the door</div>
+            <div class="quiz-options" id="quizOptions">
+                <button data-opt="0">option A</button>
+                <button data-opt="1">option B</button>
+                <button data-opt="2">option C</button>
+                <button data-opt="3">option D</button>
+            </div>
+            <div class="quiz-feedback" id="quizFeedback">↳ select the correct verb</div>
+            <div class="quiz-progress" id="quizProgress"></div>
         </div>
 
-        <!-- Chart + Demographics -->
-        <div class="chart-grid">
-            <div class="chart-box">
-                <h2>📉 Top 20 Most Missed Verbs <span class="badge">% incorrect</span></h2>
-                <div class="chart-wrapper">
-                    <canvas id="verbChart"></canvas>
-                </div>
-                <div style="margin-top:0.8rem; font-size:0.8rem; color:#4d7a8f; text-align:center;">
-                    Based on all user responses · bars show % of times each verb was answered incorrectly
-                </div>
+        <!-- Demographic + Submit -->
+        <div class="demographic">
+            <label>Gender <select id="genderSelect"><option value="F">Female</option><option value="M">Male</option><option value="NB">Non-binary</option><option value="other">Other</option></select></label>
+            <label>Age <input type="number" id="ageInput" min="3" max="120" placeholder="25" style="width:70px;"></label>
+            <label>First language <input type="text" id="langInput" placeholder="e.g. Spanish" style="width:100px;"></label>
+            <button class="send-btn" id="sendDataBtn">📊 Submit & View Dashboard</button>
+        </div>
+        <div class="footnote">
+            <strong>400 sentences (200 short + 200 longer) · 400 fill-in-blank questions</strong> · responses include gender, age, first language · results released <strong>9/5/2026</strong> · <span id="sentStatus" class="status-msg">✅ ready</span>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    POPUP DASHBOARD
+    ============================================================ -->
+    <div class="dashboard-overlay" id="dashboardOverlay">
+        <div class="dashboard-popup" id="dashboardPopup">
+            <div class="popup-header">
+                <h2>📊 Your Quiz Dashboard</h2>
+                <button class="popup-close" id="closeDashboard">✕ Close</button>
             </div>
 
-            <div>
-                <div class="demographic-box">
-                    <h2>👥 Demographics</h2>
-                    <div id="demographicsContent">
-                        <div class="loading">Waiting for data connection…</div>
+            <div class="popup-stats" id="popupStats">
+                <div class="popup-stat"><div class="num" id="popTotal">—</div><div class="lbl">Questions</div></div>
+                <div class="popup-stat"><div class="num" id="popCorrect">—</div><div class="lbl">Correct</div></div>
+                <div class="popup-stat"><div class="num" id="popScore">—%</div><div class="lbl">Score</div></div>
+                <div class="popup-stat"><div class="num" id="popWrong">—</div><div class="lbl">Wrong</div></div>
+            </div>
+
+            <div class="popup-grid">
+                <div class="popup-chart-box">
+                    <h3>📉 Your Most Missed Verbs</h3>
+                    <div class="popup-chart-wrapper">
+                        <canvas id="popupChart"></canvas>
+                    </div>
+                    <div style="font-size:0.75rem; color:#4d7a8f; text-align:center; margin-top:0.3rem;">
+                        Based on your quiz answers · bars show % of times you got each verb wrong
                     </div>
                 </div>
-                <div class="demographic-box" style="margin-top:1.2rem;">
-                    <h2>🏆 Top 5 Missed Verbs</h2>
-                    <div id="topFiveContainer">
-                        <div class="loading">Waiting for data…</div>
+                <div>
+                    <div class="popup-demographics">
+                        <h3>👤 Your Profile</h3>
+                        <div id="popupProfile">
+                            <div class="popup-demo-item"><span class="label">Gender</span><span class="value" id="popGender">—</span></div>
+                            <div class="popup-demo-item"><span class="label">Age</span><span class="value" id="popAge">—</span></div>
+                            <div class="popup-demo-item"><span class="label">First Language</span><span class="value" id="popLang">—</span></div>
+                            <div class="popup-demo-item"><span class="label">Total Responses</span><span class="value" id="popTotalResponses">—</span></div>
+                        </div>
+                    </div>
+                    <div class="popup-demographics" style="margin-top:1rem;">
+                        <h3>🏆 Top 5 Missed Verbs</h3>
+                        <div id="popupTop5">
+                            <div style="color:#4d7a8f; font-size:0.9rem;">Complete the quiz to see results</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="footer-note">
-            <strong>Data source:</strong> Google Sheets API · results released <strong>9/5/2026</strong>
+            <div class="popup-footer">
+                <strong>Data submitted successfully!</strong> · Results will be released on <strong>9/5/2026</strong> · Thank you for participating! 🎉
+            </div>
         </div>
     </div>
 
     <script>
         // ============================================================
-        // DEMO DATA - Shows the dashboard working with sample data
+        // 400 SENTENCES
         // ============================================================
-        const DEMO_DATA = {
-            totalResponses: 47,
-            totalQuestions: 400,
-            avgScore: 72,
-            uniqueVerbs: 89,
-            verbErrorRates: [
-                { verb: "shut", total: 32, wrong: 28, errorRate: 0.875 },
-                { verb: "put", total: 28, wrong: 24, errorRate: 0.857 },
-                { verb: "take", total: 31, wrong: 26, errorRate: 0.839 },
-                { verb: "turn", total: 29, wrong: 24, errorRate: 0.828 },
-                { verb: "go", total: 26, wrong: 21, errorRate: 0.808 },
-                { verb: "come", total: 24, wrong: 19, errorRate: 0.792 },
-                { verb: "run", total: 22, wrong: 17, errorRate: 0.773 },
-                { verb: "walk", total: 23, wrong: 17, errorRate: 0.739 },
-                { verb: "jump", total: 19, wrong: 14, errorRate: 0.737 },
-                { verb: "throw", total: 18, wrong: 13, errorRate: 0.722 },
-                { verb: "catch", total: 17, wrong: 12, errorRate: 0.706 },
-                { verb: "push", total: 20, wrong: 14, errorRate: 0.700 },
-                { verb: "pull", total: 18, wrong: 12, errorRate: 0.667 },
-                { verb: "lift", total: 16, wrong: 10, errorRate: 0.625 },
-                { verb: "carry", total: 15, wrong: 9, errorRate: 0.600 },
-                { verb: "hold", total: 14, wrong: 8, errorRate: 0.571 },
-                { verb: "drop", total: 16, wrong: 9, errorRate: 0.563 },
-                { verb: "break", total: 13, wrong: 7, errorRate: 0.538 },
-                { verb: "fix", total: 12, wrong: 6, errorRate: 0.500 },
-                { verb: "build", total: 14, wrong: 7, errorRate: 0.500 },
-                { verb: "draw", total: 11, wrong: 5, errorRate: 0.455 },
-                { verb: "write", total: 12, wrong: 5, errorRate: 0.417 },
-                { verb: "read", total: 13, wrong: 5, errorRate: 0.385 },
-                { verb: "sing", total: 10, wrong: 3, errorRate: 0.300 },
-            ],
-            demographics: {
-                gender: ["F", "F", "M", "F", "M", "NB", "F", "M", "F", "F", "M", "NB", "F", "M", "F", "F", "M", "F", "NB",
-                    "F", "M", "F", "M", "F", "F", "M", "F", "M", "NB", "F", "M", "F", "F", "M", "F", "F", "M", "F", "M", "F",
-                    "F", "M", "F", "M", "F", "F", "M"
-                ],
-                age: [22, 25, 31, 19, 28, 24, 22, 35, 21, 26, 29, 23, 27, 32, 20, 24, 30, 22, 26, 25, 28, 21, 33, 24, 27,
-                    22, 29, 31, 23, 26, 28, 20, 25, 30, 22, 27, 24, 29, 21, 26, 23, 28, 25, 32, 22, 27, 30
-                ],
-                lang: ["Spanish", "English", "French", "Spanish", "English", "Mandarin", "Spanish", "English", "French",
-                    "Spanish", "English", "Mandarin", "Spanish", "English", "French", "Spanish", "English", "Mandarin",
-                    "Spanish", "English", "French", "Spanish", "English", "Mandarin", "Spanish", "English", "French",
-                    "Spanish", "English", "Mandarin", "Spanish", "English", "French", "Spanish", "English", "Mandarin",
-                    "Spanish", "English", "French", "Spanish", "English", "Mandarin", "Spanish", "English", "French",
-                    "Spanish", "English"
-                ]
-            }
-        };
+        const SHORT_SENTENCES = [
+            "shut up your laptop", "open the window", "close the door", "turn on the light", "turn off the fan",
+            "put on your coat", "take off your shoes", "pick up the book", "put down the glass", "stand up straight",
+            "sit down here", "come over to me", "go back home", "run faster", "walk slowly",
+            "jump over the puddle", "throw the ball", "catch the ball", "kick the stone", "push the door",
+            "pull the handle", "lift the box", "carry the bag", "hold the baby", "drop the keys",
+            "break the chocolate", "fix the chair", "build a house", "draw a circle", "write a note",
+            "read the sign", "sing a song", "dance with me", "listen to music", "watch the movie",
+            "look at the sky", "see the bird", "smell the flower", "taste the soup", "touch the surface",
+            "feel the warmth", "wash your hands", "clean the table", "brush your hair", "comb your hair",
+            "shave your face", "dry your hands", "fold the clothes", "hang the shirt", "iron the pants",
+            "sew the button", "cut the paper", "glue the pieces", "paint the wall", "sweep the floor",
+            "mop the floor", "dust the shelf", "vacuum the carpet", "water the plant", "feed the cat",
+            "walk the dog", "pet the rabbit", "call your friend", "text your mom", "email the boss",
+            "fax the document", "print the receipt", "scan the QR", "copy the file", "paste the link",
+            "delete the photo", "save the changes", "update the app", "install the program", "uninstall the tool",
+            "restart the device", "shut down the system", "log in to your account", "log out", "sign up for news",
+            "subscribe to channel", "unsubscribe from list", "follow the path", "lead the team", "manage the project",
+            "organize the files", "plan the trip", "book the hotel", "rent a car", "buy groceries",
+            "sell your old phone", "pay the bill", "lend me money", "borrow a pen", "give a gift",
+            "take a photo", "make a cake", "do the dishes", "bake the bread", "fry the egg",
+            "boil the water", "steam the vegetables", "grill the fish", "roast the chicken", "mix the salad",
+            "pour the juice", "fill the glass", "empty the bin", "turn the page", "fold the map",
+            "unfold the chair", "lock the door", "unlock the phone", "plug in charger", "unplug the lamp",
+            "connect the cable", "disconnect the wire", "attach the tag", "detach the sticker", "wrap the present",
+            "unwrap the candy", "tie your shoelaces", "untie the knot", "button your shirt", "unbutton the coat",
+            "zip your jacket", "unzip the bag", "buckle your belt", "unbuckle the strap", "switch on the TV",
+            "switch off the radio", "mute the microphone", "unmute yourself", "raise your hand", "lower your voice",
+            "speak clearly", "whisper softly", "shout loudly", "answer the question", "ask for help",
+            "explain the rule", "describe the view", "discuss the idea", "argue with logic", "convince your friend",
+            "encourage the child", "praise the effort", "criticize constructively", "apologize sincerely", "forgive easily",
+            "thank your partner", "welcome the guest", "invite your colleagues", "introduce yourself", "meet the manager",
+            "accompany your friend", "escort the visitor", "guide the tourist", "direct the traffic", "control the drone",
+            "operate the machine", "repair the bike", "service the car", "check the oil", "fill the tank",
+            "start the engine", "stop the car", "park the vehicle", "reverse slowly", "accelerate gently",
+            "brake in time", "signal your turn", "honk the horn", "wipe the windscreen", "adjust the mirror",
+            "fasten your seatbelt", "unfasten after stop", "board the plane", "disembark safely", "catch the train",
+            "miss the bus", "wait for taxi", "hail a cab", "ride the bicycle", "skate on ice",
+            "ski down the slope", "surf the wave", "swim across the lake", "dive into water", "float on your back",
+            "sail the boat", "row the canoe", "paddle the kayak", "cycle to work", "jog in the park",
+            "stretch your legs", "bend your knees", "lift your arms", "turn your head", "shake your body",
+            "dance to rhythm", "clap your hands", "stomp your feet", "nod your head", "wave goodbye"
+        ];
+
+        const LONGER_SENTENCES = [
+            "shut up your laptop before the meeting starts", "open the window to let in some fresh air",
+            "close the door quietly so you don't wake the baby",
+            "turn on the light and read the book", "turn off the fan when you leave the room",
+            "put on your coat because it is freezing outside",
+            "take off your shoes before you enter the house", "pick up the book that fell under the table",
+            "put down the glass carefully on the coaster",
+            "stand up straight and look ahead", "sit down here and rest for a moment",
+            "come over to me and I will show you the photos",
+            "go back home before it gets dark", "run faster if you want to catch the bus",
+            "walk slowly across the slippery bridge",
+            "jump over the puddle to avoid getting wet", "throw the ball to your teammate",
+            "catch the ball with both hands",
+            "kick the stone out of the way", "push the door gently to open it", "pull the handle to release the lock",
+            "lift the box with your legs not your back", "carry the bag over your shoulder",
+            "hold the baby carefully in your arms",
+            "drop the keys into the bowl by the door", "break the chocolate into small pieces",
+            "fix the chair before someone sits on it",
+            "build a house with wooden blocks", "draw a circle in the middle of the paper",
+            "write a note and leave it on the desk",
+            "read the sign carefully before entering", "sing a song to cheer everyone up",
+            "dance with me to the rhythm of the music",
+            "listen to music while you work", "watch the movie without interruptions",
+            "look at the sky and admire the stars",
+            "see the bird perched on the branch", "smell the flower and enjoy its fragrance",
+            "taste the soup and add more salt if needed",
+            "touch the surface to feel its texture", "feel the warmth of the sun on your skin",
+            "wash your hands with soap and water",
+            "clean the table after every meal", "brush your hair before going out", "comb your hair to remove tangles",
+            "shave your face carefully with a new blade", "dry your hands with a clean towel",
+            "fold the clothes and put them in the drawer",
+            "hang the shirt in the closet", "iron the pants to remove wrinkles", "sew the button back onto your jacket",
+            "cut the paper along the dotted line", "glue the pieces together and let them dry",
+            "paint the wall with a soft blue color",
+            "sweep the floor to remove dust and dirt", "mop the floor with a wet mop", "dust the shelf with a soft cloth",
+            "vacuum the carpet to remove pet hair", "water the plant every morning",
+            "feed the cat at exactly six o'clock",
+            "walk the dog around the block twice", "pet the rabbit gently behind its ears",
+            "call your friend and invite them over",
+            "text your mom to let her know you are safe", "email the boss with the updated report",
+            "fax the document to the main office",
+            "print the receipt and keep it for your records", "scan the QR code to access the website",
+            "copy the file to the shared folder",
+            "paste the link into the address bar", "delete the photo that is out of focus",
+            "save the changes before you close the document",
+            "update the app to the latest version", "install the program and follow the setup wizard",
+            "uninstall the tool that you no longer use",
+            "restart the device to complete the update", "shut down the system properly at the end of the day",
+            "log in to your account using your credentials", "log out of the session after you finish",
+            "sign up for the newsletter to get updates",
+            "subscribe to the channel and hit the bell icon", "unsubscribe from the list if you get too many emails",
+            "follow the path through the forest", "lead the team with confidence and clarity",
+            "manage the project from start to finish",
+            "organize the files by date and category", "plan the trip carefully to avoid delays",
+            "book the hotel in advance for better rates",
+            "rent a car that suits your needs", "buy groceries for the whole week",
+            "sell your old phone online for a fair price",
+            "pay the bill before the due date", "lend me money and I will pay you back",
+            "borrow a pen from your classmate",
+            "give a gift to show your appreciation", "take a photo of the beautiful sunset",
+            "make a cake from scratch using organic ingredients",
+            "do the dishes right after dinner", "bake the bread until it is golden brown",
+            "fry the egg in a little bit of oil",
+            "boil the water before adding the pasta", "steam the vegetables to preserve nutrients",
+            "grill the fish over medium heat",
+            "roast the chicken with herbs and garlic", "mix the salad with a light vinaigrette",
+            "pour the juice into a tall glass",
+            "fill the glass with ice and lemonade", "empty the bin before it overflows",
+            "turn the page to continue reading",
+            "fold the map and put it in your pocket", "unfold the chair and set it up",
+            "lock the door with the deadbolt",
+            "unlock the phone using facial recognition", "plug in the charger and wait for the battery to increase",
+            "unplug the lamp before you leave the house", "connect the cable to the HDMI port",
+            "disconnect the wire carefully to avoid sparks",
+            "attach the tag to your luggage", "detach the sticker from the surface",
+            "wrap the present in colorful paper",
+            "unwrap the candy and enjoy it", "tie your shoelaces so you don't trip",
+            "untie the knot with your fingers",
+            "button your shirt from the bottom up", "unbutton the coat when you enter the warm room",
+            "zip your jacket to keep the wind out",
+            "unzip the bag and take out your wallet", "buckle your belt for a secure fit",
+            "unbuckle the strap and release the pressure",
+            "switch on the TV and find a good show", "switch off the radio when the news ends",
+            "mute the microphone during the presentation",
+            "unmute yourself when you have a question", "raise your hand if you know the answer",
+            "lower your voice in the library",
+            "speak clearly so everyone can understand", "whisper softly so no one else hears",
+            "shout loudly to get their attention",
+            "answer the question in complete sentences", "ask for help when you are stuck",
+            "explain the rule with a simple example",
+            "describe the view from the top of the hill", "discuss the idea with your colleagues",
+            "argue with logic not emotion",
+            "convince your friend to join the club", "encourage the child to try again",
+            "praise the effort regardless of the outcome",
+            "criticize constructively without hurting feelings", "apologize sincerely if you made a mistake",
+            "forgive easily and move forward",
+            "thank your partner for their support", "welcome the guest with a warm smile",
+            "invite your colleagues to the meeting",
+            "introduce yourself to the new team member", "meet the manager in the conference room",
+            "accompany your friend to the station",
+            "escort the visitor to the main entrance", "guide the tourist through the museum",
+            "direct the traffic during the parade",
+            "control the drone with the remote", "operate the machine according to the manual",
+            "repair the bike and replace the chain",
+            "service the car every six months", "check the oil level before the long drive",
+            "fill the tank with premium gasoline",
+            "start the engine and let it warm up", "stop the car at the red light",
+            "park the vehicle in the designated spot",
+            "reverse slowly into the parking space", "accelerate gently when merging onto the highway",
+            "brake in time to avoid collision",
+            "signal your turn well in advance", "honk the horn only in emergencies",
+            "wipe the windscreen with a clean cloth",
+            "adjust the mirror to eliminate blind spots", "fasten your seatbelt before driving off",
+            "unfasten the seatbelt after you park",
+            "board the plane and find your seat", "disembark safely after the flight lands",
+            "catch the train at platform three",
+            "miss the bus and wait for the next one", "wait for the taxi outside the station",
+            "hail a cab by raising your hand",
+            "ride the bicycle along the scenic route", "skate on ice with caution and balance",
+            "ski down the slope at a steady pace",
+            "surf the wave with confidence and style", "swim across the lake to reach the island",
+            "dive into water and explore the reef",
+            "float on your back and relax", "sail the boat towards the harbour",
+            "row the canoe across the calm river",
+            "paddle the kayak through the rapids", "cycle to work to stay fit and save fuel",
+            "jog in the park every evening",
+            "stretch your legs before the long run", "bend your knees when lifting heavy objects",
+            "lift your arms above your head",
+            "turn your head to see who is behind you", "shake your body to the rhythm of the beat",
+            "dance to the rhythm of the samba",
+            "clap your hands to show appreciation", "stomp your feet to the beat of the drum",
+            "nod your head to indicate agreement",
+            "wave goodbye to your friends at the station"
+        ];
+
+        const ALL_SENTENCES = [...SHORT_SENTENCES, ...LONGER_SENTENCES];
+        while (ALL_SENTENCES.length < 400) ALL_SENTENCES.push("learn by example " + (ALL_SENTENCES.length + 1));
+        if (ALL_SENTENCES.length > 400) ALL_SENTENCES.length = 400;
 
         // ============================================================
-        // STATE
+        // APP STATE
         // ============================================================
-        let chartInstance = null;
-        let currentData = null;
+        let currentIndex = 0;
+        let sentences = [...ALL_SENTENCES];
+        let quizQuestions = [];
+        let quizAnswers = [];
+        let quizUserAnswers = [];
+        let quizLocked = false;
+        let quizIndex = 0;
+        let isSending = false;
+        let popupChartInstance = null;
+        let currentStats = null;
 
-        // ============================================================
         // DOM refs
-        // ============================================================
-        const totalResponsesEl = document.getElementById('totalResponses');
-        const totalQuestionsEl = document.getElementById('totalQuestions');
-        const avgScoreEl = document.getElementById('avgScore');
-        const uniqueVerbsEl = document.getElementById('uniqueVerbs');
-        const demographicsContent = document.getElementById('demographicsContent');
-        const topFiveContainer = document.getElementById('topFiveContainer');
-        const refreshBtn = document.getElementById('refreshBtn');
-        const connectBtn = document.getElementById('connectBtn');
-        const demoDataBtn = document.getElementById('demoDataBtn');
-        const sheetIdInput = document.getElementById('sheetIdInput');
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        const connectionStatus = document.getElementById('connectionStatus');
+        const sentenceDisplay = document.getElementById('sentenceDisplay');
+        const counterDisplay = document.getElementById('counterDisplay');
+        const progressDots = document.getElementById('progressDots');
+        const playBtn = document.getElementById('playAudioBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const randomBtn = document.getElementById('randomBtn');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const quizQuestion = document.getElementById('quizQuestion');
+        const quizCounter = document.getElementById('quizCounter');
+        const quizOptions = document.getElementById('quizOptions');
+        const quizFeedback = document.getElementById('quizFeedback');
+        const quizProgress = document.getElementById('quizProgress');
+        const blankSentence = document.getElementById('blankSentence');
+        const sendBtn = document.getElementById('sendDataBtn');
+        const sentStatus = document.getElementById('sentStatus');
+
+        // Popup DOM refs
+        const overlay = document.getElementById('dashboardOverlay');
+        const closeBtn = document.getElementById('closeDashboard');
+        const popTotal = document.getElementById('popTotal');
+        const popCorrect = document.getElementById('popCorrect');
+        const popScore = document.getElementById('popScore');
+        const popWrong = document.getElementById('popWrong');
+        const popGender = document.getElementById('popGender');
+        const popAge = document.getElementById('popAge');
+        const popLang = document.getElementById('popLang');
+        const popTotalResponses = document.getElementById('popTotalResponses');
+        const popupTop5 = document.getElementById('popupTop5');
 
         // ============================================================
-        // RENDER DASHBOARD
+        // AUDIO
         // ============================================================
-        function renderDashboard(stats) {
-            if (!stats || stats.totalResponses === 0) {
-                document.querySelector('.stats-grid').innerHTML =
-                    `<div class="error-msg" style="grid-column:1/-1;">⚠️ No data available. Please load data or use demo data.</div>`;
+        function speakSentence(text) {
+            if (!window.speechSynthesis) return alert('Speech synthesis not supported.');
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'en-US';
+            u.rate = 0.9;
+            u.pitch = 1.0;
+            window.speechSynthesis.speak(u);
+        }
+
+        // ============================================================
+        // RENDER SENTENCE
+        // ============================================================
+        function render() {
+            const s = sentences[currentIndex] || "example";
+            const isShort = currentIndex < 200;
+            const badge = isShort ? '<span class="badge">short</span>' :
+                '<span class="badge" style="background:#2a7a8a;">longer</span>';
+            sentenceDisplay.innerHTML = `${s} <small>#${currentIndex+1}</small> ${badge}`;
+            counterDisplay.textContent = `${currentIndex+1} / ${sentences.length}`;
+            updateDots();
+        }
+
+        function updateDots() {
+            const total = sentences.length;
+            const dotCount = Math.min(total, 30);
+            let html = '';
+            const step = Math.max(1, Math.floor(total / dotCount));
+            for (let i = 0; i < dotCount; i++) {
+                const idx = Math.min(i * step, total - 1);
+                html += `<span class="dot ${idx===currentIndex?'active':''}"></span>`;
+            }
+            progressDots.innerHTML = html;
+        }
+
+        function goTo(idx) {
+            if (idx < 0) idx = sentences.length - 1;
+            if (idx >= sentences.length) idx = 0;
+            currentIndex = idx;
+            render();
+        }
+
+        function next() { goTo(currentIndex + 1); }
+
+        function prev() { goTo(currentIndex - 1); }
+
+        function randomIdx() { goTo(Math.floor(Math.random() * sentences.length)); }
+
+        function shuffleAll() {
+            for (let i = sentences.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [sentences[i], sentences[j]] = [sentences[j], sentences[i]];
+            }
+            currentIndex = 0;
+            render();
+            buildQuiz();
+        }
+
+        // ============================================================
+        // EXTRACT VERB
+        // ============================================================
+        function extractVerb(sentence) {
+            const words = sentence.split(' ');
+            const commonVerbs = ['shut', 'open', 'close', 'turn', 'put', 'take', 'pick', 'stand', 'sit', 'come', 'go', 'run',
+                'walk', 'jump', 'throw', 'catch', 'kick', 'push', 'pull', 'lift', 'carry', 'hold', 'drop', 'break', 'fix',
+                'build', 'draw', 'write', 'read', 'sing', 'dance', 'listen', 'watch', 'look', 'see', 'smell', 'taste',
+                'touch', 'feel', 'wash', 'clean', 'brush', 'comb', 'shave', 'dry', 'fold', 'hang', 'iron', 'sew', 'cut',
+                'glue', 'paint', 'sweep', 'mop', 'dust', 'vacuum', 'water', 'feed', 'walk', 'pet', 'call', 'text', 'email',
+                'fax', 'print', 'scan', 'copy', 'paste', 'delete', 'save', 'update', 'install', 'uninstall', 'restart',
+                'log', 'sign', 'subscribe', 'unsubscribe', 'follow', 'lead', 'manage', 'organize', 'plan', 'book', 'rent',
+                'buy', 'sell', 'pay', 'lend', 'borrow', 'give', 'take', 'make', 'do', 'bake', 'fry', 'boil', 'steam',
+                'grill', 'roast', 'mix', 'pour', 'fill', 'empty', 'turn', 'fold', 'unfold', 'lock', 'unlock', 'plug',
+                'unplug', 'connect', 'disconnect', 'attach', 'detach', 'wrap', 'unwrap', 'tie', 'untie', 'button',
+                'unbutton', 'zip', 'unzip', 'buckle', 'unbuckle', 'switch', 'mute', 'unmute', 'raise', 'lower', 'speak',
+                'whisper', 'shout', 'answer', 'ask', 'explain', 'describe', 'discuss', 'argue', 'convince', 'encourage',
+                'praise', 'criticize', 'apologize', 'forgive', 'thank', 'welcome', 'invite', 'introduce', 'meet',
+                'accompany', 'escort', 'guide', 'direct', 'control', 'operate', 'repair', 'service', 'check', 'fill',
+                'start', 'stop', 'park', 'reverse', 'accelerate', 'brake', 'signal', 'honk', 'wipe', 'adjust', 'fasten',
+                'unfasten', 'board', 'disembark', 'catch', 'miss', 'wait', 'hail', 'ride', 'skate', 'ski', 'surf', 'swim',
+                'dive', 'float', 'sail', 'row', 'paddle', 'cycle', 'jog', 'stretch', 'bend', 'lift', 'turn', 'shake',
+                'dance', 'clap', 'stomp', 'nod', 'wave'
+            ];
+            for (let w of words) {
+                const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                if (commonVerbs.includes(clean)) return clean;
+            }
+            return words[0]?.replace(/[^a-zA-Z]/g, '') || 'verb';
+        }
+
+        // ============================================================
+        // BUILD QUIZ
+        // ============================================================
+        function buildQuiz() {
+            const allVerbs = ['shut', 'open', 'close', 'turn', 'put', 'take', 'pick', 'stand', 'sit', 'come', 'go', 'run',
+                'walk', 'jump', 'throw', 'catch', 'kick', 'push', 'pull', 'lift', 'carry', 'hold', 'drop', 'break', 'fix',
+                'build', 'draw', 'write', 'read', 'sing', 'dance', 'listen', 'watch', 'look', 'see', 'smell', 'taste',
+                'touch', 'feel', 'wash', 'clean', 'brush', 'comb', 'shave', 'dry', 'fold', 'hang', 'iron', 'sew', 'cut',
+                'glue', 'paint', 'sweep', 'mop', 'dust', 'vacuum', 'water', 'feed', 'walk', 'pet', 'call', 'text', 'email',
+                'fax', 'print', 'scan', 'copy', 'paste', 'delete', 'save', 'update', 'install', 'uninstall', 'restart',
+                'log', 'sign', 'subscribe', 'unsubscribe', 'follow', 'lead', 'manage', 'organize', 'plan', 'book', 'rent',
+                'buy', 'sell', 'pay', 'lend', 'borrow', 'give', 'take', 'make', 'do', 'bake', 'fry', 'boil', 'steam',
+                'grill', 'roast', 'mix', 'pour', 'fill', 'empty', 'turn', 'fold', 'unfold', 'lock', 'unlock', 'plug',
+                'unplug', 'connect', 'disconnect', 'attach', 'detach', 'wrap', 'unwrap', 'tie', 'untie', 'button',
+                'unbutton', 'zip', 'unzip', 'buckle', 'unbuckle', 'switch', 'mute', 'unmute', 'raise', 'lower', 'speak',
+                'whisper', 'shout', 'answer', 'ask', 'explain', 'describe', 'discuss', 'argue', 'convince', 'encourage',
+                'praise', 'criticize', 'apologize', 'forgive', 'thank', 'welcome', 'invite', 'introduce', 'meet',
+                'accompany', 'escort', 'guide', 'direct', 'control', 'operate', 'repair', 'service', 'check', 'fill',
+                'start', 'stop', 'park', 'reverse', 'accelerate', 'brake', 'signal', 'honk', 'wipe', 'adjust', 'fasten',
+                'unfasten', 'board', 'disembark', 'catch', 'miss', 'wait', 'hail', 'ride', 'skate', 'ski', 'surf', 'swim',
+                'dive', 'float', 'sail', 'row', 'paddle', 'cycle', 'jog', 'stretch', 'bend', 'lift', 'turn', 'shake',
+                'dance', 'clap', 'stomp', 'nod', 'wave'
+            ];
+
+            quizQuestions = [];
+            quizAnswers = [];
+            quizUserAnswers = [];
+
+            for (let i = 0; i < sentences.length; i++) {
+                const sentence = sentences[i];
+                const verb = extractVerb(sentence);
+                const words = sentence.split(' ');
+                let blankIndex = -1;
+                for (let j = 0; j < words.length; j++) {
+                    const clean = words[j].replace(/[^a-zA-Z]/g, '').toLowerCase();
+                    if (clean === verb) { blankIndex = j; break; }
+                }
+                let displaySentence = sentence;
+                if (blankIndex >= 0) {
+                    const parts = sentence.split(' ');
+                    parts[blankIndex] = '____';
+                    displaySentence = parts.join(' ');
+                } else {
+                    const parts = sentence.split(' ');
+                    parts[0] = '____';
+                    displaySentence = parts.join(' ');
+                }
+
+                let options = [verb];
+                let attempts = 0;
+                while (options.length < 4 && attempts < 100) {
+                    const r = allVerbs[Math.floor(Math.random() * allVerbs.length)];
+                    if (!options.includes(r) && r !== verb) options.push(r);
+                    attempts++;
+                }
+                for (let j = options.length - 1; j > 0; j--) {
+                    const k = Math.floor(Math.random() * (j + 1));
+                    [options[j], options[k]] = [options[k], options[j]];
+                }
+
+                quizQuestions.push({ sentence, display: displaySentence, correct: verb, options });
+                quizAnswers.push(verb);
+                quizUserAnswers.push(null);
+            }
+
+            quizIndex = 0;
+            renderQuizItem();
+        }
+
+        function renderQuizItem() {
+            if (quizIndex >= quizQuestions.length) {
+                const correctCount = quizUserAnswers.filter(a => a === 'correct').length;
+                quizQuestion.textContent = `🎉 Quiz complete! Score: ${correctCount}/${quizQuestions.length}`;
+                quizCounter.textContent = `${quizQuestions.length}/${quizQuestions.length}`;
+                quizOptions.innerHTML = `<button disabled>✔️ Finished</button>`;
+                quizFeedback.textContent = `⭐ You answered ${correctCount} correctly. Great effort!`;
+                blankSentence.textContent = '🎉 All done!';
+                renderQuizProgress();
                 return;
             }
 
-            // Stats
-            totalResponsesEl.textContent = stats.totalResponses;
-            totalQuestionsEl.textContent = stats.totalQuestions;
-            avgScoreEl.innerHTML = `${stats.avgScore}<small>%</small>`;
-            uniqueVerbsEl.textContent = stats.uniqueVerbs;
+            const q = quizQuestions[quizIndex];
+            quizQuestion.textContent = `Fill in the blank with the correct verb`;
+            quizCounter.textContent = `${quizIndex+1}/${quizQuestions.length}`;
+            blankSentence.innerHTML = q.display;
 
-            // Demographics
-            const demo = stats.demographics;
-            if (demo) {
-                const genderCount = {};
-                demo.gender.forEach(g => { genderCount[g] = (genderCount[g] || 0) + 1; });
-                const langCount = {};
-                demo.lang.forEach(l => { langCount[l] = (langCount[l] || 0) + 1; });
+            quizOptions.innerHTML = '';
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.textContent = opt;
+                btn.dataset.opt = opt;
+                btn.addEventListener('click', (e) => handleQuizAnswer(e, opt));
+                quizOptions.appendChild(btn);
+            });
 
-                const avgAge = demo.age.length > 0 ? Math.round(demo.age.reduce((a, b) => a + b, 0) / demo.age.length) : '—';
-                const ageRange = demo.age.length > 0 ? `${Math.min(...demo.age)} – ${Math.max(...demo.age)}` : '—';
-                const topLang = Object.entries(langCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
-
-                demographicsContent.innerHTML = `
-                    <div class="demographic-item"><span class="label">👤 Gender</span><span class="value">${Object.entries(genderCount).map(([k,v]) => `${k} (${v})`).join(' · ') || '—'}</span></div>
-                    <div class="demographic-item"><span class="label">📅 Avg Age</span><span class="value">${avgAge}</span></div>
-                    <div class="demographic-item"><span class="label">📅 Age Range</span><span class="value">${ageRange}</span></div>
-                    <div class="demographic-item"><span class="label">🌍 Top Language</span><span class="value">${topLang}</span></div>
-                    <div class="demographic-item"><span class="label">🌍 Languages</span><span class="value">${Object.keys(langCount).length}</span></div>
-                `;
+            if (quizUserAnswers[quizIndex] !== null) {
+                const status = quizUserAnswers[quizIndex];
+                const correct = quizAnswers[quizIndex];
+                const btns = document.querySelectorAll('.quiz-options button');
+                btns.forEach(b => {
+                    if (b.dataset.opt === correct) b.classList.add('correct');
+                    else if (b.dataset.opt !== correct && status === 'wrong') {
+                        if (b.dataset.opt === quizUserAnswers[quizIndex]?.selected) b.classList.add('wrong');
+                    }
+                    b.disabled = true;
+                });
+                quizFeedback.textContent = status === 'correct' ? '✅ Correct!' : `❌ The correct verb is “${correct}”.`;
+            } else {
+                quizFeedback.textContent = '↳ select the correct verb to fill the blank';
             }
+
+            renderQuizProgress();
+        }
+
+        function handleQuizAnswer(e, selected) {
+            if (quizLocked) return;
+            if (quizUserAnswers[quizIndex] !== null) return;
+
+            const correct = quizAnswers[quizIndex];
+            const btns = document.querySelectorAll('.quiz-options button');
+            let isCorrect = (selected === correct);
+
+            btns.forEach(b => {
+                if (b.dataset.opt === correct) b.classList.add('correct');
+                else if (b.dataset.opt === selected && !isCorrect) b.classList.add('wrong');
+                b.disabled = true;
+            });
+
+            quizUserAnswers[quizIndex] = isCorrect ? 'correct' : 'wrong';
+            quizUserAnswers[quizIndex].selected = selected;
+
+            quizFeedback.textContent = isCorrect ? '✅ Correct! +1' : `❌ Oops. The correct verb is “${correct}”.`;
+
+            quizLocked = true;
+            setTimeout(() => {
+                quizLocked = false;
+                quizIndex++;
+                renderQuizItem();
+            }, 1100);
+        }
+
+        function renderQuizProgress() {
+            let html = '';
+            for (let i = 0; i < quizQuestions.length; i++) {
+                const status = quizUserAnswers[i];
+                let cls = 'qdot';
+                if (status === 'correct') cls += ' correct';
+                else if (status === 'wrong') cls += ' wrong';
+                else if (status !== null) cls += ' answered';
+                html += `<span class="${cls}"></span>`;
+            }
+            quizProgress.innerHTML = html;
+        }
+
+        // ============================================================
+        // COMPUTE STATS FROM QUIZ RESULTS
+        // ============================================================
+        function computeStats() {
+            const total = quizUserAnswers.length;
+            const correct = quizUserAnswers.filter(a => a === 'correct').length;
+            const wrong = quizUserAnswers.filter(a => a === 'wrong').length;
+            const unanswered = quizUserAnswers.filter(a => a === null).length;
+
+            // Per-verb stats
+            const verbStats = {};
+            for (let i = 0; i < quizQuestions.length; i++) {
+                const verb = quizAnswers[i];
+                const result = quizUserAnswers[i];
+                if (!verbStats[verb]) verbStats[verb] = { total: 0, wrong: 0 };
+                verbStats[verb].total++;
+                if (result === 'wrong') verbStats[verb].wrong++;
+            }
+
+            const verbErrorRates = [];
+            for (const [verb, stats] of Object.entries(verbStats)) {
+                if (stats.total > 0) {
+                    verbErrorRates.push({
+                        verb,
+                        total: stats.total,
+                        wrong: stats.wrong,
+                        errorRate: stats.wrong / stats.total,
+                    });
+                }
+            }
+            verbErrorRates.sort((a, b) => b.errorRate - a.errorRate);
+
+            return {
+                total,
+                correct,
+                wrong,
+                unanswered,
+                score: total > 0 ? Math.round((correct / total) * 100) : 0,
+                verbErrorRates,
+            };
+        }
+
+        // ============================================================
+        // SHOW POPUP DASHBOARD
+        // ============================================================
+        function showDashboard(stats, gender, age, lang) {
+            // Update stats
+            popTotal.textContent = stats.total;
+            popCorrect.textContent = stats.correct;
+            popScore.textContent = stats.score + '%';
+            popWrong.textContent = stats.wrong;
+
+            // Update profile
+            popGender.textContent = gender || '—';
+            popAge.textContent = age || '—';
+            popLang.textContent = lang || '—';
+            popTotalResponses.textContent = stats.total;
 
             // Top 5
             const top5 = stats.verbErrorRates.slice(0, 5);
-            topFiveContainer.innerHTML = top5.length > 0 ?
-                top5.map(v =>
-                    `<div class="top-verb-item"><span class="verb">${v.verb}</span><span class="pct">${Math.round(v.errorRate * 100)}%</span></div>`
-                ).join('') :
-                '<div style="color:#4d7a8f;">No data yet</div>';
+            if (top5.length > 0) {
+                popupTop5.innerHTML = top5.map(v =>
+                    `<div class="popup-top5-item"><span class="verb">${v.verb}</span><span class="pct">${Math.round(v.errorRate * 100)}%</span></div>`
+                ).join('');
+            } else {
+                popupTop5.innerHTML = '<div style="color:#4d7a8f; font-size:0.9rem;">No wrong answers yet!</div>';
+            }
 
             // Chart - Top 20
             const top20 = stats.verbErrorRates.slice(0, 20);
             const labels = top20.map(v => v.verb);
             const data = top20.map(v => +(v.errorRate * 100).toFixed(1));
 
-            const ctx = document.getElementById('verbChart').getContext('2d');
+            const ctx = document.getElementById('popupChart').getContext('2d');
+            if (popupChartInstance) popupChartInstance.destroy();
 
-            if (chartInstance) chartInstance.destroy();
-
-            chartInstance = new Chart(ctx, {
+            popupChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
@@ -518,213 +1260,116 @@
                             ticks: { callback: (v) => v + '%' }
                         },
                         y: {
-                            ticks: { font: { size: 11 } }
+                            ticks: { font: { size: 10 } }
                         }
                     }
                 }
             });
 
-            currentData = stats;
-            document.getElementById('configPanel').style.display = 'none';
+            // Show overlay
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            currentStats = stats;
         }
 
         // ============================================================
-        // FETCH FROM GOOGLE SHEETS API
+        // SEND TO SHEET + SHOW DASHBOARD
         // ============================================================
-        async function fetchFromSheetsAPI() {
-            const sheetId = sheetIdInput.value.trim();
-            const apiKey = apiKeyInput.value.trim();
+        function sendToSheet() {
+            if (isSending) return;
 
-            if (!sheetId || !apiKey) {
-                connectionStatus.textContent = '⚠️ Please enter both Sheet ID and API Key.';
-                connectionStatus.className = 'status-msg error';
-                return null;
-            }
+            const gender = document.getElementById('genderSelect').value;
+            const age = document.getElementById('ageInput').value || 'unknown';
+            const lang = document.getElementById('langInput').value || 'not specified';
 
-            connectionStatus.textContent = '⏳ Fetching data from Google Sheets...';
-            connectionStatus.className = 'status-msg info';
-            connectBtn.disabled = true;
+            const stats = computeStats();
 
-            try {
-                const url =
-                    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1?key=${apiKey}`;
-                const response = await fetch(url);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-
-                if (!data.values || data.values.length < 2) {
-                    throw new Error('No data found in the sheet.');
-                }
-
-                // Parse the sheet data
-                const headers = data.values[0];
-                const rows = data.values.slice(1);
-
-                const stats = parseSheetData(headers, rows);
-
-                if (stats && stats.totalResponses > 0) {
-                    connectionStatus.textContent = `✅ Loaded ${stats.totalResponses} responses successfully!`;
-                    connectionStatus.className = 'status-msg success';
-                    return stats;
-                } else {
-                    throw new Error('No valid data rows found.');
-                }
-
-            } catch (error) {
-                connectionStatus.textContent = `❌ Error: ${error.message}`;
-                connectionStatus.className = 'status-msg error';
-                return null;
-            } finally {
-                connectBtn.disabled = false;
-            }
-        }
-
-        // ============================================================
-        // PARSE SHEET DATA
-        // ============================================================
-        function parseSheetData(headers, rows) {
-            const idx = {
-                gender: headers.indexOf('Gender'),
-                age: headers.indexOf('Age'),
-                lang: headers.indexOf('First Language'),
-                score: headers.indexOf('Score (%)'),
-                results: headers.indexOf('Quiz Results (JSON)'),
+            const payload = {
+                gender,
+                age,
+                lang,
+                timestamp: new Date().toISOString(),
+                totalQuestions: quizQuestions.length,
+                correctAnswers: stats.correct,
+                quizResults: quizUserAnswers.map((ans, idx) => ({
+                    sentence: quizQuestions[idx]?.sentence || '',
+                    correct: quizAnswers[idx] || '',
+                    userResult: ans === 'correct' ? 'correct' : (ans === 'wrong' ? 'wrong' : 'unanswered')
+                }))
             };
 
-            // Try alternative column names
-            if (idx.results === -1) {
-                const altNames = ['QuizResults', 'results', 'json', 'Quiz Results'];
-                for (const name of altNames) {
-                    const i = headers.indexOf(name);
-                    if (i !== -1) { idx.results = i; break; }
-                }
-            }
+            const webAppUrl =
+                'https://script.google.com/macros/s/AKfycbyhIbfr9UxULHvaGscBQyRXtgqitdQj0pIP3eyyE0KYa9vqE0zZk5GPsDt0cShRH3aE/exec';
 
-            const verbStats = {};
-            let totalScore = 0;
-            let scoreCount = 0;
-            let totalQ = 0;
-            const genders = [];
-            const ages = [];
-            const langs = [];
+            isSending = true;
+            sendBtn.disabled = true;
+            sentStatus.textContent = '⏳ Sending data...';
+            sentStatus.className = 'status-msg sending';
 
-            for (const row of rows) {
-                if (!row || row.length === 0 || row.every(c => !c)) continue;
-
-                const gender = row[idx.gender] || 'Unknown';
-                const age = row[idx.age] || '';
-                const lang = row[idx.lang] || 'Unknown';
-                const score = parseFloat(row[idx.score]);
-
-                if (gender) genders.push(gender);
-                if (lang) langs.push(lang);
-                if (age) { const a = parseInt(age); if (!isNaN(a)) ages.push(a); }
-
-                if (!isNaN(score)) { totalScore += score;
-                    scoreCount++; }
-
-                let results = [];
-                if (idx.results !== -1 && row[idx.results]) {
-                    try {
-                        const raw = row[idx.results].trim();
-                        if (raw.startsWith('[') || raw.startsWith('{')) {
-                            results = JSON.parse(raw);
-                        } else {
-                            const cleaned = raw.replace(/'/g, '"');
-                            results = JSON.parse(cleaned);
-                        }
-                    } catch (e) {
-                        // Try to extract verbs from string
-                        const parts = row[idx.results].split(',').map(s => s.trim());
-                        results = parts.map(p => {
-                            const match = p.match(/"verb":"([^"]+)"/);
-                            return match ? { verb: match[1], result: 'wrong' } : null;
-                        }).filter(Boolean);
-                    }
-                }
-
-                if (Array.isArray(results) && results.length > 0) {
-                    totalQ = Math.max(totalQ, results.length);
-                    for (const item of results) {
-                        const verb = item.verb || item.correct || item.word || '';
-                        if (!verb) continue;
-                        const isWrong = (item.userResult === 'wrong' || item.result === 'wrong');
-                        if (!verbStats[verb]) verbStats[verb] = { total: 0, wrong: 0 };
-                        verbStats[verb].total++;
-                        if (isWrong) verbStats[verb].wrong++;
-                    }
-                }
-            }
-
-            const verbErrorRates = [];
-            for (const [verb, stats] of Object.entries(verbStats)) {
-                if (stats.total > 0) {
-                    verbErrorRates.push({
-                        verb,
-                        total: stats.total,
-                        wrong: stats.wrong,
-                        errorRate: stats.wrong / stats.total,
-                    });
-                }
-            }
-
-            verbErrorRates.sort((a, b) => b.errorRate - a.errorRate);
-
-            return {
-                totalResponses: genders.length,
-                totalQuestions: totalQ || 400,
-                avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0,
-                uniqueVerbs: verbErrorRates.length,
-                verbErrorRates,
-                demographics: {
-                    gender: genders,
-                    age: ages,
-                    lang: langs,
-                },
-            };
+            fetch(webAppUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(() => {
+                    sentStatus.textContent = '✅ Data sent successfully!';
+                    sentStatus.className = 'status-msg success';
+                    // Show the dashboard popup with the stats
+                    showDashboard(stats, gender, age, lang);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    sentStatus.textContent = '❌ Error sending data. But you can still view your dashboard.';
+                    sentStatus.className = 'status-msg error';
+                    // Still show the dashboard even if submission fails
+                    showDashboard(stats, gender, age, lang);
+                })
+                .finally(() => {
+                    isSending = false;
+                    sendBtn.disabled = false;
+                });
         }
 
         // ============================================================
-        // LOAD DEMO DATA
+        // CLOSE POPUP
         // ============================================================
-        function loadDemoData() {
-            renderDashboard(DEMO_DATA);
-            connectionStatus.textContent = '✅ Demo data loaded successfully!';
-            connectionStatus.className = 'status-msg success';
-            document.getElementById('configPanel').style.display = 'none';
+        function closeDashboard() {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
         }
 
         // ============================================================
-        // EVENT LISTENERS
+        // EVENT BINDING
         // ============================================================
-        connectBtn.addEventListener('click', async function() {
-            const stats = await fetchFromSheetsAPI();
-            if (stats) {
-                renderDashboard(stats);
-            }
+        playBtn.addEventListener('click', () => speakSentence(sentences[currentIndex] || ''));
+        nextBtn.addEventListener('click', next);
+        prevBtn.addEventListener('click', prev);
+        randomBtn.addEventListener('click', randomIdx);
+        shuffleBtn.addEventListener('click', shuffleAll);
+        sendBtn.addEventListener('click', sendToSheet);
+        closeBtn.addEventListener('click', closeDashboard);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeDashboard();
         });
 
-        demoDataBtn.addEventListener('click', loadDemoData);
-
-        refreshBtn.addEventListener('click', function() {
-            if (currentData) {
-                renderDashboard(currentData);
-            } else {
-                alert('Please load data first (use "Load Demo Data" or "Connect & Load Data").');
-            }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeDashboard();
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            if (e.key === 'ArrowRight') { e.preventDefault();
+                next(); }
+            if (e.key === 'ArrowLeft') { e.preventDefault();
+                prev(); }
+            if (e.key === ' ' || e.key === 'Space') { e.preventDefault();
+                speakSentence(sentences[currentIndex] || ''); }
+            if (e.key === 'r' || e.key === 'R') { randomIdx(); }
         });
 
         // ============================================================
-        // AUTO-LOAD DEMO DATA ON START
+        // INIT
         // ============================================================
-        // Load demo data automatically so the dashboard shows something
-        setTimeout(() => {
-            loadDemoData();
-        }, 500);
+        render();
+        buildQuiz();
     </script>
 </body>
 </html>
