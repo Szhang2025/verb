@@ -1,589 +1,923 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VerbLingua · Analytics Dashboard</title>
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-  </script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-    }
-    body {
-      background: #eef5f9;
-      min-height: 100vh;
-      padding: 2rem 1.5rem;
-    }
-    .container {
-      max-width: 1300px;
-      margin: 0 auto;
-    }
-    h1 {
-      font-size: 2.2rem;
-      color: #063544;
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.2rem;
-    }
-    .sub {
-      color: #1b5b72;
-      border-left: 4px solid #3f8ca8;
-      padding-left: 1.2rem;
-      margin-bottom: 2rem;
-      font-size: 1.05rem;
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .stat-card {
-      background: white;
-      border-radius: 20px;
-      padding: 1.2rem 1.5rem;
-      box-shadow: 0 4px 12px rgba(0, 20, 30, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-    }
-    .stat-card .label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #4d7a8f;
-      font-weight: 600;
-    }
-    .stat-card .value {
-      font-size: 1.9rem;
-      font-weight: 700;
-      color: #063544;
-      margin-top: 0.2rem;
-    }
-    .stat-card .value small {
-      font-size: 0.9rem;
-      font-weight: 400;
-      color: #4d7a8f;
-      margin-left: 0.3rem;
-    }
-    .chart-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 1.8rem;
-      margin-bottom: 2rem;
-    }
-    @media (max-width: 800px) {
-      .chart-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    .chart-box {
-      background: white;
-      border-radius: 28px;
-      padding: 1.5rem 1.5rem 1rem;
-      box-shadow: 0 8px 24px rgba(0, 20, 30, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-    }
-    .chart-box h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #063544;
-      margin-bottom: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .chart-box h2 .badge {
-      background: #d3e6ef;
-      font-size: 0.7rem;
-      padding: 0.1rem 0.7rem;
-      border-radius: 30px;
-      color: #1b5b72;
-      font-weight: 400;
-    }
-    .chart-wrapper {
-      position: relative;
-      height: 380px;
-    }
-    .demographic-box {
-      background: white;
-      border-radius: 28px;
-      padding: 1.5rem;
-      box-shadow: 0 8px 24px rgba(0, 20, 30, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-    }
-    .demographic-box h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #063544;
-      margin-bottom: 1rem;
-    }
-    .demographic-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #eef5f9;
-    }
-    .demographic-item:last-child {
-      border-bottom: none;
-    }
-    .demographic-item .label {
-      color: #2d657b;
-    }
-    .demographic-item .value {
-      font-weight: 600;
-      color: #063544;
-    }
-    .footer-note {
-      text-align: center;
-      color: #4d7a8f;
-      font-size: 0.85rem;
-      border-top: 1px dashed #c2dae8;
-      padding-top: 1.2rem;
-      margin-top: 0.5rem;
-      opacity: 0.8;
-    }
-    .footer-note strong {
-      color: #064257;
-    }
-    .loading {
-      text-align: center;
-      padding: 2rem;
-      color: #4d7a8f;
-      font-size: 1.1rem;
-    }
-    .error-msg {
-      background: #ffebee;
-      color: #b71c1c;
-      padding: 1.2rem 1.5rem;
-      border-radius: 16px;
-      border-left: 4px solid #b71c1c;
-      margin-bottom: 1.5rem;
-    }
-    .refresh-btn {
-      background: #1c617b;
-      border: none;
-      color: white;
-      padding: 0.4rem 1.2rem;
-      border-radius: 40px;
-      font-weight: 500;
-      cursor: pointer;
-      font-size: 0.85rem;
-      box-shadow: 0 3px 0 #0d3342;
-      transition: 0.07s;
-      margin-left: 0.5rem;
-    }
-    .refresh-btn:active {
-      transform: translateY(3px);
-      box-shadow: none;
-    }
-    .top-verb-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.3rem 0;
-      font-size: 0.9rem;
-      border-bottom: 1px solid #f0f6fa;
-    }
-    .top-verb-item .verb {
-      font-weight: 500;
-      color: #063544;
-    }
-    .top-verb-item .pct {
-      color: #1b5b72;
-      font-weight: 600;
-    }
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-top: 0.5rem;
-    }
-    @media (max-width: 500px) {
-      .two-col {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VerbLingua · Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        body {
+            background: #eef5f9;
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.2rem;
+            color: #063544;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.2rem;
+        }
+        .sub {
+            color: #1b5b72;
+            border-left: 4px solid #3f8ca8;
+            padding-left: 1.2rem;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.2rem 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 20, 30, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .stat-card .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4d7a8f;
+            font-weight: 600;
+        }
+        .stat-card .value {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #063544;
+            margin-top: 0.2rem;
+        }
+        .stat-card .value small {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #4d7a8f;
+            margin-left: 0.3rem;
+        }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.8rem;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 800px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .chart-box {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem 1.5rem 1rem;
+            box-shadow: 0 8px 24px rgba(0, 20, 30, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .chart-box h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #063544;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .chart-box h2 .badge {
+            background: #d3e6ef;
+            font-size: 0.7rem;
+            padding: 0.1rem 0.7rem;
+            border-radius: 30px;
+            color: #1b5b72;
+            font-weight: 400;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 380px;
+        }
+        .demographic-box {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 24px rgba(0, 20, 30, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .demographic-box h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #063544;
+            margin-bottom: 1rem;
+        }
+        .demographic-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eef5f9;
+        }
+        .demographic-item:last-child {
+            border-bottom: none;
+        }
+        .demographic-item .label {
+            color: #2d657b;
+        }
+        .demographic-item .value {
+            font-weight: 600;
+            color: #063544;
+        }
+        .footer-note {
+            text-align: center;
+            color: #4d7a8f;
+            font-size: 0.85rem;
+            border-top: 1px dashed #c2dae8;
+            padding-top: 1.2rem;
+            margin-top: 0.5rem;
+            opacity: 0.8;
+        }
+        .footer-note strong {
+            color: #064257;
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #4d7a8f;
+            font-size: 1.1rem;
+        }
+        .error-msg {
+            background: #ffebee;
+            color: #b71c1c;
+            padding: 1.2rem 1.5rem;
+            border-radius: 16px;
+            border-left: 4px solid #b71c1c;
+            margin-bottom: 1.5rem;
+        }
+        .refresh-btn {
+            background: #1c617b;
+            border: none;
+            color: white;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.85rem;
+            box-shadow: 0 3px 0 #0d3342;
+            transition: 0.07s;
+            margin-left: 0.5rem;
+        }
+        .refresh-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+        .top-verb-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #f0f6fa;
+        }
+        .top-verb-item .verb {
+            font-weight: 500;
+            color: #063544;
+        }
+        .top-verb-item .pct {
+            color: #1b5b72;
+            font-weight: 600;
+        }
+        .config-box {
+            background: #fff3e0;
+            border: 1px solid #ffcc80;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .config-box code {
+            background: #f5f5f5;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .config-box input {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid #b6d1df;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            font-size: 0.9rem;
+            margin: 0.3rem 0;
+        }
+        .config-box label {
+            font-weight: 600;
+            color: #063544;
+            display: block;
+            margin-top: 0.5rem;
+        }
+        .config-box .hint {
+            font-size: 0.85rem;
+            color: #4d7a8f;
+            margin-top: 0.2rem;
+        }
+        .btn-primary {
+            background: #1c617b;
+            color: white;
+            border: none;
+            padding: 0.4rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            box-shadow: 0 3px 0 #0d3342;
+            transition: 0.07s;
+        }
+        .btn-primary:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .status-msg {
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+        .status-msg.success {
+            color: #2e7d32;
+        }
+        .status-msg.error {
+            color: #c62828;
+        }
+        .status-msg.info {
+            color: #0d47a1;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>
-      📊 VerbLingua · Analytics Dashboard
-      <button class="refresh-btn" id="refreshBtn">⟳ Refresh</button>
-    </h1>
-    <div class="sub">Top 20 verbs answered incorrectly · based on all responses</div>
+    <div class="container">
+        <h1>
+            📊 VerbLingua · Analytics Dashboard
+            <button class="refresh-btn" id="refreshBtn">⟳ Refresh</button>
+        </h1>
+        <div class="sub">Top 20 verbs answered incorrectly · based on all responses</div>
 
-    <!-- Stats -->
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat-card"><div class="label">Total Responses</div><div class="value" id="totalResponses">—</div></div>
-      <div class="stat-card"><div class="label">Total Questions</div><div class="value" id="totalQuestions">—</div></div>
-      <div class="stat-card"><div class="label">Average Score</div><div class="value" id="avgScore">—<small>%</small></div></div>
-      <div class="stat-card"><div class="label">Unique Verbs</div><div class="value" id="uniqueVerbs">—</div></div>
+        <!-- Configuration Panel -->
+        <div class="config-box" id="configPanel">
+            <h3 style="color:#063544; margin-bottom:0.5rem;">⚙️ Data Source Configuration</h3>
+            <p style="color:#4d7a8f; font-size:0.9rem; margin-bottom:0.8rem;">
+                Enter your Google Apps Script Web App URL (the same one used in the learning app):
+            </p>
+            <label>Web App URL</label>
+            <input type="text" id="webAppUrlInput" 
+                   placeholder="https://script.google.com/macros/s/.../exec" 
+                   value="https://script.google.com/macros/s/AKfycbyhIbfr9UxULHvaGscBQyRXtgqitdQj0pIP3eyyE0KYa9vqE0zZk5GPsDt0cShRH3aE/exec" />
+            <div class="hint">This should be the same URL you used in the <code>sendToSheet()</code> function.</div>
+            <button class="btn-primary" id="connectBtn">🔗 Connect & Load Data</button>
+            <div id="connectionStatus" class="status-msg" style="margin-top:0.5rem;"></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card"><div class="label">Total Responses</div><div class="value" id="totalResponses">—</div></div>
+            <div class="stat-card"><div class="label">Total Questions</div><div class="value" id="totalQuestions">—</div></div>
+            <div class="stat-card"><div class="label">Average Score</div><div class="value" id="avgScore">—<small>%</small></div></div>
+            <div class="stat-card"><div class="label">Unique Verbs</div><div class="value" id="uniqueVerbs">—</div></div>
+        </div>
+
+        <!-- Chart + Demographics -->
+        <div class="chart-grid">
+            <div class="chart-box">
+                <h2>📉 Top 20 Most Missed Verbs <span class="badge">% incorrect</span></h2>
+                <div class="chart-wrapper">
+                    <canvas id="verbChart"></canvas>
+                </div>
+                <div style="margin-top:0.8rem; font-size:0.8rem; color:#4d7a8f; text-align:center;">
+                    Based on all user responses · bars show % of times each verb was answered incorrectly
+                </div>
+            </div>
+
+            <div>
+                <div class="demographic-box">
+                    <h2>👥 Demographics</h2>
+                    <div id="demographicsContent">
+                        <div class="loading">Waiting for data connection…</div>
+                    </div>
+                </div>
+                <div class="demographic-box" style="margin-top:1.2rem;">
+                    <h2>🏆 Top 5 Missed Verbs</h2>
+                    <div id="topFiveContainer">
+                        <div class="loading">Waiting for data…</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            <strong>Data source:</strong> Google Apps Script Web App · results released <strong>9/5/2026</strong>
+        </div>
     </div>
 
-    <!-- Chart + Demographics -->
-    <div class="chart-grid">
-      <div class="chart-box">
-        <h2>📉 Top 20 Most Missed Verbs <span class="badge">% incorrect</span></h2>
-        <div class="chart-wrapper">
-          <canvas id="verbChart"></canvas>
-        </div>
-        <div style="margin-top:0.8rem; font-size:0.8rem; color:#4d7a8f; text-align:center;">
-          Based on all user responses · bars show % of times each verb was answered incorrectly
-        </div>
-      </div>
+    <script>
+        // ============================================================
+        // STATE
+        // ============================================================
+        let chartInstance = null;
+        let currentData = null;
+        let webAppUrl = '';
 
-      <div>
-        <div class="demographic-box">
-          <h2>👥 Demographics</h2>
-          <div id="demographicsContent">
-            <div class="loading">Loading demographics…</div>
-          </div>
-        </div>
-        <div class="demographic-box" style="margin-top:1.2rem;">
-          <h2>🏆 Top 5 Missed Verbs</h2>
-          <div id="topFiveContainer">
-            <div class="loading">Loading…</div>
-          </div>
-        </div>
-      </div>
-    </div>
+        // ============================================================
+        // DOM refs
+        // ============================================================
+        const totalResponsesEl = document.getElementById('totalResponses');
+        const totalQuestionsEl = document.getElementById('totalQuestions');
+        const avgScoreEl = document.getElementById('avgScore');
+        const uniqueVerbsEl = document.getElementById('uniqueVerbs');
+        const demographicsContent = document.getElementById('demographicsContent');
+        const topFiveContainer = document.getElementById('topFiveContainer');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const connectBtn = document.getElementById('connectBtn');
+        const webAppUrlInput = document.getElementById('webAppUrlInput');
+        const connectionStatus = document.getElementById('connectionStatus');
 
-    <div class="footer-note">
-      <strong>Data source:</strong> Google Sheet · results released <strong>9/5/2026</strong> · dashboard auto-updates on refresh
-    </div>
-  </div>
+        // ============================================================
+        // FETCH DATA FROM GOOGLE APPS SCRIPT WEB APP
+        // ============================================================
+        async function fetchDataFromGS(url) {
+            // Try to fetch data from the web app
+            // The web app needs to have a GET endpoint that returns JSON data
+            // We'll try multiple approaches
 
-  <script>
-    // ============================================================
-    // CONFIGURATION — REPLACE WITH YOUR GOOGLE SHEETS API CONFIG
-    // ============================================================
-    const SHEET_ID = '1YOUR_SHEET_ID_HERE'; // <-- PASTE YOUR SHEET ID
-    const API_KEY = 'YOUR_API_KEY_HERE'; // <-- PASTE YOUR API KEY
-    const SHEET_NAME = 'Sheet1'; // or the name of your sheet
+            // Approach 1: Try with ?action=getData parameter
+            try {
+                const response = await fetch(`${url}?action=getData`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
 
-    // If you don't have API Key, you can use the Google Apps Script endpoint:
-    // const GS_WEBAPP_URL = 'https://script.google.com/macros/s/.../exec?action=getData';
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.status === 'success' && data.data) {
+                        return data.data;
+                    }
+                    // If the response has a different structure, try to use it directly
+                    if (data.values || data.rows || data.data) {
+                        return data.values || data.rows || data.data;
+                    }
+                    // If it's an array, use it directly
+                    if (Array.isArray(data)) {
+                        return data;
+                    }
+                }
+            } catch (e) {
+                console.log('Approach 1 failed:', e);
+            }
 
-    // ============================================================
-    // STATE
-    // ============================================================
-    let chartInstance = null;
-    let rawData = [];
+            // Approach 2: Try POST with action=getData
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'getData' })
+                });
+                // With no-cors, we can't read the response body
+                // So we need the GS script to log data or use a different method
+                console.log('POST with no-cors sent, but response is opaque');
+            } catch (e) {
+                console.log('Approach 2 failed:', e);
+            }
 
-    // ============================================================
-    // DOM refs
-    // ============================================================
-    const totalResponsesEl = document.getElementById('totalResponses');
-    const totalQuestionsEl = document.getElementById('totalQuestions');
-    const avgScoreEl = document.getElementById('avgScore');
-    const uniqueVerbsEl = document.getElementById('uniqueVerbs');
-    const demographicsContent = document.getElementById('demographicsContent');
-    const topFiveContainer = document.getElementById('topFiveContainer');
-    const refreshBtn = document.getElementById('refreshBtn');
-
-    // ============================================================
-    // FETCH DATA FROM GOOGLE SHEETS (via Google Sheets API)
-    // ============================================================
-    async function fetchSheetData() {
-      // Option A: Using Google Sheets API (requires API Key)
-      const url =
-        `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
-
-      try {
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // If we get here, we need to use the fallback: prompt user to paste data
+            return null;
         }
-        const data = await response.json();
-        if (!data.values || data.values.length < 2) {
-          throw new Error('No data found in sheet.');
+
+        // ============================================================
+        // PARSE DATA FROM GS RESPONSE
+        // ============================================================
+        function parseGSResponse(data) {
+            // If data is an array of arrays (sheet rows)
+            if (Array.isArray(data) && data.length > 0) {
+                const headers = data[0];
+                const rows = data.slice(1);
+                return parseRows(headers, rows);
+            }
+
+            // If data has a values property
+            if (data && data.values) {
+                const headers = data.values[0];
+                const rows = data.values.slice(1);
+                return parseRows(headers, rows);
+            }
+
+            // If data is an array of objects
+            if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+                return parseObjects(data);
+            }
+
+            return null;
         }
-        return data.values;
-      } catch (err) {
-        console.warn('Sheets API fetch failed, trying fallback…', err);
-        // Option B: Fallback to Google Apps Script Web App
-        // Uncomment and configure if you have a GS endpoint that returns JSON
-        // const fallbackUrl = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=getData';
-        // const res = await fetch(fallbackUrl);
-        // if (!res.ok) throw new Error('Fallback fetch failed');
-        // const json = await res.json();
-        // return json.values; // expecting { values: [ [row], ... ] }
 
-        throw new Error('Unable to fetch data. Please configure SHEET_ID and API_KEY.');
-      }
-    }
+        function parseRows(headers, rows) {
+            const idx = {
+                gender: headers.indexOf('Gender'),
+                age: headers.indexOf('Age'),
+                lang: headers.indexOf('First Language'),
+                score: headers.indexOf('Score (%)'),
+                results: headers.indexOf('Quiz Results (JSON)'),
+            };
 
-    // ============================================================
-    // PARSE DATA & COMPUTE STATISTICS
-    // ============================================================
-    function parseResponses(rows) {
-      if (!rows || rows.length < 2) return null;
+            // Try alternative column names
+            if (idx.results === -1) {
+                const altNames = ['QuizResults', 'results', 'json', 'Quiz Results'];
+                for (const name of altNames) {
+                    const i = headers.indexOf(name);
+                    if (i !== -1) { idx.results = i; break; }
+                }
+            }
 
-      const headers = rows[0];
-      const dataRows = rows.slice(1);
+            const parsed = [];
+            const verbStats = {};
+            let totalScore = 0;
+            let scoreCount = 0;
+            let totalQ = 0;
 
-      // Find column indices
-      const idx = {
-        gender: headers.indexOf('Gender'),
-        age: headers.indexOf('Age'),
-        lang: headers.indexOf('First Language'),
-        score: headers.indexOf('Score (%)'),
-        results: headers.indexOf('Quiz Results (JSON)'),
-      };
+            for (const row of rows) {
+                if (!row || row.length === 0 || row.every(c => !c)) continue;
 
-      // If we can't find the results column, try alternative names
-      if (idx.results === -1) {
-        const altNames = ['Quiz Results (JSON)', 'QuizResults', 'results', 'json'];
-        for (const name of altNames) {
-          const i = headers.indexOf(name);
-          if (i !== -1) { idx.results = i; break; }
+                const gender = row[idx.gender] || 'Unknown';
+                const age = row[idx.age] || '';
+                const lang = row[idx.lang] || 'Unknown';
+                const score = parseFloat(row[idx.score]);
+                if (!isNaN(score)) { totalScore += score;
+                    scoreCount++; }
+
+                let results = [];
+                if (idx.results !== -1 && row[idx.results]) {
+                    try {
+                        const raw = row[idx.results].trim();
+                        if (raw.startsWith('[') || raw.startsWith('{')) {
+                            results = JSON.parse(raw);
+                        } else {
+                            const cleaned = raw.replace(/'/g, '"');
+                            results = JSON.parse(cleaned);
+                        }
+                    } catch (e) {
+                        // Try to extract verbs from string
+                        const parts = row[idx.results].split(',').map(s => s.trim());
+                        results = parts.map(p => {
+                            const match = p.match(/"verb":"([^"]+)"/);
+                            return match ? { verb: match[1], result: 'wrong' } : null;
+                        }).filter(Boolean);
+                    }
+                }
+
+                if (Array.isArray(results) && results.length > 0) {
+                    totalQ = Math.max(totalQ, results.length);
+                    for (const item of results) {
+                        const verb = item.verb || item.correct || item.word || '';
+                        if (!verb) continue;
+                        const isWrong = (item.userResult === 'wrong' || item.result === 'wrong');
+                        if (!verbStats[verb]) verbStats[verb] = { total: 0, wrong: 0 };
+                        verbStats[verb].total++;
+                        if (isWrong) verbStats[verb].wrong++;
+                    }
+                }
+
+                parsed.push({ gender, age, lang, score, results });
+            }
+
+            const verbErrorRates = [];
+            for (const [verb, stats] of Object.entries(verbStats)) {
+                if (stats.total > 0) {
+                    verbErrorRates.push({
+                        verb,
+                        total: stats.total,
+                        wrong: stats.wrong,
+                        errorRate: stats.wrong / stats.total,
+                    });
+                }
+            }
+
+            verbErrorRates.sort((a, b) => b.errorRate - a.errorRate);
+
+            const ages = parsed.map(p => parseInt(p.age)).filter(a => !isNaN(a) && a > 0);
+
+            return {
+                totalResponses: parsed.length,
+                totalQuestions: totalQ || 400,
+                avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0,
+                uniqueVerbs: verbErrorRates.length,
+                verbErrorRates,
+                demographics: {
+                    gender: parsed.map(p => p.gender).filter(Boolean),
+                    age: ages,
+                    lang: parsed.map(p => p.lang).filter(Boolean),
+                },
+                raw: parsed,
+            };
         }
-      }
 
-      const parsed = [];
-      const verbStats = {}; // verb -> { total: 0, wrong: 0 }
+        function parseObjects(data) {
+            // data is an array of objects
+            const verbStats = {};
+            let totalScore = 0;
+            let scoreCount = 0;
+            let totalQ = 0;
+            const demographics = { gender: [], age: [], lang: [] };
 
-      let totalScore = 0;
-      let scoreCount = 0;
-      let totalQ = 0;
+            for (const row of data) {
+                const gender = row.Gender || row.gender || 'Unknown';
+                const age = row.Age || row.age || '';
+                const lang = row['First Language'] || row.lang || row.Language || 'Unknown';
+                const score = parseFloat(row['Score (%)'] || row.score || row.Score);
+                if (!isNaN(score)) { totalScore += score;
+                    scoreCount++; }
 
-      for (const row of dataRows) {
-        // Skip empty rows
-        if (!row || row.length === 0 || row.every(c => !c)) continue;
+                demographics.gender.push(gender);
+                if (age) demographics.age.push(parseInt(age));
+                if (lang) demographics.lang.push(lang);
 
-        const gender = row[idx.gender] || 'Unknown';
-        const age = row[idx.age] || '';
-        const lang = row[idx.lang] || 'Unknown';
-        const score = parseFloat(row[idx.score]);
-        if (!isNaN(score)) { totalScore += score;
-          scoreCount++; }
+                let results = row['Quiz Results (JSON)'] || row.quizResults || row.results || row.QuizResults;
+                if (typeof results === 'string') {
+                    try {
+                        results = JSON.parse(results);
+                    } catch (e) {
+                        results = [];
+                    }
+                }
 
-        // Parse quiz results JSON
-        let results = [];
-        if (idx.results !== -1 && row[idx.results]) {
-          try {
-            const raw = row[idx.results].trim();
-            // Handle both JSON string and already-parsed
-            if (raw.startsWith('[') || raw.startsWith('{')) {
-              results = JSON.parse(raw);
+                if (Array.isArray(results) && results.length > 0) {
+                    totalQ = Math.max(totalQ, results.length);
+                    for (const item of results) {
+                        const verb = item.verb || item.correct || item.word || '';
+                        if (!verb) continue;
+                        const isWrong = (item.userResult === 'wrong' || item.result === 'wrong');
+                        if (!verbStats[verb]) verbStats[verb] = { total: 0, wrong: 0 };
+                        verbStats[verb].total++;
+                        if (isWrong) verbStats[verb].wrong++;
+                    }
+                }
+            }
+
+            const verbErrorRates = [];
+            for (const [verb, stats] of Object.entries(verbStats)) {
+                if (stats.total > 0) {
+                    verbErrorRates.push({
+                        verb,
+                        total: stats.total,
+                        wrong: stats.wrong,
+                        errorRate: stats.wrong / stats.total,
+                    });
+                }
+            }
+
+            verbErrorRates.sort((a, b) => b.errorRate - a.errorRate);
+
+            const ages = demographics.age.filter(a => !isNaN(a) && a > 0);
+
+            return {
+                totalResponses: demographics.gender.length,
+                totalQuestions: totalQ || 400,
+                avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0,
+                uniqueVerbs: verbErrorRates.length,
+                verbErrorRates,
+                demographics: {
+                    gender: demographics.gender,
+                    age: ages,
+                    lang: demographics.lang,
+                },
+                raw: data,
+            };
+        }
+
+        // ============================================================
+        // RENDER DASHBOARD
+        // ============================================================
+        function renderDashboard(stats) {
+            if (!stats || stats.totalResponses === 0) {
+                document.querySelector('.stats-grid').innerHTML =
+                    `<div class="error-msg" style="grid-column:1/-1;">⚠️ No data available. Please submit some quiz responses first.</div>`;
+                return;
+            }
+
+            // Stats
+            totalResponsesEl.textContent = stats.totalResponses;
+            totalQuestionsEl.textContent = stats.totalQuestions;
+            avgScoreEl.innerHTML = `${stats.avgScore}<small>%</small>`;
+            uniqueVerbsEl.textContent = stats.uniqueVerbs;
+
+            // Demographics
+            const demo = stats.demographics;
+            const genderCount = {};
+            demo.gender.forEach(g => { genderCount[g] = (genderCount[g] || 0) + 1; });
+            const langCount = {};
+            demo.lang.forEach(l => { langCount[l] = (langCount[l] || 0) + 1; });
+
+            const avgAge = demo.age.length > 0 ? Math.round(demo.age.reduce((a, b) => a + b, 0) / demo.age.length) : '—';
+            const ageRange = demo.age.length > 0 ? `${Math.min(...demo.age)} – ${Math.max(...demo.age)}` : '—';
+            const topLang = Object.entries(langCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
+
+            demographicsContent.innerHTML = `
+                <div class="demographic-item"><span class="label">👤 Gender</span><span class="value">${Object.entries(genderCount).map(([k,v]) => `${k} (${v})`).join(' · ') || '—'}</span></div>
+                <div class="demographic-item"><span class="label">📅 Avg Age</span><span class="value">${avgAge}</span></div>
+                <div class="demographic-item"><span class="label">📅 Age Range</span><span class="value">${ageRange}</span></div>
+                <div class="demographic-item"><span class="label">🌍 Top Language</span><span class="value">${topLang}</span></div>
+                <div class="demographic-item"><span class="label">🌍 Languages</span><span class="value">${Object.keys(langCount).length}</span></div>
+            `;
+
+            // Top 5
+            const top5 = stats.verbErrorRates.slice(0, 5);
+            topFiveContainer.innerHTML = top5.length > 0 ?
+                top5.map(v =>
+                    `<div class="top-verb-item"><span class="verb">${v.verb}</span><span class="pct">${Math.round(v.errorRate * 100)}%</span></div>`
+                ).join('') :
+                '<div style="color:#4d7a8f;">No data yet</div>';
+
+            // Chart - Top 20
+            const top20 = stats.verbErrorRates.slice(0, 20);
+            const labels = top20.map(v => v.verb);
+            const data = top20.map(v => +(v.errorRate * 100).toFixed(1));
+
+            const ctx = document.getElementById('verbChart').getContext('2d');
+
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '% Incorrect',
+                        data: data,
+                        backgroundColor: data.map((v) => {
+                            const intensity = Math.min(v / 100, 1);
+                            const r = 200 - intensity * 150;
+                            const g = 80 - intensity * 40;
+                            const b = 80 - intensity * 50;
+                            return `rgb(${r}, ${g}, ${b})`;
+                        }),
+                        borderColor: '#1c617b',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.parsed.x}% incorrect (${top20[ctx.dataIndex]?.wrong || 0} wrong out of ${top20[ctx.dataIndex]?.total || 0})`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { callback: (v) => v + '%' }
+                        },
+                        y: {
+                            ticks: { font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+
+            // Store data for later use
+            currentData = stats;
+        }
+
+        // ============================================================
+        // LOAD DATA FROM WEB APP
+        // ============================================================
+        async function loadFromWebApp(url) {
+            connectionStatus.textContent = '⏳ Connecting to web app...';
+            connectionStatus.className = 'status-msg info';
+            connectBtn.disabled = true;
+
+            try {
+                // Try to fetch data from the web app
+                // The web app needs a GET endpoint that returns data
+                // We'll use the approach with ?action=getData
+
+                // First, try with a simple GET
+                let response = await fetch(`${url}?action=getData`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    // Try without the action parameter
+                    response = await fetch(url, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Check if the response contains data
+                let parsedStats = null;
+
+                if (data.status === 'success' && data.data) {
+                    // If the web app returns { status: 'success', data: [...] }
+                    parsedStats = parseGSResponse(data.data);
+                } else if (data.values || data.rows) {
+                    // If the web app returns { values: [...] } or { rows: [...] }
+                    parsedStats = parseGSResponse(data);
+                } else if (Array.isArray(data)) {
+                    // If the web app returns an array directly
+                    parsedStats = parseGSResponse(data);
+                } else if (data.data && Array.isArray(data.data)) {
+                    parsedStats = parseGSResponse(data.data);
+                } else {
+                    // Try to use the data as-is
+                    parsedStats = parseGSResponse(data);
+                }
+
+                if (parsedStats && parsedStats.totalResponses > 0) {
+                    renderDashboard(parsedStats);
+                    connectionStatus.textContent = '✅ Data loaded successfully!';
+                    connectionStatus.className = 'status-msg success';
+                    // Hide config panel
+                    document.getElementById('configPanel').style.display = 'none';
+                } else {
+                    throw new Error('No data found in the response. Make sure you have submitted some quiz responses.');
+                }
+
+            } catch (error) {
+                console.error('Error loading from web app:', error);
+                connectionStatus.textContent = `❌ Error: ${error.message}`;
+                connectionStatus.className = 'status-msg error';
+
+                // Show fallback option
+                document.querySelector('.stats-grid').innerHTML = `
+                    <div class="error-msg" style="grid-column:1/-1;">
+                        ⚠️ Could not fetch data from the web app: ${error.message}
+                        <br><br>
+                        <strong>To fix this, you need to add a GET endpoint to your Google Apps Script:</strong>
+                        <br>
+                        Add this function to your GS script:
+                        <br><br>
+                        <code style="background:#f5f5f5; padding:0.5rem; display:block; white-space:pre-wrap; font-size:0.85rem;">
+                        function doGet(e) {
+                          var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+                          var data = sheet.getDataRange().getValues();
+                          return ContentService
+                            .createTextOutput(JSON.stringify({ status: 'success', data: data }))
+                            .setMimeType(ContentService.MimeType.JSON);
+                        }
+                        </code>
+                        <br>
+                        Then redeploy the web app and try again.
+                    </div>
+                `;
+            } finally {
+                connectBtn.disabled = false;
+            }
+        }
+
+        // ============================================================
+        // FALLBACK: PASTE DATA MANUALLY
+        // ============================================================
+        function showManualDataInput() {
+            // This is a fallback for when the web app can't be reached
+            const statsGrid = document.querySelector('.stats-grid');
+            statsGrid.innerHTML = `
+                <div class="error-msg" style="grid-column:1/-1;">
+                    <strong>📋 Manual Data Import</strong>
+                    <br><br>
+                    Since we couldn't fetch data automatically, you can paste your data here:
+                    <br><br>
+                    <textarea id="manualDataInput" style="width:100%; height:120px; padding:0.5rem; border:1px solid #b6d1df; border-radius:8px; font-family:monospace; font-size:0.85rem;" 
+                        placeholder='Paste your JSON data here (array of objects or array of arrays)'></textarea>
+                    <br>
+                    <button class="btn-primary" id="manualImportBtn" style="margin-top:0.5rem;">📥 Import Data</button>
+                    <br><br>
+                    <details>
+                        <summary style="cursor:pointer; color:#1c617b; font-weight:500;">📖 Expected format</summary>
+                        <pre style="background:#f5f5f5; padding:0.5rem; border-radius:8px; font-size:0.8rem; overflow-x:auto;">
+                    [
+                      {
+                        "Gender": "F",
+                        "Age": 25,
+                        "First Language": "Spanish",
+                        "Score (%)": 85,
+                        "Quiz Results (JSON)": "[{\"verb\":\"shut\",\"userResult\":\"correct\"},{\"verb\":\"open\",\"userResult\":\"wrong\"}]"
+                      }
+                    ]
+                        </pre>
+                    </details>
+                </div>
+            `;
+
+            document.getElementById('manualImportBtn')?.addEventListener('click', function() {
+                const textarea = document.getElementById('manualDataInput');
+                try {
+                    const data = JSON.parse(textarea.value);
+                    if (Array.isArray(data) && data.length > 0) {
+                        const stats = parseGSResponse(data);
+                        if (stats && stats.totalResponses > 0) {
+                            renderDashboard(stats);
+                            connectionStatus.textContent = '✅ Data imported manually!';
+                            connectionStatus.className = 'status-msg success';
+                            document.getElementById('configPanel').style.display = 'none';
+                        } else {
+                            alert('No valid data found. Please check the format.');
+                        }
+                    } else {
+                        alert('Data must be an array of objects or arrays.');
+                    }
+                } catch (e) {
+                    alert('Invalid JSON: ' + e.message);
+                }
+            });
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        connectBtn.addEventListener('click', async function() {
+            const url = webAppUrlInput.value.trim();
+            if (!url) {
+                connectionStatus.textContent = '⚠️ Please enter a web app URL.';
+                connectionStatus.className = 'status-msg error';
+                return;
+            }
+
+            // Save to localStorage for next time
+            try {
+                localStorage.setItem('verblingua_webapp_url', url);
+            } catch (e) {}
+
+            await loadFromWebApp(url);
+        });
+
+        refreshBtn.addEventListener('click', function() {
+            if (currentData) {
+                renderDashboard(currentData);
             } else {
-              // Might be a stringified array with single quotes
-              const cleaned = raw.replace(/'/g, '"');
-              results = JSON.parse(cleaned);
+                const url = webAppUrlInput.value.trim();
+                if (url) {
+                    loadFromWebApp(url);
+                } else {
+                    alert('Please connect to a data source first.');
+                }
             }
-          } catch (e) {
-            // If parsing fails, try splitting by comma (simple fallback)
-            const parts = row[idx.results].split(',').map(s => s.trim());
-            results = parts.map(p => {
-              const match = p.match(/"verb":"([^"]+)"/);
-              return match ? { verb: match[1], result: 'wrong' } : null;
-            }).filter(Boolean);
-          }
-        }
+        });
 
-        if (Array.isArray(results) && results.length > 0) {
-          totalQ = Math.max(totalQ, results.length);
-          for (const item of results) {
-            const verb = item.verb || item.correct || item.word || '';
-            if (!verb) continue;
-            const isWrong = (item.userResult === 'wrong' || item.result === 'wrong');
-            if (!verbStats[verb]) verbStats[verb] = { total: 0, wrong: 0 };
-            verbStats[verb].total++;
-            if (isWrong) verbStats[verb].wrong++;
-          }
-        }
-
-        parsed.push({ gender, age, lang, score, results });
-      }
-
-      // Compute error rates
-      const verbErrorRates = [];
-      for (const [verb, stats] of Object.entries(verbStats)) {
-        if (stats.total > 0) {
-          verbErrorRates.push({
-            verb,
-            total: stats.total,
-            wrong: stats.wrong,
-            errorRate: stats.wrong / stats.total,
-          });
-        }
-      }
-
-      // Sort by error rate descending
-      verbErrorRates.sort((a, b) => b.errorRate - a.errorRate);
-
-      return {
-        totalResponses: parsed.length,
-        totalQuestions: totalQ || 400,
-        avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0,
-        uniqueVerbs: verbErrorRates.length,
-        verbErrorRates,
-        demographics: {
-          gender: parsed.map(p => p.gender).filter(Boolean),
-          age: parsed.map(p => p.age).filter(a => a && !isNaN(a)),
-          lang: parsed.map(p => p.lang).filter(Boolean),
-        },
-        raw: parsed,
-      };
-    }
-
-    // ============================================================
-    // RENDER DASHBOARD
-    // ============================================================
-    function renderDashboard(stats) {
-      if (!stats) {
-        document.querySelector('.stats-grid').innerHTML =
-          `<div class="error-msg" style="grid-column:1/-1;">⚠️ No data available. Please check your sheet configuration.</div>`;
-        return;
-      }
-
-      // Stats
-      totalResponsesEl.textContent = stats.totalResponses;
-      totalQuestionsEl.textContent = stats.totalQuestions;
-      avgScoreEl.innerHTML = `${stats.avgScore}<small>%</small>`;
-      uniqueVerbsEl.textContent = stats.uniqueVerbs;
-
-      // Demographics
-      const demo = stats.demographics;
-      const genderCount = {};
-      demo.gender.forEach(g => { genderCount[g] = (genderCount[g] || 0) + 1; });
-      const langCount = {};
-      demo.lang.forEach(l => { langCount[l] = (langCount[l] || 0) + 1; });
-
-      const ages = demo.age.map(Number).filter(a => !isNaN(a) && a > 0);
-      const avgAge = ages.length > 0 ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : '—';
-      const ageRange = ages.length > 0 ? `${Math.min(...ages)} – ${Math.max(...ages)}` : '—';
-
-      demographicsContent.innerHTML = `
-        <div class="demographic-item"><span class="label">👤 Gender</span><span class="value">${Object.entries(genderCount).map(([k,v]) => `${k} (${v})`).join(' · ') || '—'}</span></div>
-        <div class="demographic-item"><span class="label">📅 Avg Age</span><span class="value">${avgAge}</span></div>
-        <div class="demographic-item"><span class="label">📅 Age Range</span><span class="value">${ageRange}</span></div>
-        <div class="demographic-item"><span class="label">🌍 Top Language</span><span class="value">${Object.entries(langCount).sort((a,b) => b[1]-a[1])[0]?.[0] || '—'}</span></div>
-        <div class="demographic-item"><span class="label">🌍 Languages</span><span class="value">${Object.keys(langCount).length}</span></div>
-      `;
-
-      // Top 5
-      const top5 = stats.verbErrorRates.slice(0, 5);
-      topFiveContainer.innerHTML = top5.length > 0 ?
-        top5.map(v =>
-          `<div class="top-verb-item"><span class="verb">${v.verb}</span><span class="pct">${Math.round(v.errorRate * 100)}%</span></div>`
-        ).join('') :
-        '<div style="color:#4d7a8f;">No data yet</div>';
-
-      // Chart
-      const top20 = stats.verbErrorRates.slice(0, 20);
-      const labels = top20.map(v => v.verb);
-      const data = top20.map(v => +(v.errorRate * 100).toFixed(1));
-
-      const ctx = document.getElementById('verbChart').getContext('2d');
-
-      if (chartInstance) chartInstance.destroy();
-
-      chartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: '% Incorrect',
-            data: data,
-            backgroundColor: data.map((v, i) => {
-              const intensity = Math.min(v / 100, 1);
-              const r = 200 - intensity * 150;
-              const g = 80 - intensity * 40;
-              const b = 80 - intensity * 50;
-              return `rgb(${r}, ${g}, ${b})`;
-            }),
-            borderColor: '#1c617b',
-            borderWidth: 1,
-            borderRadius: 4,
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => `${ctx.parsed.x}% incorrect (${top20[ctx.dataIndex]?.wrong || 0} wrong)`
-              }
+        // Load saved URL
+        try {
+            const savedUrl = localStorage.getItem('verblingua_webapp_url');
+            if (savedUrl) {
+                webAppUrlInput.value = savedUrl;
             }
-          },
-          scales: {
-            x: {
-              beginAtZero: true,
-              max: 100,
-              ticks: { callback: (v) => v + '%' }
-            },
-            y: {
-              ticks: { font: { size: 11 } }
-            }
-          }
+        } catch (e) {}
+
+        // Auto-connect if URL is present
+        if (webAppUrlInput.value.trim()) {
+            // Wait a moment for the page to fully load
+            setTimeout(() => {
+                connectBtn.click();
+            }, 500);
         }
-      });
-    }
 
-    // ============================================================
-    // MAIN LOAD FUNCTION
-    // ============================================================
-    async function loadDashboard() {
-      const loadingEl = document.querySelector('.loading');
-      if (loadingEl) loadingEl.textContent = '⏳ Loading data from Google Sheets…';
+        // ============================================================
+        // INSTRUCTIONS FOR GOOGLE APPS SCRIPT
+        // ============================================================
+        console.log(`
+        📊 VerbLingua Dashboard Setup:
 
-      try {
-        const rows = await fetchSheetData();
-        const stats = parseResponses(rows);
-        if (stats) {
-          renderDashboard(stats);
-        } else {
-          throw new Error('Failed to parse sheet data.');
+        To make this dashboard work, you need to add a doGet() function to your Google Apps Script:
+
+        function doGet(e) {
+          var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+          var data = sheet.getDataRange().getValues();
+          return ContentService
+            .createTextOutput(JSON.stringify({ status: 'success', data: data }))
+            .setMimeType(ContentService.MimeType.JSON);
         }
-      } catch (err) {
-        console.error('Dashboard error:', err);
-        document.querySelector('.stats-grid').innerHTML = `
-          <div class="error-msg" style="grid-column:1/-1;">
-            ⚠️ Error loading data: ${err.message}
-            <br><br>
-            <strong>To fix this:</strong>
-            <ol style="margin:0.8rem 0 0 1.2rem; font-weight:400;">
-              <li>Enable the Google Sheets API in your Google Cloud Console</li>
-              <li>Create an API Key and restrict it to the Sheets API</li>
-              <li>Replace <code>SHEET_ID</code> and <code>API_KEY</code> in the script</li>
-              <li>Or use the Google Apps Script fallback endpoint</li>
-            </ol>
-          </div>
-        `;
-        if (document.querySelector('.loading')) {
-          document.querySelector('.loading').textContent = '❌ Error loading data';
-        }
-      }
-    }
 
-    // ============================================================
-    // INIT
-    // ============================================================
-    refreshBtn.addEventListener('click', loadDashboard);
-    loadDashboard();
-
-    // ============================================================
-    // INSTRUCTIONS FOR GOOGLE SHEETS API SETUP
-    // ============================================================
-    console.log(`
-    📊 VerbLingua Dashboard Setup:
-    1. Enable Google Sheets API in Google Cloud Console
-    2. Create an API Key (restrict to Sheets API)
-    3. Share your sheet with "Anyone with the link" (viewer)
-    4. Replace SHEET_ID and API_KEY in the script
-    5. Your sheet must have these columns:
-       - Gender, Age, First Language, Score (%), Quiz Results (JSON)
-    `);
-  </script>
+        Then redeploy the web app and use the same URL in the dashboard.
+        `);
+    </script>
 </body>
 </html>
