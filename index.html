@@ -316,15 +316,38 @@
         }
         .footnote {
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: #2d657b;
-            margin-top: 0.6rem;
-            opacity: 0.8;
+            margin-top: 0.8rem;
+            opacity: 0.9;
             border-top: 1px dashed #b7d3e2;
-            padding-top: 0.8rem;
+            padding-top: 1rem;
+            line-height: 1.8;
         }
         .footnote strong {
             color: #064257;
+        }
+        .footnote .quote {
+            display: block;
+            font-style: italic;
+            color: #1b5b72;
+            margin-top: 0.3rem;
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            border-left: 3px solid #3f8ca8;
+        }
+        .footnote .quote-author {
+            font-style: normal;
+            font-weight: 500;
+            color: #063544;
+        }
+        .footnote .quote-divider {
+            display: block;
+            margin: 0.15rem 0;
+            font-size: 0.7rem;
+            color: #8ab3c7;
         }
         .status-msg {
             font-weight: 600;
@@ -527,9 +550,32 @@
             margin-top: 1rem;
             padding-top: 1rem;
             border-top: 1px dashed #c2dae8;
+            line-height: 1.8;
         }
         .popup-footer strong {
             color: #064257;
+        }
+        .popup-footer .quote {
+            display: block;
+            font-style: italic;
+            color: #1b5b72;
+            margin-top: 0.3rem;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            border-left: 3px solid #3f8ca8;
+        }
+        .popup-footer .quote-author {
+            font-style: normal;
+            font-weight: 500;
+            color: #063544;
+        }
+        .popup-footer .quote-divider {
+            display: block;
+            margin: 0.15rem 0;
+            font-size: 0.7rem;
+            color: #8ab3c7;
         }
         .popup-loading {
             text-align: center;
@@ -568,6 +614,22 @@
                 transform: rotate(360deg);
             }
         }
+        .btn-primary {
+            background: #1c617b;
+            color: white;
+            border: none;
+            padding: 0.4rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            box-shadow: 0 3px 0 #0d3342;
+            transition: 0.07s;
+        }
+        .btn-primary:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -575,10 +637,9 @@
     <!-- ===== MAIN APP ===== -->
     <div class="app" id="app">
         <h1>
-            <span>📘 Learn Commonly Used English Verbs</span>
-            <span style="font-size:1rem; font-weight:300; opacity:0.7;">400 · audio · fill‑in‑blank quiz</span>
+            <span>📘 Learning Basic English Verbs</span>
         </h1>
-
+        
         <div class="panel">
             <div class="sentence" id="sentenceDisplay">loading… <small>#1</small></div>
             <div class="audio-row">
@@ -620,6 +681,12 @@
             <label>Age <input type="number" id="ageInput" min="3" max="120" placeholder="25" style="width:70px;"></label>
             <label>First language <input type="text" id="langInput" placeholder="e.g. Spanish" style="width:100px;"></label>
             <button class="send-btn" id="sendDataBtn">📊 Submit & View Dashboard</button>
+        </div>
+        <div class="footnote">
+            <span id="sentStatus" class="status-msg">✅ ready</span>
+            <span class="quote">“The limits of my language mean the limits of my world.” — <span class="quote-author">Ludwig Wittgenstein</span></span>
+            <span class="quote-divider">✦ ✦ ✦</span>
+            <span class="quote">“To have another language is to possess a second soul.” — <span class="quote-author">Charlemagne</span></span>
         </div>
     </div>
 
@@ -679,6 +746,9 @@
 
                 <div class="popup-footer" id="popupFooter" style="display:none;">
                     <strong>Data from all responders</strong> · Results will be released on <strong>9/5/2026</strong> · <span id="popupResponseCount">0</span> responses collected so far
+                    <span class="quote">“The limits of my language mean the limits of my world.” — <span class="quote-author">Ludwig Wittgenstein</span></span>
+                    <span class="quote-divider">✦ ✦ ✦</span>
+                    <span class="quote">“To have another language is to possess a second soul.” — <span class="quote-author">Charlemagne</span></span>
                 </div>
             </div>
         </div>
@@ -1636,6 +1706,8 @@
         console.log('📊 VerbLingua App loaded!');
         console.log('ℹ️ After submitting, the dashboard will show aggregate data from ALL responders.');
         console.log('ℹ️ Make sure your Google Apps Script has a doGet() function that returns sheet data.');
+        console.log('📚 "The limits of my language mean the limits of my world." — Ludwig Wittgenstein');
+        console.log('📚 "To have another language is to possess a second soul." — Charlemagne');
     </script>
 </body>
 </html>
