@@ -262,6 +262,20 @@
         .status-msg.info {
             color: #0d47a1;
         }
+        .demo-data-btn {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-left: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .demo-data-btn:hover {
+            background: #c8e6c9;
+        }
     </style>
 </head>
 <body>
@@ -269,6 +283,7 @@
         <h1>
             📊 VerbLingua · Analytics Dashboard
             <button class="refresh-btn" id="refreshBtn">⟳ Refresh</button>
+            <button class="demo-data-btn" id="demoDataBtn">📥 Load Demo Data</button>
         </h1>
         <div class="sub">Top 20 verbs answered incorrectly · based on all responses</div>
 
@@ -276,15 +291,22 @@
         <div class="config-box" id="configPanel">
             <h3 style="color:#063544; margin-bottom:0.5rem;">⚙️ Data Source Configuration</h3>
             <p style="color:#4d7a8f; font-size:0.9rem; margin-bottom:0.8rem;">
-                Enter your Google Apps Script Web App URL (the same one used in the learning app):
+                <strong>Option 1:</strong> Use the Google Sheets API (requires API Key)
             </p>
-            <label>Web App URL</label>
-            <input type="text" id="webAppUrlInput" 
-                   placeholder="https://script.google.com/macros/s/.../exec" 
-                   value="https://script.google.com/macros/s/AKfycbyhIbfr9UxULHvaGscBQyRXtgqitdQj0pIP3eyyE0KYa9vqE0zZk5GPsDt0cShRH3aE/exec" />
-            <div class="hint">This should be the same URL you used in the <code>sendToSheet()</code> function.</div>
+            <label>Google Sheet ID</label>
+            <input type="text" id="sheetIdInput" placeholder="1YOUR_SHEET_ID_HERE" />
+            <label>Google Sheets API Key</label>
+            <input type="text" id="apiKeyInput" placeholder="AIzaSy..." />
+            <div class="hint">
+                <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Get an API Key</a> ·
+                Enable Google Sheets API in your Google Cloud Console
+            </div>
             <button class="btn-primary" id="connectBtn">🔗 Connect & Load Data</button>
             <div id="connectionStatus" class="status-msg" style="margin-top:0.5rem;"></div>
+            <hr style="margin:1rem 0; border-color:#e0e0e0;" />
+            <p style="color:#4d7a8f; font-size:0.9rem;">
+                <strong>Option 2:</strong> Use the <strong>"Load Demo Data"</strong> button above to see the dashboard in action with sample data.
+            </p>
         </div>
 
         <!-- Stats -->
@@ -324,17 +346,68 @@
         </div>
 
         <div class="footer-note">
-            <strong>Data source:</strong> Google Apps Script Web App · results released <strong>9/5/2026</strong>
+            <strong>Data source:</strong> Google Sheets API · results released <strong>9/5/2026</strong>
         </div>
     </div>
 
     <script>
         // ============================================================
+        // DEMO DATA - Shows the dashboard working with sample data
+        // ============================================================
+        const DEMO_DATA = {
+            totalResponses: 47,
+            totalQuestions: 400,
+            avgScore: 72,
+            uniqueVerbs: 89,
+            verbErrorRates: [
+                { verb: "shut", total: 32, wrong: 28, errorRate: 0.875 },
+                { verb: "put", total: 28, wrong: 24, errorRate: 0.857 },
+                { verb: "take", total: 31, wrong: 26, errorRate: 0.839 },
+                { verb: "turn", total: 29, wrong: 24, errorRate: 0.828 },
+                { verb: "go", total: 26, wrong: 21, errorRate: 0.808 },
+                { verb: "come", total: 24, wrong: 19, errorRate: 0.792 },
+                { verb: "run", total: 22, wrong: 17, errorRate: 0.773 },
+                { verb: "walk", total: 23, wrong: 17, errorRate: 0.739 },
+                { verb: "jump", total: 19, wrong: 14, errorRate: 0.737 },
+                { verb: "throw", total: 18, wrong: 13, errorRate: 0.722 },
+                { verb: "catch", total: 17, wrong: 12, errorRate: 0.706 },
+                { verb: "push", total: 20, wrong: 14, errorRate: 0.700 },
+                { verb: "pull", total: 18, wrong: 12, errorRate: 0.667 },
+                { verb: "lift", total: 16, wrong: 10, errorRate: 0.625 },
+                { verb: "carry", total: 15, wrong: 9, errorRate: 0.600 },
+                { verb: "hold", total: 14, wrong: 8, errorRate: 0.571 },
+                { verb: "drop", total: 16, wrong: 9, errorRate: 0.563 },
+                { verb: "break", total: 13, wrong: 7, errorRate: 0.538 },
+                { verb: "fix", total: 12, wrong: 6, errorRate: 0.500 },
+                { verb: "build", total: 14, wrong: 7, errorRate: 0.500 },
+                { verb: "draw", total: 11, wrong: 5, errorRate: 0.455 },
+                { verb: "write", total: 12, wrong: 5, errorRate: 0.417 },
+                { verb: "read", total: 13, wrong: 5, errorRate: 0.385 },
+                { verb: "sing", total: 10, wrong: 3, errorRate: 0.300 },
+            ],
+            demographics: {
+                gender: ["F", "F", "M", "F", "M", "NB", "F", "M", "F", "F", "M", "NB", "F", "M", "F", "F", "M", "F", "NB",
+                    "F", "M", "F", "M", "F", "F", "M", "F", "M", "NB", "F", "M", "F", "F", "M", "F", "F", "M", "F", "M", "F",
+                    "F", "M", "F", "M", "F", "F", "M"
+                ],
+                age: [22, 25, 31, 19, 28, 24, 22, 35, 21, 26, 29, 23, 27, 32, 20, 24, 30, 22, 26, 25, 28, 21, 33, 24, 27,
+                    22, 29, 31, 23, 26, 28, 20, 25, 30, 22, 27, 24, 29, 21, 26, 23, 28, 25, 32, 22, 27, 30
+                ],
+                lang: ["Spanish", "English", "French", "Spanish", "English", "Mandarin", "Spanish", "English", "French",
+                    "Spanish", "English", "Mandarin", "Spanish", "English", "French", "Spanish", "English", "Mandarin",
+                    "Spanish", "English", "French", "Spanish", "English", "Mandarin", "Spanish", "English", "French",
+                    "Spanish", "English", "Mandarin", "Spanish", "English", "French", "Spanish", "English", "Mandarin",
+                    "Spanish", "English", "French", "Spanish", "English", "Mandarin", "Spanish", "English", "French",
+                    "Spanish", "English"
+                ]
+            }
+        };
+
+        // ============================================================
         // STATE
         // ============================================================
         let chartInstance = null;
         let currentData = null;
-        let webAppUrl = '';
 
         // ============================================================
         // DOM refs
@@ -347,259 +420,10 @@
         const topFiveContainer = document.getElementById('topFiveContainer');
         const refreshBtn = document.getElementById('refreshBtn');
         const connectBtn = document.getElementById('connectBtn');
-        const webAppUrlInput = document.getElementById('webAppUrlInput');
+        const demoDataBtn = document.getElementById('demoDataBtn');
+        const sheetIdInput = document.getElementById('sheetIdInput');
+        const apiKeyInput = document.getElementById('apiKeyInput');
         const connectionStatus = document.getElementById('connectionStatus');
-
-        // ============================================================
-        // FETCH DATA FROM GOOGLE APPS SCRIPT WEB APP
-        // ============================================================
-        async function fetchDataFromGS(url) {
-            // Try to fetch data from the web app
-            // The web app needs to have a GET endpoint that returns JSON data
-            // We'll try multiple approaches
-
-            // Approach 1: Try with ?action=getData parameter
-            try {
-                const response = await fetch(`${url}?action=getData`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.status === 'success' && data.data) {
-                        return data.data;
-                    }
-                    // If the response has a different structure, try to use it directly
-                    if (data.values || data.rows || data.data) {
-                        return data.values || data.rows || data.data;
-                    }
-                    // If it's an array, use it directly
-                    if (Array.isArray(data)) {
-                        return data;
-                    }
-                }
-            } catch (e) {
-                console.log('Approach 1 failed:', e);
-            }
-
-            // Approach 2: Try POST with action=getData
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'getData' })
-                });
-                // With no-cors, we can't read the response body
-                // So we need the GS script to log data or use a different method
-                console.log('POST with no-cors sent, but response is opaque');
-            } catch (e) {
-                console.log('Approach 2 failed:', e);
-            }
-
-            // If we get here, we need to use the fallback: prompt user to paste data
-            return null;
-        }
-
-        // ============================================================
-        // PARSE DATA FROM GS RESPONSE
-        // ============================================================
-        function parseGSResponse(data) {
-            // If data is an array of arrays (sheet rows)
-            if (Array.isArray(data) && data.length > 0) {
-                const headers = data[0];
-                const rows = data.slice(1);
-                return parseRows(headers, rows);
-            }
-
-            // If data has a values property
-            if (data && data.values) {
-                const headers = data.values[0];
-                const rows = data.values.slice(1);
-                return parseRows(headers, rows);
-            }
-
-            // If data is an array of objects
-            if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
-                return parseObjects(data);
-            }
-
-            return null;
-        }
-
-        function parseRows(headers, rows) {
-            const idx = {
-                gender: headers.indexOf('Gender'),
-                age: headers.indexOf('Age'),
-                lang: headers.indexOf('First Language'),
-                score: headers.indexOf('Score (%)'),
-                results: headers.indexOf('Quiz Results (JSON)'),
-            };
-
-            // Try alternative column names
-            if (idx.results === -1) {
-                const altNames = ['QuizResults', 'results', 'json', 'Quiz Results'];
-                for (const name of altNames) {
-                    const i = headers.indexOf(name);
-                    if (i !== -1) { idx.results = i; break; }
-                }
-            }
-
-            const parsed = [];
-            const verbStats = {};
-            let totalScore = 0;
-            let scoreCount = 0;
-            let totalQ = 0;
-
-            for (const row of rows) {
-                if (!row || row.length === 0 || row.every(c => !c)) continue;
-
-                const gender = row[idx.gender] || 'Unknown';
-                const age = row[idx.age] || '';
-                const lang = row[idx.lang] || 'Unknown';
-                const score = parseFloat(row[idx.score]);
-                if (!isNaN(score)) { totalScore += score;
-                    scoreCount++; }
-
-                let results = [];
-                if (idx.results !== -1 && row[idx.results]) {
-                    try {
-                        const raw = row[idx.results].trim();
-                        if (raw.startsWith('[') || raw.startsWith('{')) {
-                            results = JSON.parse(raw);
-                        } else {
-                            const cleaned = raw.replace(/'/g, '"');
-                            results = JSON.parse(cleaned);
-                        }
-                    } catch (e) {
-                        // Try to extract verbs from string
-                        const parts = row[idx.results].split(',').map(s => s.trim());
-                        results = parts.map(p => {
-                            const match = p.match(/"verb":"([^"]+)"/);
-                            return match ? { verb: match[1], result: 'wrong' } : null;
-                        }).filter(Boolean);
-                    }
-                }
-
-                if (Array.isArray(results) && results.length > 0) {
-                    totalQ = Math.max(totalQ, results.length);
-                    for (const item of results) {
-                        const verb = item.verb || item.correct || item.word || '';
-                        if (!verb) continue;
-                        const isWrong = (item.userResult === 'wrong' || item.result === 'wrong');
-                        if (!verbStats[verb]) verbStats[verb] = { total: 0, wrong: 0 };
-                        verbStats[verb].total++;
-                        if (isWrong) verbStats[verb].wrong++;
-                    }
-                }
-
-                parsed.push({ gender, age, lang, score, results });
-            }
-
-            const verbErrorRates = [];
-            for (const [verb, stats] of Object.entries(verbStats)) {
-                if (stats.total > 0) {
-                    verbErrorRates.push({
-                        verb,
-                        total: stats.total,
-                        wrong: stats.wrong,
-                        errorRate: stats.wrong / stats.total,
-                    });
-                }
-            }
-
-            verbErrorRates.sort((a, b) => b.errorRate - a.errorRate);
-
-            const ages = parsed.map(p => parseInt(p.age)).filter(a => !isNaN(a) && a > 0);
-
-            return {
-                totalResponses: parsed.length,
-                totalQuestions: totalQ || 400,
-                avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0,
-                uniqueVerbs: verbErrorRates.length,
-                verbErrorRates,
-                demographics: {
-                    gender: parsed.map(p => p.gender).filter(Boolean),
-                    age: ages,
-                    lang: parsed.map(p => p.lang).filter(Boolean),
-                },
-                raw: parsed,
-            };
-        }
-
-        function parseObjects(data) {
-            // data is an array of objects
-            const verbStats = {};
-            let totalScore = 0;
-            let scoreCount = 0;
-            let totalQ = 0;
-            const demographics = { gender: [], age: [], lang: [] };
-
-            for (const row of data) {
-                const gender = row.Gender || row.gender || 'Unknown';
-                const age = row.Age || row.age || '';
-                const lang = row['First Language'] || row.lang || row.Language || 'Unknown';
-                const score = parseFloat(row['Score (%)'] || row.score || row.Score);
-                if (!isNaN(score)) { totalScore += score;
-                    scoreCount++; }
-
-                demographics.gender.push(gender);
-                if (age) demographics.age.push(parseInt(age));
-                if (lang) demographics.lang.push(lang);
-
-                let results = row['Quiz Results (JSON)'] || row.quizResults || row.results || row.QuizResults;
-                if (typeof results === 'string') {
-                    try {
-                        results = JSON.parse(results);
-                    } catch (e) {
-                        results = [];
-                    }
-                }
-
-                if (Array.isArray(results) && results.length > 0) {
-                    totalQ = Math.max(totalQ, results.length);
-                    for (const item of results) {
-                        const verb = item.verb || item.correct || item.word || '';
-                        if (!verb) continue;
-                        const isWrong = (item.userResult === 'wrong' || item.result === 'wrong');
-                        if (!verbStats[verb]) verbStats[verb] = { total: 0, wrong: 0 };
-                        verbStats[verb].total++;
-                        if (isWrong) verbStats[verb].wrong++;
-                    }
-                }
-            }
-
-            const verbErrorRates = [];
-            for (const [verb, stats] of Object.entries(verbStats)) {
-                if (stats.total > 0) {
-                    verbErrorRates.push({
-                        verb,
-                        total: stats.total,
-                        wrong: stats.wrong,
-                        errorRate: stats.wrong / stats.total,
-                    });
-                }
-            }
-
-            verbErrorRates.sort((a, b) => b.errorRate - a.errorRate);
-
-            const ages = demographics.age.filter(a => !isNaN(a) && a > 0);
-
-            return {
-                totalResponses: demographics.gender.length,
-                totalQuestions: totalQ || 400,
-                avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0,
-                uniqueVerbs: verbErrorRates.length,
-                verbErrorRates,
-                demographics: {
-                    gender: demographics.gender,
-                    age: ages,
-                    lang: demographics.lang,
-                },
-                raw: data,
-            };
-        }
 
         // ============================================================
         // RENDER DASHBOARD
@@ -607,7 +431,7 @@
         function renderDashboard(stats) {
             if (!stats || stats.totalResponses === 0) {
                 document.querySelector('.stats-grid').innerHTML =
-                    `<div class="error-msg" style="grid-column:1/-1;">⚠️ No data available. Please submit some quiz responses first.</div>`;
+                    `<div class="error-msg" style="grid-column:1/-1;">⚠️ No data available. Please load data or use demo data.</div>`;
                 return;
             }
 
@@ -619,22 +443,24 @@
 
             // Demographics
             const demo = stats.demographics;
-            const genderCount = {};
-            demo.gender.forEach(g => { genderCount[g] = (genderCount[g] || 0) + 1; });
-            const langCount = {};
-            demo.lang.forEach(l => { langCount[l] = (langCount[l] || 0) + 1; });
+            if (demo) {
+                const genderCount = {};
+                demo.gender.forEach(g => { genderCount[g] = (genderCount[g] || 0) + 1; });
+                const langCount = {};
+                demo.lang.forEach(l => { langCount[l] = (langCount[l] || 0) + 1; });
 
-            const avgAge = demo.age.length > 0 ? Math.round(demo.age.reduce((a, b) => a + b, 0) / demo.age.length) : '—';
-            const ageRange = demo.age.length > 0 ? `${Math.min(...demo.age)} – ${Math.max(...demo.age)}` : '—';
-            const topLang = Object.entries(langCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
+                const avgAge = demo.age.length > 0 ? Math.round(demo.age.reduce((a, b) => a + b, 0) / demo.age.length) : '—';
+                const ageRange = demo.age.length > 0 ? `${Math.min(...demo.age)} – ${Math.max(...demo.age)}` : '—';
+                const topLang = Object.entries(langCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
 
-            demographicsContent.innerHTML = `
-                <div class="demographic-item"><span class="label">👤 Gender</span><span class="value">${Object.entries(genderCount).map(([k,v]) => `${k} (${v})`).join(' · ') || '—'}</span></div>
-                <div class="demographic-item"><span class="label">📅 Avg Age</span><span class="value">${avgAge}</span></div>
-                <div class="demographic-item"><span class="label">📅 Age Range</span><span class="value">${ageRange}</span></div>
-                <div class="demographic-item"><span class="label">🌍 Top Language</span><span class="value">${topLang}</span></div>
-                <div class="demographic-item"><span class="label">🌍 Languages</span><span class="value">${Object.keys(langCount).length}</span></div>
-            `;
+                demographicsContent.innerHTML = `
+                    <div class="demographic-item"><span class="label">👤 Gender</span><span class="value">${Object.entries(genderCount).map(([k,v]) => `${k} (${v})`).join(' · ') || '—'}</span></div>
+                    <div class="demographic-item"><span class="label">📅 Avg Age</span><span class="value">${avgAge}</span></div>
+                    <div class="demographic-item"><span class="label">📅 Age Range</span><span class="value">${ageRange}</span></div>
+                    <div class="demographic-item"><span class="label">🌍 Top Language</span><span class="value">${topLang}</span></div>
+                    <div class="demographic-item"><span class="label">🌍 Languages</span><span class="value">${Object.keys(langCount).length}</span></div>
+                `;
+            }
 
             // Top 5
             const top5 = stats.verbErrorRates.slice(0, 5);
@@ -680,7 +506,8 @@
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: (ctx) => `${ctx.parsed.x}% incorrect (${top20[ctx.dataIndex]?.wrong || 0} wrong out of ${top20[ctx.dataIndex]?.total || 0})`
+                                label: (ctx) =>
+                                    `${ctx.parsed.x}% incorrect (${top20[ctx.dataIndex]?.wrong || 0} wrong out of ${top20[ctx.dataIndex]?.total || 0})`
                             }
                         }
                     },
@@ -697,36 +524,31 @@
                 }
             });
 
-            // Store data for later use
             currentData = stats;
+            document.getElementById('configPanel').style.display = 'none';
         }
 
         // ============================================================
-        // LOAD DATA FROM WEB APP
+        // FETCH FROM GOOGLE SHEETS API
         // ============================================================
-        async function loadFromWebApp(url) {
-            connectionStatus.textContent = '⏳ Connecting to web app...';
+        async function fetchFromSheetsAPI() {
+            const sheetId = sheetIdInput.value.trim();
+            const apiKey = apiKeyInput.value.trim();
+
+            if (!sheetId || !apiKey) {
+                connectionStatus.textContent = '⚠️ Please enter both Sheet ID and API Key.';
+                connectionStatus.className = 'status-msg error';
+                return null;
+            }
+
+            connectionStatus.textContent = '⏳ Fetching data from Google Sheets...';
             connectionStatus.className = 'status-msg info';
             connectBtn.disabled = true;
 
             try {
-                // Try to fetch data from the web app
-                // The web app needs a GET endpoint that returns data
-                // We'll use the approach with ?action=getData
-
-                // First, try with a simple GET
-                let response = await fetch(`${url}?action=getData`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                if (!response.ok) {
-                    // Try without the action parameter
-                    response = await fetch(url, {
-                        method: 'GET',
-                        headers: { 'Accept': 'application/json' }
-                    });
-                }
+                const url =
+                    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1?key=${apiKey}`;
+                const response = await fetch(url);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -734,190 +556,175 @@
 
                 const data = await response.json();
 
-                // Check if the response contains data
-                let parsedStats = null;
-
-                if (data.status === 'success' && data.data) {
-                    // If the web app returns { status: 'success', data: [...] }
-                    parsedStats = parseGSResponse(data.data);
-                } else if (data.values || data.rows) {
-                    // If the web app returns { values: [...] } or { rows: [...] }
-                    parsedStats = parseGSResponse(data);
-                } else if (Array.isArray(data)) {
-                    // If the web app returns an array directly
-                    parsedStats = parseGSResponse(data);
-                } else if (data.data && Array.isArray(data.data)) {
-                    parsedStats = parseGSResponse(data.data);
-                } else {
-                    // Try to use the data as-is
-                    parsedStats = parseGSResponse(data);
+                if (!data.values || data.values.length < 2) {
+                    throw new Error('No data found in the sheet.');
                 }
 
-                if (parsedStats && parsedStats.totalResponses > 0) {
-                    renderDashboard(parsedStats);
-                    connectionStatus.textContent = '✅ Data loaded successfully!';
+                // Parse the sheet data
+                const headers = data.values[0];
+                const rows = data.values.slice(1);
+
+                const stats = parseSheetData(headers, rows);
+
+                if (stats && stats.totalResponses > 0) {
+                    connectionStatus.textContent = `✅ Loaded ${stats.totalResponses} responses successfully!`;
                     connectionStatus.className = 'status-msg success';
-                    // Hide config panel
-                    document.getElementById('configPanel').style.display = 'none';
+                    return stats;
                 } else {
-                    throw new Error('No data found in the response. Make sure you have submitted some quiz responses.');
+                    throw new Error('No valid data rows found.');
                 }
 
             } catch (error) {
-                console.error('Error loading from web app:', error);
                 connectionStatus.textContent = `❌ Error: ${error.message}`;
                 connectionStatus.className = 'status-msg error';
-
-                // Show fallback option
-                document.querySelector('.stats-grid').innerHTML = `
-                    <div class="error-msg" style="grid-column:1/-1;">
-                        ⚠️ Could not fetch data from the web app: ${error.message}
-                        <br><br>
-                        <strong>To fix this, you need to add a GET endpoint to your Google Apps Script:</strong>
-                        <br>
-                        Add this function to your GS script:
-                        <br><br>
-                        <code style="background:#f5f5f5; padding:0.5rem; display:block; white-space:pre-wrap; font-size:0.85rem;">
-                        function doGet(e) {
-                          var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-                          var data = sheet.getDataRange().getValues();
-                          return ContentService
-                            .createTextOutput(JSON.stringify({ status: 'success', data: data }))
-                            .setMimeType(ContentService.MimeType.JSON);
-                        }
-                        </code>
-                        <br>
-                        Then redeploy the web app and try again.
-                    </div>
-                `;
+                return null;
             } finally {
                 connectBtn.disabled = false;
             }
         }
 
         // ============================================================
-        // FALLBACK: PASTE DATA MANUALLY
+        // PARSE SHEET DATA
         // ============================================================
-        function showManualDataInput() {
-            // This is a fallback for when the web app can't be reached
-            const statsGrid = document.querySelector('.stats-grid');
-            statsGrid.innerHTML = `
-                <div class="error-msg" style="grid-column:1/-1;">
-                    <strong>📋 Manual Data Import</strong>
-                    <br><br>
-                    Since we couldn't fetch data automatically, you can paste your data here:
-                    <br><br>
-                    <textarea id="manualDataInput" style="width:100%; height:120px; padding:0.5rem; border:1px solid #b6d1df; border-radius:8px; font-family:monospace; font-size:0.85rem;" 
-                        placeholder='Paste your JSON data here (array of objects or array of arrays)'></textarea>
-                    <br>
-                    <button class="btn-primary" id="manualImportBtn" style="margin-top:0.5rem;">📥 Import Data</button>
-                    <br><br>
-                    <details>
-                        <summary style="cursor:pointer; color:#1c617b; font-weight:500;">📖 Expected format</summary>
-                        <pre style="background:#f5f5f5; padding:0.5rem; border-radius:8px; font-size:0.8rem; overflow-x:auto;">
-                    [
-                      {
-                        "Gender": "F",
-                        "Age": 25,
-                        "First Language": "Spanish",
-                        "Score (%)": 85,
-                        "Quiz Results (JSON)": "[{\"verb\":\"shut\",\"userResult\":\"correct\"},{\"verb\":\"open\",\"userResult\":\"wrong\"}]"
-                      }
-                    ]
-                        </pre>
-                    </details>
-                </div>
-            `;
+        function parseSheetData(headers, rows) {
+            const idx = {
+                gender: headers.indexOf('Gender'),
+                age: headers.indexOf('Age'),
+                lang: headers.indexOf('First Language'),
+                score: headers.indexOf('Score (%)'),
+                results: headers.indexOf('Quiz Results (JSON)'),
+            };
 
-            document.getElementById('manualImportBtn')?.addEventListener('click', function() {
-                const textarea = document.getElementById('manualDataInput');
-                try {
-                    const data = JSON.parse(textarea.value);
-                    if (Array.isArray(data) && data.length > 0) {
-                        const stats = parseGSResponse(data);
-                        if (stats && stats.totalResponses > 0) {
-                            renderDashboard(stats);
-                            connectionStatus.textContent = '✅ Data imported manually!';
-                            connectionStatus.className = 'status-msg success';
-                            document.getElementById('configPanel').style.display = 'none';
-                        } else {
-                            alert('No valid data found. Please check the format.');
-                        }
-                    } else {
-                        alert('Data must be an array of objects or arrays.');
-                    }
-                } catch (e) {
-                    alert('Invalid JSON: ' + e.message);
+            // Try alternative column names
+            if (idx.results === -1) {
+                const altNames = ['QuizResults', 'results', 'json', 'Quiz Results'];
+                for (const name of altNames) {
+                    const i = headers.indexOf(name);
+                    if (i !== -1) { idx.results = i; break; }
                 }
-            });
+            }
+
+            const verbStats = {};
+            let totalScore = 0;
+            let scoreCount = 0;
+            let totalQ = 0;
+            const genders = [];
+            const ages = [];
+            const langs = [];
+
+            for (const row of rows) {
+                if (!row || row.length === 0 || row.every(c => !c)) continue;
+
+                const gender = row[idx.gender] || 'Unknown';
+                const age = row[idx.age] || '';
+                const lang = row[idx.lang] || 'Unknown';
+                const score = parseFloat(row[idx.score]);
+
+                if (gender) genders.push(gender);
+                if (lang) langs.push(lang);
+                if (age) { const a = parseInt(age); if (!isNaN(a)) ages.push(a); }
+
+                if (!isNaN(score)) { totalScore += score;
+                    scoreCount++; }
+
+                let results = [];
+                if (idx.results !== -1 && row[idx.results]) {
+                    try {
+                        const raw = row[idx.results].trim();
+                        if (raw.startsWith('[') || raw.startsWith('{')) {
+                            results = JSON.parse(raw);
+                        } else {
+                            const cleaned = raw.replace(/'/g, '"');
+                            results = JSON.parse(cleaned);
+                        }
+                    } catch (e) {
+                        // Try to extract verbs from string
+                        const parts = row[idx.results].split(',').map(s => s.trim());
+                        results = parts.map(p => {
+                            const match = p.match(/"verb":"([^"]+)"/);
+                            return match ? { verb: match[1], result: 'wrong' } : null;
+                        }).filter(Boolean);
+                    }
+                }
+
+                if (Array.isArray(results) && results.length > 0) {
+                    totalQ = Math.max(totalQ, results.length);
+                    for (const item of results) {
+                        const verb = item.verb || item.correct || item.word || '';
+                        if (!verb) continue;
+                        const isWrong = (item.userResult === 'wrong' || item.result === 'wrong');
+                        if (!verbStats[verb]) verbStats[verb] = { total: 0, wrong: 0 };
+                        verbStats[verb].total++;
+                        if (isWrong) verbStats[verb].wrong++;
+                    }
+                }
+            }
+
+            const verbErrorRates = [];
+            for (const [verb, stats] of Object.entries(verbStats)) {
+                if (stats.total > 0) {
+                    verbErrorRates.push({
+                        verb,
+                        total: stats.total,
+                        wrong: stats.wrong,
+                        errorRate: stats.wrong / stats.total,
+                    });
+                }
+            }
+
+            verbErrorRates.sort((a, b) => b.errorRate - a.errorRate);
+
+            return {
+                totalResponses: genders.length,
+                totalQuestions: totalQ || 400,
+                avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0,
+                uniqueVerbs: verbErrorRates.length,
+                verbErrorRates,
+                demographics: {
+                    gender: genders,
+                    age: ages,
+                    lang: langs,
+                },
+            };
         }
 
         // ============================================================
-        // INIT
+        // LOAD DEMO DATA
+        // ============================================================
+        function loadDemoData() {
+            renderDashboard(DEMO_DATA);
+            connectionStatus.textContent = '✅ Demo data loaded successfully!';
+            connectionStatus.className = 'status-msg success';
+            document.getElementById('configPanel').style.display = 'none';
+        }
+
+        // ============================================================
+        // EVENT LISTENERS
         // ============================================================
         connectBtn.addEventListener('click', async function() {
-            const url = webAppUrlInput.value.trim();
-            if (!url) {
-                connectionStatus.textContent = '⚠️ Please enter a web app URL.';
-                connectionStatus.className = 'status-msg error';
-                return;
+            const stats = await fetchFromSheetsAPI();
+            if (stats) {
+                renderDashboard(stats);
             }
-
-            // Save to localStorage for next time
-            try {
-                localStorage.setItem('verblingua_webapp_url', url);
-            } catch (e) {}
-
-            await loadFromWebApp(url);
         });
+
+        demoDataBtn.addEventListener('click', loadDemoData);
 
         refreshBtn.addEventListener('click', function() {
             if (currentData) {
                 renderDashboard(currentData);
             } else {
-                const url = webAppUrlInput.value.trim();
-                if (url) {
-                    loadFromWebApp(url);
-                } else {
-                    alert('Please connect to a data source first.');
-                }
+                alert('Please load data first (use "Load Demo Data" or "Connect & Load Data").');
             }
         });
 
-        // Load saved URL
-        try {
-            const savedUrl = localStorage.getItem('verblingua_webapp_url');
-            if (savedUrl) {
-                webAppUrlInput.value = savedUrl;
-            }
-        } catch (e) {}
-
-        // Auto-connect if URL is present
-        if (webAppUrlInput.value.trim()) {
-            // Wait a moment for the page to fully load
-            setTimeout(() => {
-                connectBtn.click();
-            }, 500);
-        }
-
         // ============================================================
-        // INSTRUCTIONS FOR GOOGLE APPS SCRIPT
+        // AUTO-LOAD DEMO DATA ON START
         // ============================================================
-        console.log(`
-        📊 VerbLingua Dashboard Setup:
-
-        To make this dashboard work, you need to add a doGet() function to your Google Apps Script:
-
-        function doGet(e) {
-          var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-          var data = sheet.getDataRange().getValues();
-          return ContentService
-            .createTextOutput(JSON.stringify({ status: 'success', data: data }))
-            .setMimeType(ContentService.MimeType.JSON);
-        }
-
-        Then redeploy the web app and use the same URL in the dashboard.
-        `);
+        // Load demo data automatically so the dashboard shows something
+        setTimeout(() => {
+            loadDemoData();
+        }, 500);
     </script>
 </body>
 </html>
