@@ -1,1713 +1,746 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VerbLingua · Learn + Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-    </script>
-    <style>
-        /* ===== MAIN APP STYLES ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        body {
-            background: #eaf1f7;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            padding: 1.5rem;
-            position: relative;
-        }
-        .app {
-            max-width: 960px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(4px);
-            border-radius: 48px;
-            padding: 2rem;
-            box-shadow: 0 20px 40px rgba(0, 20, 30, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-        }
-        h1 {
-            font-size: 2rem;
-            color: #063544;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .sub {
-            color: #1b5b72;
-            border-left: 3px solid #3f8ca8;
-            padding-left: 1rem;
-            margin: 0.2rem 0 1.5rem;
-        }
-        .panel {
-            background: #ffffffdd;
-            border-radius: 28px;
-            padding: 1.6rem 1.8rem;
-            box-shadow: 0 8px 18px -8px rgba(0, 40, 60, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            margin-bottom: 1.2rem;
-        }
-        .sentence {
-            font-size: 1.6rem;
-            font-weight: 500;
-            color: #01212e;
-            line-height: 1.4;
-        }
-        .sentence small {
-            font-weight: 300;
-            font-size: 0.85rem;
-            background: #d3e6ef;
-            padding: 0.1rem 0.8rem;
-            border-radius: 30px;
-            margin-left: 0.6rem;
-        }
-        .sentence .badge {
-            background: #4d8aa8;
-            color: white;
-            padding: 0.05rem 0.7rem;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            margin-left: 0.5rem;
-            vertical-align: middle;
-        }
-        .audio-row {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-top: 0.8rem;
-            flex-wrap: wrap;
-        }
-        .btn-audio {
-            background: #1c617b;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            padding: 0.4rem 1.6rem;
-            border-radius: 50px;
-            font-weight: 500;
-            box-shadow: 0 4px 0 #0d3342;
-            cursor: pointer;
-            border: 1px solid #68a3bd;
-            transition: 0.07s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .btn-audio:active {
-            transform: translateY(4px);
-            box-shadow: 0 1px 0 #0d3342;
-        }
-        .counter {
-            background: #e8f1f7;
-            padding: 0.2rem 1.2rem;
-            border-radius: 40px;
-            color: #1a4c5f;
-            font-weight: 500;
-            border: 1px solid #c1dae7;
-            margin-left: auto;
-        }
-        .nav {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            margin: 0.4rem 0 0.6rem;
-        }
-        .nav-group {
-            display: flex;
-            gap: 0.4rem;
-            flex-wrap: wrap;
-        }
-        .nav-btn {
-            background: #e1edf5;
-            border: 1px solid #b8d2e0;
-            color: #073544;
-            font-weight: 500;
-            padding: 0.4rem 1.2rem;
-            border-radius: 40px;
-            cursor: pointer;
-            box-shadow: 0 2px 0 #b0cbd8;
-            transition: 0.1s;
-        }
-        .nav-btn:active {
-            transform: translateY(3px);
-            box-shadow: none;
-        }
-        .nav-btn.primary {
-            background: #1c617b;
-            border-color: #135066;
-            color: white;
-            box-shadow: 0 3px 0 #0d3342;
-        }
-        .dots {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            flex-wrap: wrap;
-            margin: 0.6rem 0 0.2rem;
-        }
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 20px;
-            background: #c9dce7;
-            transition: 0.2s;
-        }
-        .dot.active {
-            background: #1c6e8a;
-            width: 20px;
-        }
-        .quiz-box {
-            background: #e9f2f8;
-            border-radius: 32px;
-            padding: 1.5rem 1.8rem;
-            border: 1px solid #c2dae8;
-            margin-top: 1.2rem;
-        }
-        .quiz-prompt {
-            font-weight: 600;
-            color: #063544;
-            font-size: 1.1rem;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .quiz-prompt span {
-            background: #bcd7e6;
-            padding: 0.1rem 0.9rem;
-            border-radius: 40px;
-            font-weight: 400;
-        }
-        .blank-sentence {
-            font-size: 1.3rem;
-            font-weight: 500;
-            color: #01212e;
-            padding: 0.5rem 0;
-        }
-        .blank-sentence .blank {
-            background: #ffeb3b;
-            padding: 0.1rem 0.8rem;
-            border-radius: 8px;
-            border-bottom: 3px solid #f57f17;
-            font-weight: 700;
-        }
-        .quiz-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.7rem;
-            margin: 0.6rem 0;
-        }
-        .quiz-options button {
-            background: white;
-            border: 1.5px solid #b2cedc;
-            padding: 0.5rem 1.5rem;
-            border-radius: 60px;
-            font-weight: 500;
-            color: #05303f;
-            cursor: pointer;
-            box-shadow: 0 2px 0 #b2cbd8;
-            transition: 0.1s;
-            font-size: 1rem;
-        }
-        .quiz-options button:active {
-            transform: translateY(2px);
-            box-shadow: none;
-        }
-        .quiz-options button.correct {
-            background: #8bc34a;
-            border-color: #558b2f;
-            color: white;
-        }
-        .quiz-options button.wrong {
-            background: #ef9a9a;
-            border-color: #b71c1c;
-            color: white;
-        }
-        .quiz-options button:disabled {
-            opacity: 0.7;
-            cursor: default;
-            transform: none;
-            box-shadow: none;
-        }
-        .quiz-feedback {
-            margin-top: 0.5rem;
-            font-weight: 500;
-            color: #0b4357;
-        }
-        .quiz-progress {
-            display: flex;
-            gap: 3px;
-            flex-wrap: wrap;
-            margin: 0.6rem 0 0.2rem;
-            max-height: 60px;
-            overflow-y: auto;
-        }
-        .qdot {
-            width: 12px;
-            height: 12px;
-            border-radius: 20px;
-            background: #c9dce7;
-            transition: 0.2s;
-            flex-shrink: 0;
-        }
-        .qdot.answered {
-            background: #4d8aa8;
-        }
-        .qdot.correct {
-            background: #7cb342;
-        }
-        .qdot.wrong {
-            background: #e57373;
-        }
-        .demographic {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.8rem 1.5rem;
-            margin: 1.2rem 0 0.4rem;
-            background: #f2faff;
-            padding: 0.9rem 1.2rem;
-            border-radius: 60px;
-            align-items: center;
-            border: 1px solid #bdd6e5;
-        }
-        .demographic label {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-weight: 500;
-            color: #074153;
-        }
-        .demographic select,
-        .demographic input {
-            padding: 0.3rem 0.7rem;
-            border-radius: 30px;
-            border: 1px solid #b6d1df;
-            background: white;
-            font-size: 0.9rem;
-        }
-        .send-btn {
-            background: #135f7a;
-            border: none;
-            color: white;
-            padding: 0.4rem 1.6rem;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 3px 0 #0b3a4b;
-            transition: 0.07s;
-            margin-left: auto;
-        }
-        .send-btn:active {
-            transform: translateY(3px);
-            box-shadow: none;
-        }
-        .send-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .footnote {
-            text-align: center;
-            font-size: 0.85rem;
-            color: #2d657b;
-            margin-top: 0.8rem;
-            opacity: 0.9;
-            border-top: 1px dashed #b7d3e2;
-            padding-top: 1rem;
-            line-height: 1.8;
-        }
-        .footnote strong {
-            color: #064257;
-        }
-        .footnote .quote {
-            display: block;
-            font-style: italic;
-            color: #1b5b72;
-            margin-top: 0.3rem;
-            font-size: 0.95rem;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 0.4rem 0.8rem;
-            border-radius: 12px;
-            border-left: 3px solid #3f8ca8;
-        }
-        .footnote .quote-author {
-            font-style: normal;
-            font-weight: 500;
-            color: #063544;
-        }
-        .footnote .quote-divider {
-            display: block;
-            margin: 0.15rem 0;
-            font-size: 0.7rem;
-            color: #8ab3c7;
-        }
-        .status-msg {
-            font-weight: 600;
-        }
-        .status-msg.success {
-            color: #2e7d32;
-        }
-        .status-msg.error {
-            color: #c62828;
-        }
-        .status-msg.sending {
-            color: #e65100;
-        }
-        @media (max-width: 600px) {
-            .app {
-                padding: 1rem;
-            }
-            .sentence {
-                font-size: 1.2rem;
-            }
-            .demographic {
-                flex-direction: column;
-                align-items: stretch;
-                border-radius: 30px;
-            }
-            .send-btn {
-                margin-left: 0;
-            }
-        }
-
-        /* ===== POPUP DASHBOARD STYLES ===== */
-        .dashboard-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            padding: 1.5rem;
-            overflow-y: auto;
-        }
-        .dashboard-overlay.active {
-            display: flex;
-        }
-        .dashboard-popup {
-            background: #eef5f9;
-            border-radius: 40px;
-            max-width: 1200px;
-            width: 100%;
-            max-height: 95vh;
-            overflow-y: auto;
-            padding: 2rem;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
-            animation: slideUp 0.4s ease;
-            position: relative;
-        }
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        .popup-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .popup-header h2 {
-            font-size: 1.8rem;
-            color: #063544;
-        }
-        .popup-close {
-            background: #e1edf5;
-            border: none;
-            font-size: 1.5rem;
-            padding: 0.3rem 1.2rem;
-            border-radius: 40px;
-            cursor: pointer;
-            color: #063544;
-            font-weight: 600;
-            box-shadow: 0 2px 0 #b0cbd8;
-            transition: 0.1s;
-        }
-        .popup-close:active {
-            transform: translateY(3px);
-            box-shadow: none;
-        }
-        .popup-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .popup-stat {
-            background: white;
-            border-radius: 16px;
-            padding: 1rem 1.2rem;
-            box-shadow: 0 2px 8px rgba(0, 20, 30, 0.06);
-            text-align: center;
-        }
-        .popup-stat .num {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #063544;
-        }
-        .popup-stat .lbl {
-            font-size: 0.75rem;
-            color: #4d7a8f;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-        .popup-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
-        }
-        @media (max-width: 800px) {
-            .popup-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        .popup-chart-box {
-            background: white;
-            border-radius: 24px;
-            padding: 1.2rem;
-            box-shadow: 0 2px 8px rgba(0, 20, 30, 0.06);
-        }
-        .popup-chart-box h3 {
-            font-size: 1rem;
-            color: #063544;
-            margin-bottom: 0.5rem;
-        }
-        .popup-chart-wrapper {
-            position: relative;
-            height: 340px;
-        }
-        .popup-demographics {
-            background: white;
-            border-radius: 24px;
-            padding: 1.2rem;
-            box-shadow: 0 2px 8px rgba(0, 20, 30, 0.06);
-        }
-        .popup-demographics h3 {
-            font-size: 1rem;
-            color: #063544;
-            margin-bottom: 0.8rem;
-        }
-        .popup-demo-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.4rem 0;
-            border-bottom: 1px solid #eef5f9;
-            font-size: 0.9rem;
-        }
-        .popup-demo-item:last-child {
-            border-bottom: none;
-        }
-        .popup-demo-item .label {
-            color: #2d657b;
-        }
-        .popup-demo-item .value {
-            font-weight: 600;
-            color: #063544;
-        }
-        .popup-top5 {
-            margin-top: 1rem;
-        }
-        .popup-top5-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.3rem 0;
-            font-size: 0.9rem;
-            border-bottom: 1px solid #f0f6fa;
-        }
-        .popup-top5-item .verb {
-            font-weight: 500;
-            color: #063544;
-        }
-        .popup-top5-item .pct {
-            color: #1b5b72;
-            font-weight: 600;
-        }
-        .popup-footer {
-            text-align: center;
-            color: #4d7a8f;
-            font-size: 0.8rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px dashed #c2dae8;
-            line-height: 1.8;
-        }
-        .popup-footer strong {
-            color: #064257;
-        }
-        .popup-footer .quote {
-            display: block;
-            font-style: italic;
-            color: #1b5b72;
-            margin-top: 0.3rem;
-            font-size: 0.9rem;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 0.3rem 0.8rem;
-            border-radius: 12px;
-            border-left: 3px solid #3f8ca8;
-        }
-        .popup-footer .quote-author {
-            font-style: normal;
-            font-weight: 500;
-            color: #063544;
-        }
-        .popup-footer .quote-divider {
-            display: block;
-            margin: 0.15rem 0;
-            font-size: 0.7rem;
-            color: #8ab3c7;
-        }
-        .popup-loading {
-            text-align: center;
-            padding: 2rem;
-            color: #4d7a8f;
-        }
-        .popup-error {
-            background: #ffebee;
-            color: #b71c1c;
-            padding: 1rem;
-            border-radius: 12px;
-            border-left: 4px solid #b71c1c;
-        }
-        .dashboard-popup::-webkit-scrollbar {
-            width: 6px;
-        }
-        .dashboard-popup::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .dashboard-popup::-webkit-scrollbar-thumb {
-            background: #b8d2e0;
-            border-radius: 10px;
-        }
-        .loading-spinner {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 4px solid #e0e0e0;
-            border-top: 4px solid #1c617b;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0.5rem auto;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        .btn-primary {
-            background: #1c617b;
-            color: white;
-            border: none;
-            padding: 0.4rem 1.5rem;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            margin-top: 0.5rem;
-            box-shadow: 0 3px 0 #0d3342;
-            transition: 0.07s;
-        }
-        .btn-primary:active {
-            transform: translateY(3px);
-            box-shadow: none;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- ===== MAIN APP ===== -->
-    <div class="app" id="app">
-        <h1>
-            <span>📘 Learning Basic English Verbs</span>
-        </h1>
-        
-        <div class="panel">
-            <div class="sentence" id="sentenceDisplay">loading… <small>#1</small></div>
-            <div class="audio-row">
-                <button class="btn-audio" id="playAudioBtn">🔊 Listen</button>
-                <span class="counter" id="counterDisplay">1 / 400</span>
-            </div>
-        </div>
-
-        <div class="nav">
-            <div class="nav-group">
-                <button class="nav-btn" id="prevBtn">← Prev</button>
-                <button class="nav-btn" id="randomBtn">🎲 Random</button>
-                <button class="nav-btn" id="nextBtn">Next →</button>
-            </div>
-            <div class="nav-group">
-                <button class="nav-btn primary" id="shuffleBtn">🔀 Shuffle</button>
-            </div>
-        </div>
-        <div class="dots" id="progressDots"></div>
-
-        <div class="quiz-box">
-            <div class="quiz-prompt">
-                🧠 <span id="quizQuestion">Fill in the blank with the correct verb</span>
-                <span style="margin-left:auto; font-weight:400; background:#c7dce9; padding:0 0.8rem; border-radius:30px;" id="quizCounter">1/400</span>
-            </div>
-            <div class="blank-sentence" id="blankSentence">____ the door</div>
-            <div class="quiz-options" id="quizOptions">
-                <button data-opt="0">option A</button>
-                <button data-opt="1">option B</button>
-                <button data-opt="2">option C</button>
-                <button data-opt="3">option D</button>
-            </div>
-            <div class="quiz-feedback" id="quizFeedback">↳ select the correct verb</div>
-            <div class="quiz-progress" id="quizProgress"></div>
-        </div>
-
-        <div class="demographic">
-            <label>Gender <select id="genderSelect"><option value="F">Female</option><option value="M">Male</option><option value="NB">Non-binary</option><option value="other">Other</option></select></label>
-            <label>Age <input type="number" id="ageInput" min="3" max="120" placeholder="25" style="width:70px;"></label>
-            <label>First language <input type="text" id="langInput" placeholder="e.g. Spanish" style="width:100px;"></label>
-            <button class="send-btn" id="sendDataBtn">📊 Submit & View Dashboard</button>
-        </div>
-        <div class="footnote">
-            <span id="sentStatus" class="status-msg">✅ ready</span>
-            <span class="quote">“The limits of my language mean the limits of my world.” — <span class="quote-author">Ludwig Wittgenstein</span></span>
-            <span class="quote-divider">✦ ✦ ✦</span>
-            <span class="quote">“To have another language is to possess a second soul.” — <span class="quote-author">Charlemagne</span></span>
-        </div>
-    </div>
-
-    <!-- ===== POPUP DASHBOARD ===== -->
-    <div class="dashboard-overlay" id="dashboardOverlay">
-        <div class="dashboard-popup" id="dashboardPopup">
-            <div class="popup-header">
-                <h2>📊 All Responders Dashboard</h2>
-                <button class="popup-close" id="closeDashboard">✕ Close</button>
-            </div>
-
-            <div id="dashboardContent">
-                <!-- Loading state -->
-                <div class="popup-loading" id="loadingState">
-                    <div class="loading-spinner"></div>
-                    <p style="margin-top:0.5rem;">Fetching data from all responders…</p>
-                </div>
-
-                <!-- Stats -->
-                <div class="popup-stats" id="popupStats" style="display:none;">
-                    <div class="popup-stat"><div class="num" id="popTotal">—</div><div class="lbl">Total Responses</div></div>
-                    <div class="popup-stat"><div class="num" id="popAvgScore">—%</div><div class="lbl">Average Score</div></div>
-                    <div class="popup-stat"><div class="num" id="popTotalWrong">—</div><div class="lbl">Total Wrong</div></div>
-                    <div class="popup-stat"><div class="num" id="popUniqueVerbs">—</div><div class="lbl">Unique Verbs</div></div>
-                </div>
-
-                <!-- Chart + Demographics -->
-                <div class="popup-grid" id="popupGrid" style="display:none;">
-                    <div class="popup-chart-box">
-                        <h3>📉 Top 20 Most Missed Verbs (All Responders)</h3>
-                        <div class="popup-chart-wrapper">
-                            <canvas id="popupChart"></canvas>
-                        </div>
-                        <div style="font-size:0.75rem; color:#4d7a8f; text-align:center; margin-top:0.3rem;">
-                            Bars show % of times each verb was answered incorrectly across all responders
-                        </div>
-                    </div>
-                    <div>
-                        <div class="popup-demographics">
-                            <h3>👥 Responder Demographics</h3>
-                            <div id="popupProfile">
-                                <div class="popup-demo-item"><span class="label">Gender Distribution</span><span class="value" id="popGenderDist">—</span></div>
-                                <div class="popup-demo-item"><span class="label">Avg Age</span><span class="value" id="popAvgAge">—</span></div>
-                                <div class="popup-demo-item"><span class="label">Age Range</span><span class="value" id="popAgeRange">—</span></div>
-                                <div class="popup-demo-item"><span class="label">Top Language</span><span class="value" id="popTopLang">—</span></div>
-                                <div class="popup-demo-item"><span class="label">Total Languages</span><span class="value" id="popLangCount">—</span></div>
-                            </div>
-                        </div>
-                        <div class="popup-demographics" style="margin-top:1rem;">
-                            <h3>🏆 Top 5 Most Missed Verbs</h3>
-                            <div id="popupTop5">
-                                <div style="color:#4d7a8f; font-size:0.9rem;">Loading…</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="popup-footer" id="popupFooter" style="display:none;">
-                    <strong>Data from all responders</strong> · Results will be released on <strong>9/5/2026</strong> · <span id="popupResponseCount">0</span> responses collected so far
-                    <span class="quote">“The limits of my language mean the limits of my world.” — <span class="quote-author">Ludwig Wittgenstein</span></span>
-                    <span class="quote-divider">✦ ✦ ✦</span>
-                    <span class="quote">“To have another language is to possess a second soul.” — <span class="quote-author">Charlemagne</span></span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // ============================================================
-        // 400 SENTENCES (short + longer)
-        // ============================================================
-        const SHORT_SENTENCES = [
-            "shut up your laptop", "open the window", "close the door", "turn on the light", "turn off the fan",
-            "put on your coat", "take off your shoes", "pick up the book", "put down the glass", "stand up straight",
-            "sit down here", "come over to me", "go back home", "run faster", "walk slowly",
-            "jump over the puddle", "throw the ball", "catch the ball", "kick the stone", "push the door",
-            "pull the handle", "lift the box", "carry the bag", "hold the baby", "drop the keys",
-            "break the chocolate", "fix the chair", "build a house", "draw a circle", "write a note",
-            "read the sign", "sing a song", "dance with me", "listen to music", "watch the movie",
-            "look at the sky", "see the bird", "smell the flower", "taste the soup", "touch the surface",
-            "feel the warmth", "wash your hands", "clean the table", "brush your hair", "comb your hair",
-            "shave your face", "dry your hands", "fold the clothes", "hang the shirt", "iron the pants",
-            "sew the button", "cut the paper", "glue the pieces", "paint the wall", "sweep the floor",
-            "mop the floor", "dust the shelf", "vacuum the carpet", "water the plant", "feed the cat",
-            "walk the dog", "pet the rabbit", "call your friend", "text your mom", "email the boss",
-            "fax the document", "print the receipt", "scan the QR", "copy the file", "paste the link",
-            "delete the photo", "save the changes", "update the app", "install the program", "uninstall the tool",
-            "restart the device", "shut down the system", "log in to your account", "log out", "sign up for news",
-            "subscribe to channel", "unsubscribe from list", "follow the path", "lead the team", "manage the project",
-            "organize the files", "plan the trip", "book the hotel", "rent a car", "buy groceries",
-            "sell your old phone", "pay the bill", "lend me money", "borrow a pen", "give a gift",
-            "take a photo", "make a cake", "do the dishes", "bake the bread", "fry the egg",
-            "boil the water", "steam the vegetables", "grill the fish", "roast the chicken", "mix the salad",
-            "pour the juice", "fill the glass", "empty the bin", "turn the page", "fold the map",
-            "unfold the chair", "lock the door", "unlock the phone", "plug in charger", "unplug the lamp",
-            "connect the cable", "disconnect the wire", "attach the tag", "detach the sticker", "wrap the present",
-            "unwrap the candy", "tie your shoelaces", "untie the knot", "button your shirt", "unbutton the coat",
-            "zip your jacket", "unzip the bag", "buckle your belt", "unbuckle the strap", "switch on the TV",
-            "switch off the radio", "mute the microphone", "unmute yourself", "raise your hand", "lower your voice",
-            "speak clearly", "whisper softly", "shout loudly", "answer the question", "ask for help",
-            "explain the rule", "describe the view", "discuss the idea", "argue with logic", "convince your friend",
-            "encourage the child", "praise the effort", "criticize constructively", "apologize sincerely", "forgive easily",
-            "thank your partner", "welcome the guest", "invite your colleagues", "introduce yourself", "meet the manager",
-            "accompany your friend", "escort the visitor", "guide the tourist", "direct the traffic", "control the drone",
-            "operate the machine", "repair the bike", "service the car", "check the oil", "fill the tank",
-            "start the engine", "stop the car", "park the vehicle", "reverse slowly", "accelerate gently",
-            "brake in time", "signal your turn", "honk the horn", "wipe the windscreen", "adjust the mirror",
-            "fasten your seatbelt", "unfasten after stop", "board the plane", "disembark safely", "catch the train",
-            "miss the bus", "wait for taxi", "hail a cab", "ride the bicycle", "skate on ice",
-            "ski down the slope", "surf the wave", "swim across the lake", "dive into water", "float on your back",
-            "sail the boat", "row the canoe", "paddle the kayak", "cycle to work", "jog in the park",
-            "stretch your legs", "bend your knees", "lift your arms", "turn your head", "shake your body",
-            "dance to rhythm", "clap your hands", "stomp your feet", "nod your head", "wave goodbye"
-        ];
-
-        const LONGER_SENTENCES = [
-            "shut up your laptop before the meeting starts", "open the window to let in some fresh air",
-            "close the door quietly so you don't wake the baby",
-            "turn on the light and read the book", "turn off the fan when you leave the room",
-            "put on your coat because it is freezing outside",
-            "take off your shoes before you enter the house", "pick up the book that fell under the table",
-            "put down the glass carefully on the coaster",
-            "stand up straight and look ahead", "sit down here and rest for a moment",
-            "come over to me and I will show you the photos",
-            "go back home before it gets dark", "run faster if you want to catch the bus",
-            "walk slowly across the slippery bridge",
-            "jump over the puddle to avoid getting wet", "throw the ball to your teammate",
-            "catch the ball with both hands",
-            "kick the stone out of the way", "push the door gently to open it", "pull the handle to release the lock",
-            "lift the box with your legs not your back", "carry the bag over your shoulder",
-            "hold the baby carefully in your arms",
-            "drop the keys into the bowl by the door", "break the chocolate into small pieces",
-            "fix the chair before someone sits on it",
-            "build a house with wooden blocks", "draw a circle in the middle of the paper",
-            "write a note and leave it on the desk",
-            "read the sign carefully before entering", "sing a song to cheer everyone up",
-            "dance with me to the rhythm of the music",
-            "listen to music while you work", "watch the movie without interruptions",
-            "look at the sky and admire the stars",
-            "see the bird perched on the branch", "smell the flower and enjoy its fragrance",
-            "taste the soup and add more salt if needed",
-            "touch the surface to feel its texture", "feel the warmth of the sun on your skin",
-            "wash your hands with soap and water",
-            "clean the table after every meal", "brush your hair before going out", "comb your hair to remove tangles",
-            "shave your face carefully with a new blade", "dry your hands with a clean towel",
-            "fold the clothes and put them in the drawer",
-            "hang the shirt in the closet", "iron the pants to remove wrinkles", "sew the button back onto your jacket",
-            "cut the paper along the dotted line", "glue the pieces together and let them dry",
-            "paint the wall with a soft blue color",
-            "sweep the floor to remove dust and dirt", "mop the floor with a wet mop", "dust the shelf with a soft cloth",
-            "vacuum the carpet to remove pet hair", "water the plant every morning",
-            "feed the cat at exactly six o'clock",
-            "walk the dog around the block twice", "pet the rabbit gently behind its ears",
-            "call your friend and invite them over",
-            "text your mom to let her know you are safe", "email the boss with the updated report",
-            "fax the document to the main office",
-            "print the receipt and keep it for your records", "scan the QR code to access the website",
-            "copy the file to the shared folder",
-            "paste the link into the address bar", "delete the photo that is out of focus",
-            "save the changes before you close the document",
-            "update the app to the latest version", "install the program and follow the setup wizard",
-            "uninstall the tool that you no longer use",
-            "restart the device to complete the update", "shut down the system properly at the end of the day",
-            "log in to your account using your credentials", "log out of the session after you finish",
-            "sign up for the newsletter to get updates",
-            "subscribe to the channel and hit the bell icon", "unsubscribe from the list if you get too many emails",
-            "follow the path through the forest", "lead the team with confidence and clarity",
-            "manage the project from start to finish",
-            "organize the files by date and category", "plan the trip carefully to avoid delays",
-            "book the hotel in advance for better rates",
-            "rent a car that suits your needs", "buy groceries for the whole week",
-            "sell your old phone online for a fair price",
-            "pay the bill before the due date", "lend me money and I will pay you back",
-            "borrow a pen from your classmate",
-            "give a gift to show your appreciation", "take a photo of the beautiful sunset",
-            "make a cake from scratch using organic ingredients",
-            "do the dishes right after dinner", "bake the bread until it is golden brown",
-            "fry the egg in a little bit of oil",
-            "boil the water before adding the pasta", "steam the vegetables to preserve nutrients",
-            "grill the fish over medium heat",
-            "roast the chicken with herbs and garlic", "mix the salad with a light vinaigrette",
-            "pour the juice into a tall glass",
-            "fill the glass with ice and lemonade", "empty the bin before it overflows",
-            "turn the page to continue reading",
-            "fold the map and put it in your pocket", "unfold the chair and set it up",
-            "lock the door with the deadbolt",
-            "unlock the phone using facial recognition", "plug in the charger and wait for the battery to increase",
-            "unplug the lamp before you leave the house", "connect the cable to the HDMI port",
-            "disconnect the wire carefully to avoid sparks",
-            "attach the tag to your luggage", "detach the sticker from the surface",
-            "wrap the present in colorful paper",
-            "unwrap the candy and enjoy it", "tie your shoelaces so you don't trip",
-            "untie the knot with your fingers",
-            "button your shirt from the bottom up", "unbutton the coat when you enter the warm room",
-            "zip your jacket to keep the wind out",
-            "unzip the bag and take out your wallet", "buckle your belt for a secure fit",
-            "unbuckle the strap and release the pressure",
-            "switch on the TV and find a good show", "switch off the radio when the news ends",
-            "mute the microphone during the presentation",
-            "unmute yourself when you have a question", "raise your hand if you know the answer",
-            "lower your voice in the library",
-            "speak clearly so everyone can understand", "whisper softly so no one else hears",
-            "shout loudly to get their attention",
-            "answer the question in complete sentences", "ask for help when you are stuck",
-            "explain the rule with a simple example",
-            "describe the view from the top of the hill", "discuss the idea with your colleagues",
-            "argue with logic not emotion",
-            "convince your friend to join the club", "encourage the child to try again",
-            "praise the effort regardless of the outcome",
-            "criticize constructively without hurting feelings", "apologize sincerely if you made a mistake",
-            "forgive easily and move forward",
-            "thank your partner for their support", "welcome the guest with a warm smile",
-            "invite your colleagues to the meeting",
-            "introduce yourself to the new team member", "meet the manager in the conference room",
-            "accompany your friend to the station",
-            "escort the visitor to the main entrance", "guide the tourist through the museum",
-            "direct the traffic during the parade",
-            "control the drone with the remote", "operate the machine according to the manual",
-            "repair the bike and replace the chain",
-            "service the car every six months", "check the oil level before the long drive",
-            "fill the tank with premium gasoline",
-            "start the engine and let it warm up", "stop the car at the red light",
-            "park the vehicle in the designated spot",
-            "reverse slowly into the parking space", "accelerate gently when merging onto the highway",
-            "brake in time to avoid collision",
-            "signal your turn well in advance", "honk the horn only in emergencies",
-            "wipe the windscreen with a clean cloth",
-            "adjust the mirror to eliminate blind spots", "fasten your seatbelt before driving off",
-            "unfasten the seatbelt after you park",
-            "board the plane and find your seat", "disembark safely after the flight lands",
-            "catch the train at platform three",
-            "miss the bus and wait for the next one", "wait for the taxi outside the station",
-            "hail a cab by raising your hand",
-            "ride the bicycle along the scenic route", "skate on ice with caution and balance",
-            "ski down the slope at a steady pace",
-            "surf the wave with confidence and style", "swim across the lake to reach the island",
-            "dive into water and explore the reef",
-            "float on your back and relax", "sail the boat towards the harbour",
-            "row the canoe across the calm river",
-            "paddle the kayak through the rapids", "cycle to work to stay fit and save fuel",
-            "jog in the park every evening",
-            "stretch your legs before the long run", "bend your knees when lifting heavy objects",
-            "lift your arms above your head",
-            "turn your head to see who is behind you", "shake your body to the rhythm of the beat",
-            "dance to the rhythm of the samba",
-            "clap your hands to show appreciation", "stomp your feet to the beat of the drum",
-            "nod your head to indicate agreement",
-            "wave goodbye to your friends at the station"
-        ];
-
-        const ALL_SENTENCES = [...SHORT_SENTENCES, ...LONGER_SENTENCES];
-        while (ALL_SENTENCES.length < 400) ALL_SENTENCES.push("learn by example " + (ALL_SENTENCES.length + 1));
-        if (ALL_SENTENCES.length > 400) ALL_SENTENCES.length = 400;
-
-        // ============================================================
-        // APP STATE
-        // ============================================================
-        let currentIndex = 0;
-        let sentences = [...ALL_SENTENCES];
-        let quizQuestions = [];
-        let quizAnswers = [];
-        let quizUserAnswers = [];
-        let quizLocked = false;
-        let quizIndex = 0;
-        let isSending = false;
-        let popupChartInstance = null;
-
-        // DOM refs
-        const sentenceDisplay = document.getElementById('sentenceDisplay');
-        const counterDisplay = document.getElementById('counterDisplay');
-        const progressDots = document.getElementById('progressDots');
-        const playBtn = document.getElementById('playAudioBtn');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const randomBtn = document.getElementById('randomBtn');
-        const shuffleBtn = document.getElementById('shuffleBtn');
-        const quizQuestion = document.getElementById('quizQuestion');
-        const quizCounter = document.getElementById('quizCounter');
-        const quizOptions = document.getElementById('quizOptions');
-        const quizFeedback = document.getElementById('quizFeedback');
-        const quizProgress = document.getElementById('quizProgress');
-        const blankSentence = document.getElementById('blankSentence');
-        const sendBtn = document.getElementById('sendDataBtn');
-        const sentStatus = document.getElementById('sentStatus');
-
-        // Popup DOM refs
-        const overlay = document.getElementById('dashboardOverlay');
-        const closeBtn = document.getElementById('closeDashboard');
-        const loadingState = document.getElementById('loadingState');
-        const popupStats = document.getElementById('popupStats');
-        const popupGrid = document.getElementById('popupGrid');
-        const popupFooter = document.getElementById('popupFooter');
-
-        const popTotal = document.getElementById('popTotal');
-        const popAvgScore = document.getElementById('popAvgScore');
-        const popTotalWrong = document.getElementById('popTotalWrong');
-        const popUniqueVerbs = document.getElementById('popUniqueVerbs');
-        const popGenderDist = document.getElementById('popGenderDist');
-        const popAvgAge = document.getElementById('popAvgAge');
-        const popAgeRange = document.getElementById('popAgeRange');
-        const popTopLang = document.getElementById('popTopLang');
-        const popLangCount = document.getElementById('popLangCount');
-        const popupTop5 = document.getElementById('popupTop5');
-        const popupResponseCount = document.getElementById('popupResponseCount');
-
-        // ============================================================
-        // AUDIO
-        // ============================================================
-        function speakSentence(text) {
-            if (!window.speechSynthesis) return alert('Speech synthesis not supported.');
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(text);
-            u.lang = 'en-US';
-            u.rate = 0.9;
-            u.pitch = 1.0;
-            window.speechSynthesis.speak(u);
-        }
-
-        // ============================================================
-        // RENDER SENTENCE
-        // ============================================================
-        function render() {
-            const s = sentences[currentIndex] || "example";
-            const isShort = currentIndex < 200;
-            const badge = isShort ? '<span class="badge">short</span>' :
-                '<span class="badge" style="background:#2a7a8a;">longer</span>';
-            sentenceDisplay.innerHTML = `${s} <small>#${currentIndex+1}</small> ${badge}`;
-            counterDisplay.textContent = `${currentIndex+1} / ${sentences.length}`;
-            updateDots();
-        }
-
-        function updateDots() {
-            const total = sentences.length;
-            const dotCount = Math.min(total, 30);
-            let html = '';
-            const step = Math.max(1, Math.floor(total / dotCount));
-            for (let i = 0; i < dotCount; i++) {
-                const idx = Math.min(i * step, total - 1);
-                html += `<span class="dot ${idx===currentIndex?'active':''}"></span>`;
-            }
-            progressDots.innerHTML = html;
-        }
-
-        function goTo(idx) {
-            if (idx < 0) idx = sentences.length - 1;
-            if (idx >= sentences.length) idx = 0;
-            currentIndex = idx;
-            render();
-        }
-
-        function next() { goTo(currentIndex + 1); }
-
-        function prev() { goTo(currentIndex - 1); }
-
-        function randomIdx() { goTo(Math.floor(Math.random() * sentences.length)); }
-
-        function shuffleAll() {
-            for (let i = sentences.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [sentences[i], sentences[j]] = [sentences[j], sentences[i]];
-            }
-            currentIndex = 0;
-            render();
-            buildQuiz();
-        }
-
-        // ============================================================
-        // EXTRACT VERB
-        // ============================================================
-        function extractVerb(sentence) {
-            const words = sentence.split(' ');
-            const commonVerbs = ['shut', 'open', 'close', 'turn', 'put', 'take', 'pick', 'stand', 'sit', 'come', 'go', 'run',
-                'walk', 'jump', 'throw', 'catch', 'kick', 'push', 'pull', 'lift', 'carry', 'hold', 'drop', 'break', 'fix',
-                'build', 'draw', 'write', 'read', 'sing', 'dance', 'listen', 'watch', 'look', 'see', 'smell', 'taste',
-                'touch', 'feel', 'wash', 'clean', 'brush', 'comb', 'shave', 'dry', 'fold', 'hang', 'iron', 'sew', 'cut',
-                'glue', 'paint', 'sweep', 'mop', 'dust', 'vacuum', 'water', 'feed', 'walk', 'pet', 'call', 'text', 'email',
-                'fax', 'print', 'scan', 'copy', 'paste', 'delete', 'save', 'update', 'install', 'uninstall', 'restart',
-                'log', 'sign', 'subscribe', 'unsubscribe', 'follow', 'lead', 'manage', 'organize', 'plan', 'book', 'rent',
-                'buy', 'sell', 'pay', 'lend', 'borrow', 'give', 'take', 'make', 'do', 'bake', 'fry', 'boil', 'steam',
-                'grill', 'roast', 'mix', 'pour', 'fill', 'empty', 'turn', 'fold', 'unfold', 'lock', 'unlock', 'plug',
-                'unplug', 'connect', 'disconnect', 'attach', 'detach', 'wrap', 'unwrap', 'tie', 'untie', 'button',
-                'unbutton', 'zip', 'unzip', 'buckle', 'unbuckle', 'switch', 'mute', 'unmute', 'raise', 'lower', 'speak',
-                'whisper', 'shout', 'answer', 'ask', 'explain', 'describe', 'discuss', 'argue', 'convince', 'encourage',
-                'praise', 'criticize', 'apologize', 'forgive', 'thank', 'welcome', 'invite', 'introduce', 'meet',
-                'accompany', 'escort', 'guide', 'direct', 'control', 'operate', 'repair', 'service', 'check', 'fill',
-                'start', 'stop', 'park', 'reverse', 'accelerate', 'brake', 'signal', 'honk', 'wipe', 'adjust', 'fasten',
-                'unfasten', 'board', 'disembark', 'catch', 'miss', 'wait', 'hail', 'ride', 'skate', 'ski', 'surf', 'swim',
-                'dive', 'float', 'sail', 'row', 'paddle', 'cycle', 'jog', 'stretch', 'bend', 'lift', 'turn', 'shake',
-                'dance', 'clap', 'stomp', 'nod', 'wave'
-            ];
-            for (let w of words) {
-                const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
-                if (commonVerbs.includes(clean)) return clean;
-            }
-            return words[0]?.replace(/[^a-zA-Z]/g, '') || 'verb';
-        }
-
-        // ============================================================
-        // BUILD QUIZ
-        // ============================================================
-        function buildQuiz() {
-            const allVerbs = ['shut', 'open', 'close', 'turn', 'put', 'take', 'pick', 'stand', 'sit', 'come', 'go', 'run',
-                'walk', 'jump', 'throw', 'catch', 'kick', 'push', 'pull', 'lift', 'carry', 'hold', 'drop', 'break', 'fix',
-                'build', 'draw', 'write', 'read', 'sing', 'dance', 'listen', 'watch', 'look', 'see', 'smell', 'taste',
-                'touch', 'feel', 'wash', 'clean', 'brush', 'comb', 'shave', 'dry', 'fold', 'hang', 'iron', 'sew', 'cut',
-                'glue', 'paint', 'sweep', 'mop', 'dust', 'vacuum', 'water', 'feed', 'walk', 'pet', 'call', 'text', 'email',
-                'fax', 'print', 'scan', 'copy', 'paste', 'delete', 'save', 'update', 'install', 'uninstall', 'restart',
-                'log', 'sign', 'subscribe', 'unsubscribe', 'follow', 'lead', 'manage', 'organize', 'plan', 'book', 'rent',
-                'buy', 'sell', 'pay', 'lend', 'borrow', 'give', 'take', 'make', 'do', 'bake', 'fry', 'boil', 'steam',
-                'grill', 'roast', 'mix', 'pour', 'fill', 'empty', 'turn', 'fold', 'unfold', 'lock', 'unlock', 'plug',
-                'unplug', 'connect', 'disconnect', 'attach', 'detach', 'wrap', 'unwrap', 'tie', 'untie', 'button',
-                'unbutton', 'zip', 'unzip', 'buckle', 'unbuckle', 'switch', 'mute', 'unmute', 'raise', 'lower', 'speak',
-                'whisper', 'shout', 'answer', 'ask', 'explain', 'describe', 'discuss', 'argue', 'convince', 'encourage',
-                'praise', 'criticize', 'apologize', 'forgive', 'thank', 'welcome', 'invite', 'introduce', 'meet',
-                'accompany', 'escort', 'guide', 'direct', 'control', 'operate', 'repair', 'service', 'check', 'fill',
-                'start', 'stop', 'park', 'reverse', 'accelerate', 'brake', 'signal', 'honk', 'wipe', 'adjust', 'fasten',
-                'unfasten', 'board', 'disembark', 'catch', 'miss', 'wait', 'hail', 'ride', 'skate', 'ski', 'surf', 'swim',
-                'dive', 'float', 'sail', 'row', 'paddle', 'cycle', 'jog', 'stretch', 'bend', 'lift', 'turn', 'shake',
-                'dance', 'clap', 'stomp', 'nod', 'wave'
-            ];
-
-            quizQuestions = [];
-            quizAnswers = [];
-            quizUserAnswers = [];
-
-            for (let i = 0; i < sentences.length; i++) {
-                const sentence = sentences[i];
-                const verb = extractVerb(sentence);
-                const words = sentence.split(' ');
-                let blankIndex = -1;
-                for (let j = 0; j < words.length; j++) {
-                    const clean = words[j].replace(/[^a-zA-Z]/g, '').toLowerCase();
-                    if (clean === verb) { blankIndex = j; break; }
-                }
-                let displaySentence = sentence;
-                if (blankIndex >= 0) {
-                    const parts = sentence.split(' ');
-                    parts[blankIndex] = '____';
-                    displaySentence = parts.join(' ');
-                } else {
-                    const parts = sentence.split(' ');
-                    parts[0] = '____';
-                    displaySentence = parts.join(' ');
-                }
-
-                let options = [verb];
-                let attempts = 0;
-                while (options.length < 4 && attempts < 100) {
-                    const r = allVerbs[Math.floor(Math.random() * allVerbs.length)];
-                    if (!options.includes(r) && r !== verb) options.push(r);
-                    attempts++;
-                }
-                for (let j = options.length - 1; j > 0; j--) {
-                    const k = Math.floor(Math.random() * (j + 1));
-                    [options[j], options[k]] = [options[k], options[j]];
-                }
-
-                quizQuestions.push({ sentence, display: displaySentence, correct: verb, options });
-                quizAnswers.push(verb);
-                quizUserAnswers.push(null);
-            }
-
-            quizIndex = 0;
-            renderQuizItem();
-        }
-
-        function renderQuizItem() {
-            if (quizIndex >= quizQuestions.length) {
-                const correctCount = quizUserAnswers.filter(a => a === 'correct').length;
-                quizQuestion.textContent = `🎉 Quiz complete! Score: ${correctCount}/${quizQuestions.length}`;
-                quizCounter.textContent = `${quizQuestions.length}/${quizQuestions.length}`;
-                quizOptions.innerHTML = `<button disabled>✔️ Finished</button>`;
-                quizFeedback.textContent = `⭐ You answered ${correctCount} correctly. Great effort!`;
-                blankSentence.textContent = '🎉 All done!';
-                renderQuizProgress();
-                return;
-            }
-
-            const q = quizQuestions[quizIndex];
-            quizQuestion.textContent = `Fill in the blank with the correct verb`;
-            quizCounter.textContent = `${quizIndex+1}/${quizQuestions.length}`;
-            blankSentence.innerHTML = q.display;
-
-            quizOptions.innerHTML = '';
-            q.options.forEach((opt) => {
-                const btn = document.createElement('button');
-                btn.textContent = opt;
-                btn.dataset.opt = opt;
-                btn.addEventListener('click', (e) => handleQuizAnswer(e, opt));
-                quizOptions.appendChild(btn);
-            });
-
-            if (quizUserAnswers[quizIndex] !== null) {
-                const status = quizUserAnswers[quizIndex];
-                const correct = quizAnswers[quizIndex];
-                const btns = document.querySelectorAll('.quiz-options button');
-                btns.forEach(b => {
-                    if (b.dataset.opt === correct) b.classList.add('correct');
-                    else if (b.dataset.opt !== correct && status === 'wrong') {
-                        if (b.dataset.opt === quizUserAnswers[quizIndex]?.selected) b.classList.add('wrong');
-                    }
-                    b.disabled = true;
-                });
-                quizFeedback.textContent = status === 'correct' ? '✅ Correct!' : `❌ The correct verb is “${correct}”.`;
-            } else {
-                quizFeedback.textContent = '↳ select the correct verb to fill the blank';
-            }
-
-            renderQuizProgress();
-        }
-
-        function handleQuizAnswer(e, selected) {
-            if (quizLocked) return;
-            if (quizUserAnswers[quizIndex] !== null) return;
-
-            const correct = quizAnswers[quizIndex];
-            const btns = document.querySelectorAll('.quiz-options button');
-            let isCorrect = (selected === correct);
-
-            btns.forEach(b => {
-                if (b.dataset.opt === correct) b.classList.add('correct');
-                else if (b.dataset.opt === selected && !isCorrect) b.classList.add('wrong');
-                b.disabled = true;
-            });
-
-            quizUserAnswers[quizIndex] = isCorrect ? 'correct' : 'wrong';
-            quizUserAnswers[quizIndex].selected = selected;
-
-            quizFeedback.textContent = isCorrect ? '✅ Correct! +1' : `❌ Oops. The correct verb is “${correct}”.`;
-
-            quizLocked = true;
-            setTimeout(() => {
-                quizLocked = false;
-                quizIndex++;
-                renderQuizItem();
-            }, 1100);
-        }
-
-        function renderQuizProgress() {
-            let html = '';
-            for (let i = 0; i < quizQuestions.length; i++) {
-                const status = quizUserAnswers[i];
-                let cls = 'qdot';
-                if (status === 'correct') cls += ' correct';
-                else if (status === 'wrong') cls += ' wrong';
-                else if (status !== null) cls += ' answered';
-                html += `<span class="${cls}"></span>`;
-            }
-            quizProgress.innerHTML = html;
-        }
-
-        // ============================================================
-        // COMPUTE STATS FROM QUIZ RESULTS (local)
-        // ============================================================
-        function computeLocalStats() {
-            const total = quizUserAnswers.length;
-            const correct = quizUserAnswers.filter(a => a === 'correct').length;
-            const wrong = quizUserAnswers.filter(a => a === 'wrong').length;
-            const unanswered = quizUserAnswers.filter(a => a === null).length;
-
-            const verbStats = {};
-            for (let i = 0; i < quizQuestions.length; i++) {
-                const verb = quizAnswers[i];
-                const result = quizUserAnswers[i];
-                if (!verbStats[verb]) verbStats[verb] = { total: 0, wrong: 0 };
-                verbStats[verb].total++;
-                if (result === 'wrong') verbStats[verb].wrong++;
-            }
-
-            const verbErrorRates = [];
-            for (const [verb, stats] of Object.entries(verbStats)) {
-                if (stats.total > 0) {
-                    verbErrorRates.push({
-                        verb,
-                        total: stats.total,
-                        wrong: stats.wrong,
-                        errorRate: stats.wrong / stats.total,
-                    });
-                }
-            }
-            verbErrorRates.sort((a, b) => b.errorRate - a.errorRate);
-
-            return {
-                total,
-                correct,
-                wrong,
-                unanswered,
-                score: total > 0 ? Math.round((correct / total) * 100) : 0,
-                verbErrorRates,
-            };
-        }
-
-        // ============================================================
-        // FETCH ALL DATA FROM SHEET
-        // ============================================================
-        async function fetchAllData() {
-            const webAppUrl =
-                'https://script.google.com/macros/s/AKfycbyhIbfr9UxULHvaGscBQyRXtgqitdQj0pIP3eyyE0KYa9vqE0zZk5GPsDt0cShRH3aE/exec';
-
-            try {
-                // Try GET with action parameter
-                let response = await fetch(`${webAppUrl}?action=getData`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                if (!response.ok) {
-                    // Try without parameter
-                    response = await fetch(webAppUrl, {
-                        method: 'GET',
-                        headers: { 'Accept': 'application/json' }
-                    });
-                }
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                return data;
-
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                throw error;
-            }
-        }
-
-        // ============================================================
-        // PARSE AGGREGATE DATA FROM ALL RESPONDERS
-        // ============================================================
-        function parseAggregateData(sheetData) {
-            // Handle different response formats
-            let rows = [];
-            if (sheetData.data && Array.isArray(sheetData.data)) {
-                rows = sheetData.data;
-            } else if (sheetData.values && Array.isArray(sheetData.values)) {
-                rows = sheetData.values;
-            } else if (Array.isArray(sheetData)) {
-                rows = sheetData;
-            } else {
-                throw new Error('Unexpected data format');
-            }
-
-            if (rows.length < 2) {
-                throw new Error('No data found in sheet');
-            }
-
-            const headers = rows[0];
-            const dataRows = rows.slice(1);
-
-            // Find column indices
-            const idx = {
-                gender: headers.indexOf('Gender'),
-                age: headers.indexOf('Age'),
-                lang: headers.indexOf('First Language'),
-                score: headers.indexOf('Score (%)'),
-                results: headers.indexOf('Quiz Results (JSON)'),
-            };
-
-            if (idx.results === -1) {
-                const altNames = ['QuizResults', 'results', 'json', 'Quiz Results'];
-                for (const name of altNames) {
-                    const i = headers.indexOf(name);
-                    if (i !== -1) { idx.results = i; break; }
-                }
-            }
-
-            // Aggregate stats
-            const verbStats = {};
-            let totalScore = 0;
-            let scoreCount = 0;
-            const genders = [];
-            const ages = [];
-            const langs = [];
-            let totalWrongCount = 0;
-            let totalQuestionsCount = 0;
-
-            for (const row of dataRows) {
-                if (!row || row.length === 0 || row.every(c => !c)) continue;
-
-                const gender = row[idx.gender] || 'Unknown';
-                const age = row[idx.age] || '';
-                const lang = row[idx.lang] || 'Unknown';
-                const score = parseFloat(row[idx.score]);
-
-                if (gender) genders.push(gender);
-                if (lang) langs.push(lang);
-                if (age) { const a = parseInt(age); if (!isNaN(a)) ages.push(a); }
-
-                if (!isNaN(score)) { totalScore += score;
-                    scoreCount++; }
-
-                let results = [];
-                if (idx.results !== -1 && row[idx.results]) {
-                    try {
-                        const raw = row[idx.results].trim();
-                        if (raw.startsWith('[') || raw.startsWith('{')) {
-                            results = JSON.parse(raw);
-                        } else {
-                            const cleaned = raw.replace(/'/g, '"');
-                            results = JSON.parse(cleaned);
-                        }
-                    } catch (e) {
-                        const parts = row[idx.results].split(',').map(s => s.trim());
-                        results = parts.map(p => {
-                            const match = p.match(/"verb":"([^"]+)"/);
-                            return match ? { verb: match[1], result: 'wrong' } : null;
-                        }).filter(Boolean);
-                    }
-                }
-
-                if (Array.isArray(results) && results.length > 0) {
-                    totalQuestionsCount = Math.max(totalQuestionsCount, results.length);
-                    for (const item of results) {
-                        const verb = item.verb || item.correct || item.word || '';
-                        if (!verb) continue;
-                        const isWrong = (item.userResult === 'wrong' || item.result === 'wrong');
-                        if (!verbStats[verb]) verbStats[verb] = { total: 0, wrong: 0 };
-                        verbStats[verb].total++;
-                        if (isWrong) {
-                            verbStats[verb].wrong++;
-                            totalWrongCount++;
-                        }
-                    }
-                }
-            }
-
-            // Compute error rates
-            const verbErrorRates = [];
-            for (const [verb, stats] of Object.entries(verbStats)) {
-                if (stats.total > 0) {
-                    verbErrorRates.push({
-                        verb,
-                        total: stats.total,
-                        wrong: stats.wrong,
-                        errorRate: stats.wrong / stats.total,
-                    });
-                }
-            }
-            verbErrorRates.sort((a, b) => b.errorRate - a.errorRate);
-
-            // Gender distribution
-            const genderCount = {};
-            genders.forEach(g => { genderCount[g] = (genderCount[g] || 0) + 1; });
-
-            // Language distribution
-            const langCount = {};
-            langs.forEach(l => { langCount[l] = (langCount[l] || 0) + 1; });
-
-            const validAges = ages.filter(a => !isNaN(a) && a > 0);
-
-            return {
-                totalResponses: genders.length,
-                totalQuestions: totalQuestionsCount || 400,
-                avgScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0,
-                totalWrong: totalWrongCount,
-                uniqueVerbs: verbErrorRates.length,
-                verbErrorRates,
-                demographics: {
-                    genderCount,
-                    ages: validAges,
-                    langCount,
-                },
-                raw: dataRows,
-            };
-        }
-
-        // ============================================================
-        // SHOW POPUP DASHBOARD WITH AGGREGATE DATA
-        // ============================================================
-        function showDashboardWithAggregateData(aggregateStats) {
-            // Update stats
-            popTotal.textContent = aggregateStats.totalResponses;
-            popAvgScore.textContent = aggregateStats.avgScore + '%';
-            popTotalWrong.textContent = aggregateStats.totalWrong;
-            popUniqueVerbs.textContent = aggregateStats.uniqueVerbs;
-
-            // Demographics
-            const demo = aggregateStats.demographics;
-            const genderStr = Object.entries(demo.genderCount)
-                .map(([k, v]) => `${k}: ${v}`)
-                .join(' · ');
-
-            const avgAge = demo.ages.length > 0 ?
-                Math.round(demo.ages.reduce((a, b) => a + b, 0) / demo.ages.length) :
-                '—';
-            const ageRange = demo.ages.length > 0 ?
-                `${Math.min(...demo.ages)} – ${Math.max(...demo.ages)}` :
-                '—';
-
-            const topLang = Object.entries(demo.langCount)
-                .sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
-
-            popGenderDist.textContent = genderStr || '—';
-            popAvgAge.textContent = avgAge;
-            popAgeRange.textContent = ageRange;
-            popTopLang.textContent = topLang;
-            popLangCount.textContent = Object.keys(demo.langCount).length;
-
-            // Top 5
-            const top5 = aggregateStats.verbErrorRates.slice(0, 5);
-            if (top5.length > 0) {
-                popupTop5.innerHTML = top5.map(v =>
-                    `<div class="popup-top5-item"><span class="verb">${v.verb}</span><span class="pct">${Math.round(v.errorRate * 100)}%</span></div>`
-                ).join('');
-            } else {
-                popupTop5.innerHTML = '<div style="color:#4d7a8f; font-size:0.9rem;">No wrong answers recorded yet</div>';
-            }
-
-            popupResponseCount.textContent = aggregateStats.totalResponses;
-
-            // Chart - Top 20
-            const top20 = aggregateStats.verbErrorRates.slice(0, 20);
-            const labels = top20.map(v => v.verb);
-            const data = top20.map(v => +(v.errorRate * 100).toFixed(1));
-
-            const ctx = document.getElementById('popupChart').getContext('2d');
-            if (popupChartInstance) popupChartInstance.destroy();
-
-            popupChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: '% Incorrect (All Responders)',
-                        data: data,
-                        backgroundColor: data.map((v) => {
-                            const intensity = Math.min(v / 100, 1);
-                            const r = 200 - intensity * 150;
-                            const g = 80 - intensity * 40;
-                            const b = 80 - intensity * 50;
-                            return `rgb(${r}, ${g}, ${b})`;
-                        }),
-                        borderColor: '#1c617b',
-                        borderWidth: 1,
-                        borderRadius: 4,
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (ctx) =>
-                                    `${ctx.parsed.x}% incorrect (${top20[ctx.dataIndex]?.wrong || 0} wrong out of ${top20[ctx.dataIndex]?.total || 0} attempts)`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: { callback: (v) => v + '%' }
-                        },
-                        y: {
-                            ticks: { font: { size: 10 } }
-                        }
-                    }
-                }
-            });
-
-            // Show everything
-            loadingState.style.display = 'none';
-            popupStats.style.display = 'grid';
-            popupGrid.style.display = 'grid';
-            popupFooter.style.display = 'block';
-        }
-
-        // ============================================================
-        // SHOW POPUP WITH ERROR
-        // ============================================================
-        function showPopupError(message) {
-            loadingState.innerHTML = `
-                <div class="popup-error">
-                    <strong>⚠️ Error loading data</strong>
-                    <p style="margin-top:0.5rem;">${message}</p>
-                    <p style="margin-top:0.5rem; font-size:0.85rem;">
-                        Make sure the Google Apps Script is deployed with a <code>doGet()</code> function
-                        that returns the sheet data as JSON.
-                    </p>
-                    <button class="btn-primary" style="margin-top:0.8rem;" onclick="location.reload()">🔄 Retry</button>
-                </div>
-            `;
-        }
-
-        // ============================================================
-        // SEND TO SHEET + SHOW DASHBOARD
-        // ============================================================
-        async function sendToSheet() {
-            if (isSending) return;
-
-            const gender = document.getElementById('genderSelect').value;
-            const age = document.getElementById('ageInput').value || 'unknown';
-            const lang = document.getElementById('langInput').value || 'not specified';
-
-            const localStats = computeLocalStats();
-
-            const payload = {
-                gender,
-                age,
-                lang,
-                timestamp: new Date().toISOString(),
-                totalQuestions: quizQuestions.length,
-                correctAnswers: localStats.correct,
-                quizResults: quizUserAnswers.map((ans, idx) => ({
-                    sentence: quizQuestions[idx]?.sentence || '',
-                    correct: quizAnswers[idx] || '',
-                    userResult: ans === 'correct' ? 'correct' : (ans === 'wrong' ? 'wrong' : 'unanswered')
-                }))
-            };
-
-            const webAppUrl =
-                'https://script.google.com/macros/s/AKfycbyhIbfr9UxULHvaGscBQyRXtgqitdQj0pIP3eyyE0KYa9vqE0zZk5GPsDt0cShRH3aE/exec';
-
-            isSending = true;
-            sendBtn.disabled = true;
-            sentStatus.textContent = '⏳ Sending data...';
-            sentStatus.className = 'status-msg sending';
-
-            // Show the popup with loading state
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            loadingState.style.display = 'block';
-            popupStats.style.display = 'none';
-            popupGrid.style.display = 'none';
-            popupFooter.style.display = 'none';
-
-            try {
-                // Send the data
-                await fetch(webAppUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                sentStatus.textContent = '✅ Data sent successfully!';
-                sentStatus.className = 'status-msg success';
-
-                // Now fetch all data from the sheet
-                try {
-                    const sheetData = await fetchAllData();
-                    const aggregateStats = parseAggregateData(sheetData);
-                    showDashboardWithAggregateData(aggregateStats);
-                } catch (fetchError) {
-                    console.error('Error fetching aggregate data:', fetchError);
-                    // Show error but still show what we have
-                    showPopupError(
-                        `Could not load data from all responders. Your data was submitted, but the dashboard couldn't fetch the aggregate data. Error: ${fetchError.message}`
-                    );
-                }
-
-            } catch (error) {
-                console.error('Error:', error);
-                sentStatus.textContent = '❌ Error sending data.';
-                sentStatus.className = 'status-msg error';
-
-                // Try to fetch data anyway (maybe there's already data in the sheet)
-                try {
-                    const sheetData = await fetchAllData();
-                    const aggregateStats = parseAggregateData(sheetData);
-                    showDashboardWithAggregateData(aggregateStats);
-                } catch (fetchError) {
-                    showPopupError(
-                        `Failed to submit your data and failed to load existing data. Error: ${error.message}`
-                    );
-                }
-            } finally {
-                isSending = false;
-                sendBtn.disabled = false;
-            }
-        }
-
-        // ============================================================
-        // CLOSE POPUP
-        // ============================================================
-        function closeDashboard() {
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        // ============================================================
-        // EVENT BINDING
-        // ============================================================
-        playBtn.addEventListener('click', () => speakSentence(sentences[currentIndex] || ''));
-        nextBtn.addEventListener('click', next);
-        prevBtn.addEventListener('click', prev);
-        randomBtn.addEventListener('click', randomIdx);
-        shuffleBtn.addEventListener('click', shuffleAll);
-        sendBtn.addEventListener('click', sendToSheet);
-        closeBtn.addEventListener('click', closeDashboard);
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeDashboard();
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeDashboard();
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-            if (e.key === 'ArrowRight') { e.preventDefault();
-                next(); }
-            if (e.key === 'ArrowLeft') { e.preventDefault();
-                prev(); }
-            if (e.key === ' ' || e.key === 'Space') { e.preventDefault();
-                speakSentence(sentences[currentIndex] || ''); }
-            if (e.key === 'r' || e.key === 'R') { randomIdx(); }
-        });
-
-        // ============================================================
-        // INIT
-        // ============================================================
-        render();
-        buildQuiz();
-
-        console.log('📊 VerbLingua App loaded!');
-        console.log('ℹ️ After submitting, the dashboard will show aggregate data from ALL responders.');
-        console.log('ℹ️ Make sure your Google Apps Script has a doGet() function that returns sheet data.');
-        console.log('📚 "The limits of my language mean the limits of my world." — Ludwig Wittgenstein');
-        console.log('📚 "To have another language is to possess a second soul." — Charlemagne');
-    </script>
-</body>
-</html>
+/**
+ * STAT Course Feedback System
+ * Automatically processes form responses and generates dashboard data
+ * NO SIMULATED STATISTICS - only real data from form submissions
+ * Last updated: 9/7/2026
+ */
+
+// ============================================================
+// 1. CONFIGURATION
+// ============================================================
+
+const CONFIG = {
+  RESPONSE_SHEET_NAME: 'Form Responses',
+  DASHBOARD_SHEET_NAME: 'Dashboard',
+  PROCESSED_SHEET_NAME: 'Processed Responses',
+  CHART_DATA_SHEET_NAME: 'Chart Data',
+  
+  // Column mappings (based on your Google Form)
+  COLUMNS: {
+    TIMESTAMP: 0,
+    STUDENT_ID: 1,
+    COURSES: 2,
+    EXPECTATION: 3,
+    SURPRISE: 4,
+    SUGGESTION: 5,
+    CLARITY: 6,
+    Q353_COUNTING: 7,
+    Q353_PROB: 8,
+    Q353_GITHUB: 9,
+    Q360_GITHUB_CONF: 10,
+    Q360_SHEETS_CONF: 11,
+    Q360_AI_CONF: 12,
+    Q415_METRICS: 13,
+    Q415_LOGISTIC: 14,
+    Q415_PACE: 15,
+    Q415_F1: 16
+  }
+};
+
+// ============================================================
+// 2. TRIGGER: Run automatically on form submission
+// ============================================================
+
+function installTrigger() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // Remove existing triggers
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(trigger => {
+    if (trigger.getHandlerFunction() === 'onFormSubmit') {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+  
+  // Create new trigger
+  ScriptApp.newTrigger('onFormSubmit')
+    .forSpreadsheet(ss)
+    .onFormSubmit()
+    .create();
+  
+  Logger.log('✅ Trigger installed successfully!');
+}
+
+function onFormSubmit(e) {
+  try {
+    const values = e.values;
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    // Process the new response
+    processResponse(values, ss);
+    
+    // Rebuild the dashboard with real data only
+    refreshDashboard(ss);
+    
+    Logger.log('✅ Form submission processed: Row ' + e.range.getRow());
+  } catch (error) {
+    Logger.log('❌ Error: ' + error.message);
+  }
+}
+
+// ============================================================
+// 3. PROCESS INDIVIDUAL RESPONSE
+// ============================================================
+
+function processResponse(values, ss) {
+  // Parse courses from checkbox values
+  const coursesRaw = values[CONFIG.COLUMNS.COURSES] || '';
+  const courses = coursesRaw.split(',').map(c => c.trim()).filter(c => c);
+  
+  // Build structured response object
+  const response = {
+    timestamp: values[CONFIG.COLUMNS.TIMESTAMP],
+    studentId: values[CONFIG.COLUMNS.STUDENT_ID] || 'Anonymous',
+    courses: courses,
+    expectation: values[CONFIG.COLUMNS.EXPECTATION] || '',
+    surprise: values[CONFIG.COLUMNS.SURPRISE] || '',
+    suggestion: values[CONFIG.COLUMNS.SUGGESTION] || '',
+    clarity: values[CONFIG.COLUMNS.CLARITY] || '',
+    
+    // STAT 353
+    q353_counting: parseFloat(values[CONFIG.COLUMNS.Q353_COUNTING]) || null,
+    q353_prob: parseFloat(values[CONFIG.COLUMNS.Q353_PROB]) || null,
+    q353_github: values[CONFIG.COLUMNS.Q353_GITHUB] || '',
+    
+    // STAT 360
+    q360_github_conf: parseFloat(values[CONFIG.COLUMNS.Q360_GITHUB_CONF]) || null,
+    q360_sheets_conf: parseFloat(values[CONFIG.COLUMNS.Q360_SHEETS_CONF]) || null,
+    q360_ai_conf: parseFloat(values[CONFIG.COLUMNS.Q360_AI_CONF]) || null,
+    
+    // STAT 415
+    q415_metrics: values[CONFIG.COLUMNS.Q415_METRICS] || '',
+    q415_logistic: values[CONFIG.COLUMNS.Q415_LOGISTIC] || '',
+    q415_pace: values[CONFIG.COLUMNS.Q415_PACE] || '',
+    q415_f1: values[CONFIG.COLUMNS.Q415_F1] || ''
+  };
+  
+  // Store in processed sheet
+  storeProcessedResponse(response, ss);
+  
+  return response;
+}
+
+function storeProcessedResponse(response, ss) {
+  let sheet = ss.getSheetByName(CONFIG.PROCESSED_SHEET_NAME);
+  
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.PROCESSED_SHEET_NAME);
+    const headers = [
+      'Timestamp', 'Student ID', 'Courses', 'Expectation', 'Surprise',
+      'Suggestion', 'Clarity', '353 Counting', '353 Prob', '353 GitHub',
+      '360 GitHub', '360 Sheets', '360 AI', '415 Metrics', '415 Logistic',
+      '415 Pace', '415 F1'
+    ];
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  }
+  
+  const row = [
+    response.timestamp,
+    response.studentId,
+    response.courses.join(', '),
+    response.expectation,
+    response.surprise,
+    response.suggestion,
+    response.clarity,
+    response.q353_counting,
+    response.q353_prob,
+    response.q353_github,
+    response.q360_github_conf,
+    response.q360_sheets_conf,
+    response.q360_ai_conf,
+    response.q415_metrics,
+    response.q415_logistic,
+    response.q415_pace,
+    response.q415_f1
+  ];
+  
+  sheet.appendRow(row);
+}
+
+// ============================================================
+// 4. GET ALL REAL RESPONSES
+// ============================================================
+
+function getAllResponses(ss) {
+  const sheet = ss.getSheetByName(CONFIG.PROCESSED_SHEET_NAME);
+  if (!sheet) return [];
+  
+  const data = sheet.getDataRange().getValues();
+  if (data.length < 2) return [];
+  
+  const responses = [];
+  
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    // Skip completely empty rows
+    if (!row[0] && !row[1] && !row[2]) continue;
+    
+    responses.push({
+      timestamp: row[0],
+      studentId: row[1],
+      courses: row[2] ? row[2].split(',').map(c => c.trim()) : [],
+      expectation: row[3],
+      surprise: row[4],
+      suggestion: row[5],
+      clarity: row[6],
+      q353_counting: row[7],
+      q353_prob: row[8],
+      q353_github: row[9],
+      q360_github_conf: row[10],
+      q360_sheets_conf: row[11],
+      q360_ai_conf: row[12],
+      q415_metrics: row[13],
+      q415_logistic: row[14],
+      q415_pace: row[15],
+      q415_f1: row[16]
+    });
+  }
+  
+  return responses;
+}
+
+// ============================================================
+// 5. CALCULATE SUMMARY STATISTICS (REAL DATA ONLY)
+// ============================================================
+
+function calculateSummary(responses) {
+  if (responses.length === 0) {
+    return {
+      total: 0,
+      byCourse: {},
+      expectationCounts: { exceeded: 0, met: 0, partially: 0, notMet: 0, unsure: 0 },
+      clarityCounts: { very: 0, mostly: 0, somewhat: 0, veryUnclear: 0 },
+      q353_counting_avg: 0,
+      q353_prob_avg: 0,
+      q353_github_counts: { 'Smooth / No issues': 0, 'Slightly Difficult': 0, 'Very Difficult / Glitchy': 0, 'I haven\'t tried it yet': 0 },
+      q360_github_avg: 0,
+      q360_sheets_avg: 0,
+      q360_ai_avg: 0,
+      q415_metrics_counts: { 'understand clearly': 0, 'sort of get it': 0, 'completely lost': 0 },
+      q415_logistic_counts: { 'Very comfortable': 0, 'Somewhat comfortable': 0, 'just memorizing': 0 },
+      q415_pace_counts: { 'Too Fast': 0, 'Just Right': 0, 'Too Slow': 0 },
+      q415_f1_counts: { 'understand clearly': 0, 'know formula but not sure when': 0, 'confused': 0, 'dont remember': 0 },
+      techPulse: 0,
+      paceFast: 0,
+      paceTotal: 0,
+      expectMetCount: 0,
+      surpriseList: [],
+      suggestionList: []
+    };
+  }
+  
+  const summary = {
+    total: responses.length,
+    byCourse: {},
+    expectationCounts: { exceeded: 0, met: 0, partially: 0, notMet: 0, unsure: 0 },
+    clarityCounts: { very: 0, mostly: 0, somewhat: 0, veryUnclear: 0 },
+    q353_counting_avg: 0,
+    q353_prob_avg: 0,
+    q353_github_counts: { 'Smooth / No issues': 0, 'Slightly Difficult': 0, 'Very Difficult / Glitchy': 0, 'I haven\'t tried it yet': 0 },
+    q360_github_avg: 0,
+    q360_sheets_avg: 0,
+    q360_ai_avg: 0,
+    q415_metrics_counts: { 'understand clearly': 0, 'sort of get it': 0, 'completely lost': 0 },
+    q415_logistic_counts: { 'Very comfortable': 0, 'Somewhat comfortable': 0, 'just memorizing': 0 },
+    q415_pace_counts: { 'Too Fast': 0, 'Just Right': 0, 'Too Slow': 0 },
+    q415_f1_counts: { 'understand clearly': 0, 'know formula but not sure when': 0, 'confused': 0, 'dont remember': 0 },
+    techPulse: 0,
+    paceFast: 0,
+    paceTotal: 0,
+    expectMetCount: 0,
+    surpriseList: [],
+    suggestionList: []
+  };
+  
+  const countingVals = [];
+  const probVals = [];
+  const githubConfVals = [];
+  const sheetsConfVals = [];
+  const aiConfVals = [];
+  
+  responses.forEach(r => {
+    // Course breakdown
+    r.courses.forEach(c => {
+      summary.byCourse[c] = (summary.byCourse[c] || 0) + 1;
+    });
+    
+    // Expectations
+    if (r.expectation && summary.expectationCounts.hasOwnProperty(r.expectation)) {
+      summary.expectationCounts[r.expectation]++;
+      if (r.expectation === 'met' || r.expectation === 'exceeded') {
+        summary.expectMetCount++;
+      }
+    }
+    
+    // Clarity
+    if (r.clarity && summary.clarityCounts.hasOwnProperty(r.clarity)) {
+      summary.clarityCounts[r.clarity]++;
+    }
+    
+    // STAT 353
+    if (r.q353_counting !== null && r.q353_counting !== undefined && !isNaN(r.q353_counting)) {
+      countingVals.push(r.q353_counting);
+    }
+    if (r.q353_prob !== null && r.q353_prob !== undefined && !isNaN(r.q353_prob)) {
+      probVals.push(r.q353_prob);
+    }
+    if (r.q353_github && summary.q353_github_counts.hasOwnProperty(r.q353_github)) {
+      summary.q353_github_counts[r.q353_github]++;
+    }
+    
+    // STAT 360
+    if (r.q360_github_conf !== null && r.q360_github_conf !== undefined && !isNaN(r.q360_github_conf)) {
+      githubConfVals.push(r.q360_github_conf);
+    }
+    if (r.q360_sheets_conf !== null && r.q360_sheets_conf !== undefined && !isNaN(r.q360_sheets_conf)) {
+      sheetsConfVals.push(r.q360_sheets_conf);
+    }
+    if (r.q360_ai_conf !== null && r.q360_ai_conf !== undefined && !isNaN(r.q360_ai_conf)) {
+      aiConfVals.push(r.q360_ai_conf);
+    }
+    
+    // STAT 415
+    if (r.q415_metrics && summary.q415_metrics_counts.hasOwnProperty(r.q415_metrics)) {
+      summary.q415_metrics_counts[r.q415_metrics]++;
+    }
+    if (r.q415_logistic && summary.q415_logistic_counts.hasOwnProperty(r.q415_logistic)) {
+      summary.q415_logistic_counts[r.q415_logistic]++;
+    }
+    if (r.q415_pace && summary.q415_pace_counts.hasOwnProperty(r.q415_pace)) {
+      summary.q415_pace_counts[r.q415_pace]++;
+      if (r.q415_pace === 'Too Fast') summary.paceFast++;
+      summary.paceTotal++;
+    }
+    if (r.q415_f1 && summary.q415_f1_counts.hasOwnProperty(r.q415_f1)) {
+      summary.q415_f1_counts[r.q415_f1]++;
+    }
+    
+    // Collect open-ended responses
+    if (r.surprise) summary.surpriseList.push(r.surprise);
+    if (r.suggestion) summary.suggestionList.push(r.suggestion);
+  });
+  
+  // Calculate averages
+  summary.q353_counting_avg = countingVals.length ? 
+    countingVals.reduce((a, b) => a + b, 0) / countingVals.length : 0;
+  summary.q353_prob_avg = probVals.length ? 
+    probVals.reduce((a, b) => a + b, 0) / probVals.length : 0;
+  summary.q360_github_avg = githubConfVals.length ? 
+    githubConfVals.reduce((a, b) => a + b, 0) / githubConfVals.length : 0;
+  summary.q360_sheets_avg = sheetsConfVals.length ? 
+    sheetsConfVals.reduce((a, b) => a + b, 0) / sheetsConfVals.length : 0;
+  summary.q360_ai_avg = aiConfVals.length ? 
+    aiConfVals.reduce((a, b) => a + b, 0) / aiConfVals.length : 0;
+  
+  // Tech pulse (combined average of all tech scores)
+  const allTechVals = [...githubConfVals, ...sheetsConfVals, ...aiConfVals];
+  summary.techPulse = allTechVals.length ? 
+    allTechVals.reduce((a, b) => a + b, 0) / allTechVals.length : 0;
+  
+  return summary;
+}
+
+// ============================================================
+// 6. BUILD DASHBOARD
+// ============================================================
+
+function refreshDashboard(ss) {
+  if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  const responses = getAllResponses(ss);
+  
+  if (responses.length === 0) {
+    updateEmptyDashboard(ss);
+    return;
+  }
+  
+  const summary = calculateSummary(responses);
+  updateDashboardSheet(summary, ss);
+  updateChartData(summary, ss);
+  
+  Logger.log('✅ Dashboard updated with ' + responses.length + ' real responses.');
+}
+
+function updateDashboardSheet(summary, ss) {
+  let sheet = ss.getSheetByName(CONFIG.DASHBOARD_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.DASHBOARD_SHEET_NAME);
+  } else {
+    sheet.clear();
+  }
+  
+  const now = new Date();
+  const timezone = Session.getScriptTimeZone();
+  
+  // ===== HEADER =====
+  sheet.getRange(1, 1).setValue('📊 STAT Course Feedback Dashboard');
+  sheet.getRange(2, 1).setValue('Last updated: ' + Utilities.formatDate(now, timezone, 'yyyy-MM-dd HH:mm:ss'));
+  sheet.getRange(1, 1, 2, 1).merge();
+  sheet.getRange(1, 1, 2, 1).setFontSize(16).setFontWeight('bold');
+  
+  let row = 4;
+  
+  // ===== SUMMARY STATS =====
+  sheet.getRange(row, 1).setValue('📈 Summary Statistics');
+  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
+  row += 2;
+  
+  sheet.getRange(row, 1).setValue('Total Responses:');
+  sheet.getRange(row, 2).setValue(summary.total);
+  row++;
+  
+  sheet.getRange(row, 1).setValue('Tech Pulse (avg 1-5):');
+  sheet.getRange(row, 2).setValue(summary.techPulse.toFixed(2));
+  row++;
+  
+  sheet.getRange(row, 1).setValue('Expectations Met (%):');
+  const expectPct = summary.total ? (summary.expectMetCount / summary.total * 100).toFixed(1) : 0;
+  sheet.getRange(row, 2).setValue(expectPct + '%');
+  row++;
+  
+  sheet.getRange(row, 1).setValue('Pace "Too Fast" (415):');
+  sheet.getRange(row, 2).setValue(summary.paceTotal ? `${summary.paceFast}/${summary.paceTotal}` : 'N/A');
+  row += 2;
+  
+  // ===== COURSE BREAKDOWN =====
+  sheet.getRange(row, 1).setValue('📚 Responses by Course');
+  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
+  row++;
+  
+  const courseHeaders = ['Course', 'Count'];
+  sheet.getRange(row, 1, 1, 2).setValues([courseHeaders]);
+  sheet.getRange(row, 1, 1, 2).setFontWeight('bold');
+  row++;
+  
+  const courseData = Object.entries(summary.byCourse).sort((a, b) => b[1] - a[1]);
+  if (courseData.length) {
+    sheet.getRange(row, 1, courseData.length, 2).setValues(courseData);
+    row += courseData.length + 2;
+  }
+  
+  // ===== EXPECTATION CHANGE =====
+  sheet.getRange(row, 1).setValue('🔍 Expectation Change');
+  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
+  row++;
+  
+  const expHeaders = ['Category', 'Count'];
+  sheet.getRange(row, 1, 1, 2).setValues([expHeaders]);
+  sheet.getRange(row, 1, 1, 2).setFontWeight('bold');
+  row++;
+  
+  const expData = Object.entries(summary.expectationCounts).filter(([k, v]) => v > 0);
+  if (expData.length) {
+    sheet.getRange(row, 1, expData.length, 2).setValues(expData);
+    row += expData.length + 2;
+  }
+  
+  // ===== CLARITY =====
+  sheet.getRange(row, 1).setValue('📋 Clarity of Expectations');
+  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
+  row++;
+  
+  const clarityHeaders = ['Category', 'Count'];
+  sheet.getRange(row, 1, 1, 2).setValues([clarityHeaders]);
+  sheet.getRange(row, 1, 1, 2).setFontWeight('bold');
+  row++;
+  
+  const clarityData = Object.entries(summary.clarityCounts).filter(([k, v]) => v > 0);
+  if (clarityData.length) {
+    sheet.getRange(row, 1, clarityData.length, 2).setValues(clarityData);
+    row += clarityData.length + 2;
+  }
+  
+  // ===== STAT 353 =====
+  sheet.getRange(row, 1).setValue('📌 STAT 353');
+  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
+  row++;
+  
+  sheet.getRange(row, 1).setValue('Average Comfort: Counting Principle (1-5)');
+  sheet.getRange(row, 2).setValue(summary.q353_counting_avg.toFixed(2));
+  row++;
+  sheet.getRange(row, 1).setValue('Average Comfort: Basic Probability (1-5)');
+  sheet.getRange(row, 2).setValue(summary.q353_prob_avg.toFixed(2));
+  row++;
+  
+  sheet.getRange(row, 1).setValue('GitHub Quiz Experience:');
+  row++;
+  const ghData = Object.entries(summary.q353_github_counts).filter(([k, v]) => v > 0);
+  if (ghData.length) {
+    sheet.getRange(row, 1, ghData.length, 2).setValues(ghData);
+    row += ghData.length + 2;
+  }
+  
+  // ===== STAT 360 =====
+  sheet.getRange(row, 1).setValue('🔧 STAT 360 - Tool Confidence (1-5)');
+  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
+  row++;
+  
+  sheet.getRange(row, 1).setValue('GitHub Confidence:');
+  sheet.getRange(row, 2).setValue(summary.q360_github_avg.toFixed(2));
+  row++;
+  sheet.getRange(row, 1).setValue('Sheets Confidence:');
+  sheet.getRange(row, 2).setValue(summary.q360_sheets_avg.toFixed(2));
+  row++;
+  sheet.getRange(row, 1).setValue('AI Confidence:');
+  sheet.getRange(row, 2).setValue(summary.q360_ai_avg.toFixed(2));
+  row += 2;
+  
+  // ===== STAT 415 =====
+  sheet.getRange(row, 1).setValue('📉 STAT 415');
+  sheet.getRange(row, 1).setFontWeight('bold').setFontSize(14);
+  row++;
+  
+  sheet.getRange(row, 1).setValue('Performance Metrics Grasp:');
+  row++;
+  const metricsData = Object.entries(summary.q415_metrics_counts).filter(([k, v]) => v > 0);
+  if (metricsData.length) {
+    sheet.getRange(row, 1, metricsData.length, 2).setValues(metricsData);
+    row += metricsData.length + 1;
+  }
+  
+  sheet.getRange(row, 1).setValue('Logistic Regression Comfort:');
+  row++;
+  const logData = Object.entries(summary.q415_logistic_counts).filter(([k, v]) => v > 0);
+  if (logData.length) {
+    sheet.getRange(row, 1, logData.length, 2).setValues(logData);
+    row += logData.length + 1;
+  }
+  
+  sheet.getRange(row, 1).setValue('Pace:');
+  row++;
+  const paceData = Object.entries(summary.q415_pace_counts).filter(([k, v]) => v > 0);
+  if (paceData.length) {
+    sheet.getRange(row, 1, paceData.length, 2).setValues(paceData);
+    row += paceData.length + 1;
+  }
+  
+  sheet.getRange(row, 1).setValue('F1 Score Understanding:');
+  row++;
+  const f1Data = Object.entries(summary.q415_f1_counts).filter(([k, v]) => v > 0);
+  if (f1Data.length) {
+    sheet.getRange(row, 1, f1Data.length, 2).setValues(f1Data);
+  }
+  
+  // Auto-resize and format
+  sheet.autoResizeColumns(1, 2);
+  sheet.getRange(1, 1, row + 5, 2).setBorder(true, true, true, true, false, false);
+}
+
+function updateEmptyDashboard(ss) {
+  let sheet = ss.getSheetByName(CONFIG.DASHBOARD_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.DASHBOARD_SHEET_NAME);
+  } else {
+    sheet.clear();
+  }
+  
+  const now = new Date();
+  sheet.getRange(1, 1).setValue('📊 STAT Course Feedback Dashboard');
+  sheet.getRange(2, 1).setValue('Last updated: ' + Utilities.formatDate(now, Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm:ss'));
+  sheet.getRange(1, 1, 2, 1).merge();
+  sheet.getRange(1, 1, 2, 1).setFontSize(16).setFontWeight('bold');
+  
+  sheet.getRange(4, 1).setValue('⚠️ No responses received yet.');
+  sheet.getRange(4, 1).setFontSize(14).setFontColor('#666666');
+  sheet.getRange(5, 1).setValue('Once students submit the form, the dashboard will populate automatically.');
+  sheet.getRange(5, 1).setFontSize(12).setFontColor('#888888');
+}
+
+// ============================================================
+// 7. UPDATE CHART DATA
+// ============================================================
+
+function updateChartData(summary, ss) {
+  let sheet = ss.getSheetByName(CONFIG.CHART_DATA_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.CHART_DATA_SHEET_NAME);
+  } else {
+    sheet.clear();
+  }
+  
+  let row = 1;
+  
+  // Expectation Change
+  sheet.getRange(row, 1).setValue('Expectation Change');
+  row++;
+  const expData = Object.entries(summary.expectationCounts).filter(([k, v]) => v > 0);
+  if (expData.length) {
+    sheet.getRange(row, 1, expData.length, 2).setValues(expData);
+    row += expData.length + 2;
+  }
+  
+  // GitHub Experience
+  sheet.getRange(row, 1).setValue('STAT 353 - GitHub Experience');
+  row++;
+  const ghData = Object.entries(summary.q353_github_counts).filter(([k, v]) => v > 0);
+  if (ghData.length) {
+    sheet.getRange(row, 1, ghData.length, 2).setValues(ghData);
+    row += ghData.length + 2;
+  }
+  
+  // F1 Score
+  sheet.getRange(row, 1).setValue('STAT 415 - F1 Score Understanding');
+  row++;
+  const f1Data = Object.entries(summary.q415_f1_counts).filter(([k, v]) => v > 0);
+  if (f1Data.length) {
+    sheet.getRange(row, 1, f1Data.length, 2).setValues(f1Data);
+    row += f1Data.length + 2;
+  }
+  
+  // Clarity
+  sheet.getRange(row, 1).setValue('Clarity of Expectations');
+  row++;
+  const clarityData = Object.entries(summary.clarityCounts).filter(([k, v]) => v > 0);
+  if (clarityData.length) {
+    sheet.getRange(row, 1, clarityData.length, 2).setValues(clarityData);
+  }
+  
+  sheet.autoResizeColumns(1, 2);
+}
+
+// ============================================================
+// 8. WEB APP ENDPOINTS (for HTML dashboard)
+// ============================================================
+
+function doGet(e) {
+  const action = e?.parameter?.action || 'dashboard';
+  const course = e?.parameter?.course || 'ALL';
+  
+  if (action === 'dashboard') {
+    return getDashboardJSON(course);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({
+    success: false,
+    error: 'Invalid action'
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function getDashboardJSON(courseFilter) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let responses = getAllResponses(ss);
+    
+    // Filter by course if specified
+    if (courseFilter !== 'ALL') {
+      responses = responses.filter(r => r.courses.includes(courseFilter));
+    }
+    
+    if (responses.length === 0) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true,
+        total: 0,
+        message: 'No responses for this filter',
+        stats: null,
+        charts: null
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const summary = calculateSummary(responses);
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      total: responses.length,
+      filter: courseFilter,
+      stats: {
+        techPulse: summary.techPulse,
+        expectMetCount: summary.expectMetCount,
+        paceFast: summary.paceFast,
+        paceTotal: summary.paceTotal,
+        q353_counting_avg: summary.q353_counting_avg,
+        q353_prob_avg: summary.q353_prob_avg,
+        q360_github_avg: summary.q360_github_avg,
+        q360_sheets_avg: summary.q360_sheets_avg,
+        q360_ai_avg: summary.q360_ai_avg
+      },
+      charts: {
+        expectation: summary.expectationCounts,
+        clarity: summary.clarityCounts,
+        github: summary.q353_github_counts,
+        f1: summary.q415_f1_counts,
+        metrics: summary.q415_metrics_counts,
+        logistic: summary.q415_logistic_counts,
+        pace: summary.q415_pace_counts,
+        byCourse: summary.byCourse
+      }
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: error.message
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ============================================================
+// 9. ADMIN FUNCTIONS
+// ============================================================
+
+function setupSystem() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // Create required sheets
+  let sheets = [
+    CONFIG.PROCESSED_SHEET_NAME,
+    CONFIG.DASHBOARD_SHEET_NAME,
+    CONFIG.CHART_DATA_SHEET_NAME
+  ];
+  
+  sheets.forEach(name => {
+    if (!ss.getSheetByName(name)) {
+      ss.insertSheet(name);
+    }
+  });
+  
+  // Install trigger
+  installTrigger();
+  
+  // Build initial dashboard
+  refreshDashboard(ss);
+  
+  Logger.log('✅ System setup complete!');
+  Logger.log('📊 Sheets created: ' + sheets.join(', '));
+  Logger.log('🔔 Trigger installed for automatic updates');
+}
+
+function clearAllData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(CONFIG.PROCESSED_SHEET_NAME);
+  
+  if (sheet) {
+    const lastRow = sheet.getLastRow();
+    if (lastRow > 1) {
+      sheet.deleteRows(2, lastRow - 1);
+    }
+    Logger.log('✅ All data cleared. Headers preserved.');
+  }
+  
+  refreshDashboard(ss);
+}
+
+function getResponseCount() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const responses = getAllResponses(ss);
+  return responses.length;
+}
+
+function exportCSV() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(CONFIG.PROCESSED_SHEET_NAME);
+  
+  if (!sheet) {
+    Logger.log('❌ No processed responses found.');
+    return;
+  }
+  
+  const data = sheet.getDataRange().getValues();
+  const csv = data.map(row => row.join(',')).join('\n');
+  
+  const date = new Date().toISOString().slice(0, 10);
+  const csvSheet = ss.insertSheet('CSV Export ' + date);
+  csvSheet.getRange(1, 1).setValue(csv);
+  
+  Logger.log('✅ CSV exported to sheet: CSV Export ' + date);
+}
